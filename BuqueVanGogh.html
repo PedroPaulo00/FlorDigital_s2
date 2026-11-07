@@ -1,0 +1,1208 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Um pedacinho do céu</title>
+<style>
+  :root {
+    --noite: #040a26;
+    --creme: #fff2c8;
+    --dourado: #ffd666;
+    --azul-claro: #8fb6ff;
+    --mono: Consolas, Menlo, "DejaVu Sans Mono", "Liberation Mono", "Courier New", monospace;
+  }
+  html, body { margin: 0; height: 100%; background: var(--noite); overflow: hidden; }
+  body { font-family: var(--mono); color: var(--creme); }
+
+  /* Camadas: buquê (0) → pintura da surpresa (1) → textos e botão (2) */
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  /* A grade é calculada para a proporção da tela; "contain" garante que nada seja cortado. */
+  #view { object-fit: contain; background: var(--noite); z-index: 0; transition: opacity 1.6s ease; }
+  #arte { z-index: 1; opacity: 0; visibility: hidden; background: var(--noite);
+    transition: opacity 1.8s ease .3s, visibility 0s 2.1s; }
+
+  /* Palco centralizado sobre o buquê; a posição (--ax, --ay) é calculada no script. */
+  #palco { position: fixed; z-index: 2; left: var(--ax, 50%); top: var(--ay, 45%);
+    transform: translate(-50%, -50%); width: min(92vw, max(19rem, calc(var(--bw, 60vw) * 1.05)));
+    display: grid; place-items: center; text-align: center; pointer-events: none; }
+  #palco > * { grid-area: 1 / 1; }
+
+  #mensagem { position: relative; margin: 0; padding: .7em .9em; opacity: 0;
+    font: 600 clamp(1.05rem, 2.2vw + .55rem, 1.8rem) / 1.45 var(--mono);
+    letter-spacing: .01em; text-wrap: balance; overflow-wrap: normal; word-break: normal; hyphens: none;
+    color: var(--creme);
+    text-shadow: 0 0 2px var(--noite), 0 1px 3px var(--noite), 0 0 16px rgba(4,10,38,.95), 0 0 34px rgba(4,10,38,.85); }
+  /* Leve área escurecida apenas atrás das letras, para leitura sobre as flores. */
+  #mensagem::before { content: ""; position: absolute; inset: -.6em -1.2em; z-index: -1; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(4,10,38,.62) 0%, rgba(4,10,38,.35) 45%, rgba(4,10,38,0) 72%); }
+  #mensagem .resto { color: transparent; text-shadow: none; }
+  #mensagem .cursor { display: inline-block; width: 0; position: relative; }
+  #mensagem .cursor::after { content: "_"; position: absolute; left: .05em; bottom: -.05em; color: var(--dourado);
+    animation: piscar 1s steps(1) infinite; }
+  #mensagem.completo .cursor { display: none; }
+  @keyframes piscar { 50% { opacity: 0; } }
+
+  #convite { pointer-events: auto; visibility: hidden; opacity: 0; cursor: pointer; white-space: nowrap; max-width: 94vw;
+    font: 600 clamp(1rem, 1.6vw + .6rem, 1.4rem) / 1.2 var(--mono); letter-spacing: .04em;
+    color: #ffe9a3; background: rgba(4,10,38,.78);
+    border: 1px solid rgba(255,214,102,.42); border-radius: 3px; padding: .85em 1.3em;
+    box-shadow: 0 0 18px rgba(255,200,80,.14), inset 0 0 14px rgba(40,80,200,.28);
+    text-shadow: 0 0 8px rgba(255,214,102,.35);
+    transition: color .25s, border-color .25s, box-shadow .25s, background .25s;
+    animation: brilho 3.6s ease-in-out infinite; }
+  #convite::before { content: "*~ "; color: var(--azul-claro); }
+  #convite::after  { content: " ~*"; color: var(--azul-claro); }
+  #convite:hover, #convite:focus-visible { color: #fff6d6; border-color: var(--dourado); background: rgba(8,20,64,.86);
+    box-shadow: 0 0 26px rgba(255,214,102,.32), inset 0 0 16px rgba(60,110,230,.35); }
+  #convite:focus-visible { outline: 2px solid #ffe08a; outline-offset: 5px; }
+  @keyframes brilho { 50% { box-shadow: 0 0 26px rgba(255,200,80,.26), inset 0 0 14px rgba(40,80,200,.32); } }
+  body[data-estado="convite"] #convite { visibility: visible; }
+
+  /* Surpresa final: frase e, logo abaixo, o botão da câmera */
+  #final-bloco { position: fixed; z-index: 3; left: 50%; top: 50%; width: min(92vw, 48rem);
+    transform: translate(-50%, calc(-50% + 14px)); display: flex; flex-direction: column; align-items: center;
+    gap: clamp(1.2rem, 3.5vh, 2.2rem); opacity: 0; visibility: hidden; pointer-events: none; }
+  #final { position: relative; margin: 0; outline: none; width: min(100%, 23ch);
+    font: 700 clamp(1.35rem, 3.6vw + .5rem, 3.3rem) / 1.32 var(--mono); text-align: center; letter-spacing: .01em;
+    text-wrap: balance; overflow-wrap: normal; word-break: normal; hyphens: none;
+    color: #fff4cf;
+    text-shadow: 0 0 2px #020617, 0 2px 4px #020617, 0 0 18px rgba(2,6,23,.95), 0 0 40px rgba(4,10,38,.9), 0 0 60px rgba(255,214,102,.18); }
+  #final::before { content: ""; position: absolute; inset: -.8em -1.4em; z-index: -1; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(3,8,30,.62) 0%, rgba(3,8,30,.36) 50%, rgba(3,8,30,0) 74%); }
+
+  /* Botão da câmera: mesma linguagem do convite, com quebra de linha equilibrada em telas estreitas */
+  #camera { pointer-events: auto; cursor: pointer; max-width: min(100%, 64ch); text-wrap: balance;
+    font: 600 clamp(.95rem, 1.1vw + .6rem, 1.25rem) / 1.4 var(--mono); letter-spacing: .02em;
+    color: #ffe9a3; background: rgba(4,10,38,.82);
+    border: 1px solid rgba(255,214,102,.45); border-radius: 3px; padding: .8em 1.2em;
+    box-shadow: 0 0 18px rgba(255,200,80,.16), inset 0 0 14px rgba(40,80,200,.28);
+    text-shadow: 0 0 8px rgba(255,214,102,.35); opacity: 0; visibility: hidden;
+    transition: color .25s, border-color .25s, box-shadow .25s, background .25s; }
+  #camera::before { content: "* "; color: var(--azul-claro); }
+  #camera::after  { content: " *"; color: var(--azul-claro); }
+  #camera:hover, #camera:focus-visible { color: #fff6d6; border-color: var(--dourado); background: rgba(8,20,64,.9);
+    box-shadow: 0 0 26px rgba(255,214,102,.34), inset 0 0 16px rgba(60,110,230,.35); }
+  #camera:focus-visible { outline: 2px solid #ffe08a; outline-offset: 5px; }
+
+  body[data-estado="surpresa"] #view { opacity: 0; }
+  body[data-estado="surpresa"] #arte { opacity: 1; visibility: visible; transition: opacity 1.8s ease .3s, visibility 0s; }
+  body[data-estado="surpresa"] #convite { opacity: 0 !important; visibility: hidden; animation: none;
+    transition: opacity .5s, visibility 0s .5s; }
+  body[data-estado="surpresa"] #mensagem { display: none; }
+  body[data-estado="surpresa"] #final-bloco { opacity: 1; visibility: visible; transform: translate(-50%, -50%);
+    transition: opacity 1.6s ease 1.3s, transform 1.8s ease 1.3s; }
+  body[data-estado="surpresa"] #camera { opacity: 1; visibility: visible; animation: brilho 3.6s ease-in-out 4s infinite;
+    transition: opacity 1.2s ease 3s, visibility 0s 3s, color .25s, border-color .25s, box-shadow .25s, background .25s; }
+
+  /* Selfie: a câmera frontal ocupa a tela inteira, espelhada como um espelho */
+  #selfie { position: fixed; inset: 0; z-index: 5; background: var(--noite); opacity: 0;
+    transition: opacity .8s ease; display: grid; place-items: center; }
+  #selfie[hidden] { display: none; }
+  #selfie.visivel { opacity: 1; }
+  #selfie video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+  #selfie::after { content: ""; position: absolute; inset: 0; pointer-events: none;   /* Moldura suave azul-noite */
+    background: radial-gradient(ellipse at center, rgba(4,10,38,0) 55%, rgba(4,10,38,.55) 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,214,102,.35), inset 0 0 60px rgba(255,200,80,.12); }
+  #selfie-msg { position: relative; z-index: 1; max-width: min(88vw, 34ch); margin: 0; text-align: center;
+    font: 600 clamp(1rem, 1.4vw + .6rem, 1.4rem) / 1.45 var(--mono); color: var(--creme); }
+  #selfie-msg:empty { display: none; }
+  #selfie-fechar { position: absolute; z-index: 2; left: 50%; bottom: max(1.2rem, env(safe-area-inset-bottom));
+    transform: translateX(-50%); cursor: pointer; white-space: nowrap;
+    font: 600 clamp(.85rem, .8vw + .55rem, 1rem) / 1.2 var(--mono); color: #ffe9a3;
+    background: rgba(4,10,38,.72); border: 1px solid rgba(255,214,102,.4); border-radius: 3px; padding: .7em 1.1em; }
+  #selfie-fechar:hover, #selfie-fechar:focus-visible { border-color: var(--dourado); color: #fff6d6; }
+  #selfie-fechar:focus-visible { outline: 2px solid #ffe08a; outline-offset: 4px; }
+
+  /* Controle discreto do som (necessário quando o navegador bloqueia a reprodução automática) */
+  #som { position: fixed; z-index: 6; right: max(.6rem, env(safe-area-inset-right)); top: max(.6rem, env(safe-area-inset-top));
+    cursor: pointer; font: 600 .78rem / 1 var(--mono); letter-spacing: .03em; color: rgba(255,242,200,.78);
+    background: rgba(4,10,38,.55); border: 1px solid rgba(143,182,255,.28); border-radius: 3px; padding: .55em .8em; }
+  #som:hover, #som:focus-visible { color: #fff6d6; border-color: rgba(255,214,102,.6); }
+  #som:focus-visible { outline: 2px solid #ffe08a; outline-offset: 3px; }
+  #som.bloqueado { color: #ffe9a3; border-color: rgba(255,214,102,.55); animation: brilho 2.4s ease-in-out infinite; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #convite, #mensagem .cursor::after, #som.bloqueado { animation: none; }
+    #view, #arte { transition-duration: .6s; transition-delay: 0s; }
+    body[data-estado="surpresa"] #arte { transition: opacity .6s, visibility 0s; }
+    #final-bloco { transform: translate(-50%, -50%); }
+    body[data-estado="surpresa"] #final-bloco { transition: opacity .6s ease .3s; }
+    body[data-estado="surpresa"] #camera { animation: none; transition: opacity .6s ease 1s, visibility 0s 1s; }
+  }
+</style>
+</head>
+<body>
+<canvas id="view" role="img" aria-label="Buquê animado desenhado com caracteres ASCII nas cores de A Noite Estrelada, de Van Gogh, sob um céu de redemoinhos e estrelas"></canvas>
+<canvas id="arte" role="img" aria-label="A Noite Estrelada, de Van Gogh, recriada com caracteres ASCII coloridos"></canvas>
+
+<main id="palco">
+  <p id="mensagem" aria-hidden="true"><span class="digitado"></span><span class="cursor"></span><span class="resto"></span></p>
+  <button id="convite" type="button" aria-label="Uma última estrela...">Uma última estrela...</button>
+</main>
+<p id="leitor" class="sr-only" aria-live="polite"></p>
+<div id="final-bloco">
+  <p id="final" tabindex="-1">Não sei pintar um céu estrelado, mas sei programar um pra você.</p>
+  <button id="camera" type="button">Clique aqui pra ver a estrela mais bonita do universo!</button>
+</div>
+<div id="selfie" hidden role="dialog" aria-modal="true" aria-label="Câmera frontal">
+  <video id="selfie-video" autoplay playsinline muted></video>
+  <p id="selfie-msg" role="status"></p>
+  <button id="selfie-fechar" type="button">[ fechar câmera ]</button>
+</div>
+<audio id="musica" src="fundo_site.mp3" loop autoplay preload="auto"></audio>
+<button id="som" type="button" aria-pressed="true">[ som: ligado ]</button>
+
+<script>
+"use strict";
+// CONFIGURAÇÕES
+const FONT_SIZE = 10, FPS = 30;
+const FONT = `${FONT_SIZE}px Menlo, Consolas, "DejaVu Sans Mono", "Courier New", monospace`;
+const probe = document.createElement("canvas").getContext("2d");
+probe.font = FONT;
+const CW = Math.max(1, Math.round(probe.measureText("M").width)), CH = Math.round(FONT_SIZE * 1.15);
+const WAVE_PERIOD = 14, BREATH = 7, BREATH_DEPTH = 0.18;
+const settings = { wind: 3, size: 1.8, glow: 0.6 };   // intensidade do vento, tamanho das flores e brilho difuso
+
+// Movimento reduzido: menos vento, céu mais lento, sem estrelas cadentes nem digitação.
+const reduceQuery = matchMedia("(prefers-reduced-motion: reduce)");
+let REDUCED = reduceQuery.matches;
+function aplicarMovimento() { REDUCED = reduceQuery.matches; settings.wind = REDUCED ? 0.8 : 3; }
+aplicarMovimento();
+reduceQuery.addEventListener("change", aplicarMovimento);
+
+const BUCKETS = [" ", ".'`", ":;,-~", "!/\\|()[]{}<>?+=", "tfjrxnuvczil", "XYUJCLQ0OZmwqpdbkhao", "#MW&8%B", "@$"];
+const LEVELS = [0.06, 0.15, 0.30, 0.45, 0.60, 0.75, 0.90];
+const CHARS = BUCKETS.join("") + "*";            // "*" só é usado pelas estrelas pulsantes e cadentes
+const CH_IDX = (ch) => CHARS.indexOf(ch);
+
+// FUNÇÕES MATEMÁTICAS
+const TAU = Math.PI * 2, rad = (d) => d * Math.PI / 180;
+const clamp = (x, lo = 0, hi = 1) => (x < lo ? lo : x > hi ? hi : x);
+function smoothstep(a, b, x) { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); }
+const wave = (t, k, ph = 0) => Math.sin(TAU * k * t / WAVE_PERIOD + ph);
+function hash3(a, b, c) {                       // Pseudoaleatoriedade determinística: entradas iguais produzem resultados iguais
+  let h = (Math.imul(a, 73856093) ^ Math.imul(b, 19349663) ^ Math.imul(c, 83492791)) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+const rnd = (k) => hash3(k, 911, 37) / 4294967296;      // Número pseudoaleatório fixo no intervalo de 0 a 1
+const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const mul = (a, s) => [a[0] * s, a[1] * s, a[2] * s];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const norm = (v) => mul(v, 1 / (Math.hypot(v[0], v[1], v[2]) + 1e-9));
+const lin = (n) => Array.from({ length: n }, (_, k) => k / (n - 1));
+const lerp3 = (a, b, k) => { k = clamp(k); return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; };
+const LIGHT = norm([-0.5, -0.6, 0.62]);        // Luz vinda do canto superior esquerdo
+
+// ENQUADRAMENTO RESPONSIVO
+// Caixa, em unidades do mundo, que contém o buquê inteiro (pétalas, folhas, laço e balanço do vento).
+// A grade ASCII é dimensionada para que essa caixa sempre caiba na tela, em qualquer proporção.
+const BOX = { x0: -65, x1: 65, y0: -7, y1: 184 };
+const BOX_W = BOX.x1 - BOX.x0, BOX_H = BOX.y1 - BOX.y0;
+const X_MID = (BOX.x0 + BOX.x1) / 2, Y_MID = (BOX.y0 + BOX.y1) / 2;
+function gridFor(w, h) {
+  w = Math.max(1, w); h = Math.max(1, h);
+  const A = w / h, R = CH / CW;                 // Proporção da tela e da célula
+  // Com 1 unidade por linha (e 0,5 por coluna), a caixa exige BOX_H linhas e 2·BOX_W colunas.
+  let rows = BOX_H, cols = rows * R * A;
+  if (cols < 2 * BOX_W) { cols = 2 * BOX_W; rows = cols / (R * A); }   // Tela estreita: a largura limita
+  // Limita o número de células conforme a área da tela, para manter a fluidez em celulares.
+  const budget = clamp(w * h / 14, 26000, 95000);
+  const s = Math.max(1, Math.sqrt(rows * cols / budget));
+  return { cols: Math.max(40, Math.round(cols / s)), rows: Math.max(40, Math.round(rows / s)) };
+}
+// Estado que depende do tamanho da tela; recriado por setupGrid() apenas quando a proporção muda bastante.
+let GRID_ASPECT, COLS, ROWS, N, S, Y0, VIS, VIS_W, VIS_H, VMIN, HW_MIN;
+let Xc, Yr, lum, rgb, rowShift, fg, ovr;
+
+// PALETA — A NOITE ESTRELADA (Van Gogh, 1889)
+// Amarelo-limão e ocre das estrelas e da lua, azul-ultramar e cobalto do céu,
+// turquesa e verde-menta dos redemoinhos, verde-escuro do cipreste.
+// Cada valor RGB é normalizado no intervalo de 0 a 1.
+const BUD = [0.42, 0.62, 0.42];
+const STEM = [0.13, 0.34, 0.30], ANTHER = [0.20, 0.18, 0.45];
+const PALETTES = {
+  lua:          { deep: [0.80, 0.42, 0.04], mid: [1.00, 0.80, 0.10], tip: [1.00, 0.94, 0.36], sheen: [1.00, 0.99, 0.72], spots: 0, anther: [0.10, 0.16, 0.55] },
+  estrela:      { deep: [0.66, 0.52, 0.04], mid: [0.95, 0.88, 0.18], tip: [0.80, 0.95, 0.42], sheen: [0.94, 1.00, 0.76], spots: 0, anther: [0.08, 0.20, 0.58] },
+  ocre:         { deep: [0.70, 0.30, 0.04], mid: [0.96, 0.60, 0.10], tip: [1.00, 0.82, 0.28], sheen: [1.00, 0.93, 0.60], spots: 0, anther: [0.12, 0.14, 0.50] },
+  ultramar:     { deep: [0.03, 0.06, 0.40], mid: [0.09, 0.22, 0.78], tip: [0.28, 0.48, 0.96], sheen: [0.62, 0.78, 1.00], spots: 0, anther: [1.00, 0.86, 0.22] },
+  redemoinho:   { deep: [0.05, 0.20, 0.55], mid: [0.18, 0.52, 0.82], tip: [0.48, 0.84, 0.80], sheen: [0.84, 0.97, 0.90], spots: 0, anther: [1.00, 0.88, 0.25] },
+  cobalto:      { deep: [0.03, 0.11, 0.50], mid: [0.12, 0.34, 0.90], tip: [0.44, 0.68, 0.98], sheen: [0.80, 0.92, 0.96], spots: 0, anther: [0.98, 0.80, 0.18] },
+};
+// (posição, tamanho, direção 3D, cor, início da floração, luminosidade), de trás para frente
+const FLOWERS_BASE = [
+  [[-25, 34], 15, [-0.5, -0.55, 0.68], "redemoinho", 5.4, 0.78],
+  [[24, 30], 15, [0.5, -0.6, 0.62], "lua", 5.8, 0.78],
+  [[0, 18], 13, [0.08, -0.85, 0.5], "ultramar", 6.2, 0.78],
+  [[-32, 64], 18, [-0.72, -0.2, 0.66], "estrela", 4.8, 0.9],
+  [[32, 60], 18, [0.68, -0.25, 0.68], "cobalto", 5.1, 0.9],
+  [[-3, 46], 19, [-0.12, -0.42, 0.9], "ocre", 4.5, 0.9],
+  [[-36, 112], 16, [-0.82, 0.1, 0.55], "redemoinho", 5.2, 1.0],
+  [[37, 114], 16, [0.82, 0.12, 0.55], "lua", 5.5, 1.0],
+  [[-16, 86], 22, [-0.3, -0.18, 0.93], "ultramar", 3.9, 1.0],
+  [[18, 88], 21, [0.3, -0.14, 0.94], "estrela", 4.2, 1.0],
+  [[1, 114], 20, [0.02, -0.28, 0.96], "cobalto", 4.6, 1.0],
+];
+// Botões florais: posição, tamanho, direção, maturação e cor
+const BUDS_BASE = [
+  [[-12, 10], 9, [-0.3, -0.95, 0.1], 0.0, "estrela"],
+  [[13, 7], 9, [0.35, -0.93, 0.1], 0.9, "redemoinho"],
+  [[39, 40], 8, [0.8, -0.55, 0.2], 0.0, "ocre"],
+  [[-41, 42], 8, [-0.8, -0.5, 0.2], 0.7, "ultramar"],
+  [[24, 68], 7, [0.6, -0.7, 0.3], 0.0, "lua"],
+];
+
+// TELA: LUMINOSIDADE E COR DE CADA CÉLULA
+// fg = 1: célula ocupada pelo buquê, estrelas ou vaga-lumes. ovr: caractere fixo (estrelas pulsantes e cadentes).
+function set(i, l, cr, cg, cb) { lum[i] = l; fg[i] = 1; ovr[i] = -1; const j = i * 3; rgb[j] = cr; rgb[j + 1] = cg; rgb[j + 2] = cb; }
+function setCh(i, l, cr, cg, cb, ch) { set(i, l, cr, cg, cb); ovr[i] = ch; }
+
+// FUNDO: CÉU EM REDEMOINHOS
+// Rampa de cores do céu, do azul mais profundo ao branco-menta das pinceladas iluminadas.
+const SKY = [
+  [0.00, [0.02, 0.05, 0.24]], [0.28, [0.06, 0.15, 0.60]], [0.50, [0.14, 0.33, 0.86]],
+  [0.68, [0.28, 0.58, 0.86]], [0.84, [0.52, 0.84, 0.78]], [1.00, [0.92, 0.95, 0.70]],
+];
+function skyColor(k) {
+  k = clamp(k);
+  for (let s = 1; s < SKY.length; s++)
+    if (k <= SKY[s][0]) return lerp3(SKY[s - 1][1], SKY[s][1], (k - SKY[s - 1][0]) / (SKY[s][0] - SKY[s - 1][0]));
+  return SKY[SKY.length - 1][1];
+}
+const at = (fx, fy) => [VIS.x0 + VIS_W * fx, VIS.y0 + VIS_H * fy];   // Posição relativa à tela visível
+let VORTICES = [];
+// Campo de pinceladas: ondas horizontais que se enrolam em espirais perto de cada redemoinho.
+// Retorna [seno, cosseno] da fase combinada, para animar tudo com uma única rotação por quadro.
+function skyField(x, y) {
+  const ph = y * 0.45 + 7 * Math.sin(x * 0.02 + y * 0.008) + 1.2 * Math.sin(x * 0.055 - y * 0.02);
+  let sn = 0, cs = 0, W = 0;
+  for (const v of VORTICES) {
+    const dx = x - v.p[0], dy = y - v.p[1], r = Math.hypot(dx, dy);
+    const w = Math.exp(-((r / v.R) ** 2) * 1.3), a = r * 0.6 - v.dir * 2 * Math.atan2(dy, dx);   // Espiral de dois braços
+    sn += w * Math.sin(a); cs += w * Math.cos(a); W += w;
+  }
+  const w0 = Math.max(0.12, 1 - W);
+  return [sn + w0 * Math.sin(ph), cs + w0 * Math.cos(ph)];
+}
+let bgS, bgC, bgA, bgC0, bgC1, bgDir;
+const DIR_CHARS = ["-", "\\", "|", "/"].map(CH_IDX), TILDE = CH_IDX("~");
+function buildSky() {
+  VORTICES = [                                                  // Redemoinhos: o duplo central e os menores
+    { p: at(0.40, 0.30), R: VMIN * 0.22, dir: 1 },
+    { p: at(0.60, 0.42), R: VMIN * 0.15, dir: -1 },
+    { p: at(0.82, 0.64), R: VMIN * 0.13, dir: 1 },
+    { p: at(0.15, 0.70), R: VMIN * 0.12, dir: -1 },
+  ];
+  bgS = new Float32Array(N); bgC = new Float32Array(N); bgA = new Float32Array(N);
+  bgC0 = new Float32Array(N * 3); bgC1 = new Float32Array(N * 3); bgDir = new Int16Array(N);
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const i = r * COLS + c, x = Xc[c], y = Yr[r];
+    const fx = (x - VIS.x0) / VIS_W, fy = (y - VIS.y0) / VIS_H;
+    const f = skyField(x, y), amp = Math.hypot(f[0], f[1]) + 1e-6;
+    bgS[i] = f[0] / amp; bgC[i] = f[1] / amp;
+    // Direção da pincelada: perpendicular ao gradiente da fase, convertida para pixels da tela.
+    const e = 0.6, fxp = skyField(x + e, y), fyp = skyField(x, y + e);
+    const gx = Math.atan2(fxp[0] * f[1] - fxp[1] * f[0], fxp[0] * f[0] + fxp[1] * f[1]);
+    const gy = Math.atan2(fyp[0] * f[1] - fyp[1] * f[0], fyp[0] * f[0] + fyp[1] * f[1]);
+    let ang = Math.atan2(gx * CH, -gy * 2 * CW);
+    if (ang < 0) ang += Math.PI;
+    const bin = Math.round(ang / (Math.PI / 4)) % 4, noise = hash3(r, c, 5) / 4294967296;
+    bgDir[i] = bin === 0 && noise < 0.35 ? TILDE : DIR_CHARS[bin];
+    // Tom: mais claro nos núcleos dos redemoinhos e na faixa diagonal luminosa; mais escuro embaixo.
+    let core = 0;
+    for (const v of VORTICES) core = Math.max(core, Math.exp(-((Math.hypot(x - v.p[0], y - v.p[1]) / (v.R * 0.45)) ** 2)));
+    const band = Math.exp(-(((fy - (0.66 - 0.32 * fx)) / 0.075) ** 2));
+    const tone = 0.32 + 0.22 * core + 0.32 * band + 0.14 * (noise - 0.5) - 0.18 * smoothstep(0.78, 1, fy);
+    bgC0.set(skyColor(tone), i * 3); bgC1.set(skyColor(tone + 0.32), i * 3);
+    const dim = 1 - 0.5 * Math.exp(-((x / 62) ** 2 + ((y - 78) / 90) ** 2) * 1.4);   // O céu recua atrás do buquê
+    // Pinceladas curtas: a linha é quebrada em traços de comprimentos variados, com pequenas falhas.
+    const dash = hash3(r, Math.floor((c + hash3(r, 0, 3) % 7) / 5), 13) / 4294967296 < 0.7 ? 1 : 0.2;
+    bgA[i] = (0.16 + 0.10 * band + 0.08 * core) * (0.6 + 0.4 * hash3(r >> 1, c >> 2, 9) / 4294967296) * dash * dim * clamp(amp * 1.4, 0.35, 1);
+  }
+}
+
+// Estrelas com halos concêntricos e a lua crescente no canto superior direito.
+let STARS = [], starIdx, starD, moonLit;
+function buildStars() {
+  STARS = [];
+  const moonR = clamp(VMIN * 0.16, 16, 36);
+  STARS.push({ x: VIS.x0 + VIS_W * 0.86, y: VIS.y0 + VIS_H * 0.11, R: moonR, core: 0.42, rings: 3, f: 0.6, ph: 0, moon: true });
+  const nStars = Math.round(clamp(VIS_W * VIS_H / 2600, 6, 13));
+  for (let k = 0, tries = 0; STARS.length < nStars + 1 && tries < 400; tries++, k++) {
+    const R = clamp(VMIN * (0.035 + rnd(700 + k * 5) * 0.035), 4, 13);
+    const x = VIS.x0 + VIS_W * (0.04 + 0.92 * rnd(701 + k * 5)), y = VIS.y0 + VIS_H * (0.03 + 0.80 * rnd(702 + k * 5));
+    if ((x / 62) ** 2 + ((y - 70) / 82) ** 2 < 1) continue;                     // Evita esconder estrelas atrás do buquê
+    if (STARS.some((s) => Math.hypot(s.x - x, s.y - y) < (s.R + R) * 1.05)) continue;
+    STARS.push({ x, y, R, core: 0.28, rings: 2 + (k % 2), f: 1.5 + rnd(703 + k * 5) * 2, ph: rnd(704 + k * 5) * TAU, moon: false });
+  }
+  starIdx = new Int16Array(N).fill(-1); starD = new Float32Array(N); moonLit = new Uint8Array(N);
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const i = r * COLS + c, x = Xc[c], y = Yr[r];
+    let best = 1;
+    STARS.forEach((s, k) => {
+      const d = Math.hypot(x - s.x, y - s.y) / s.R;
+      if (d < best) { best = d; starIdx[i] = k; starD[i] = d; }
+    });
+    const s = STARS[starIdx[i]];
+    if (s && s.moon && starD[i] < s.core) {                                       // Parte acesa da lua crescente
+      const cr = s.R * s.core;
+      moonLit[i] = Math.hypot(x - (s.x + cr * 0.45), y - (s.y - cr * 0.3)) > cr * 0.82 ? 1 : 0;
+    }
+  }
+}
+const ST_YEL = [1.00, 0.90, 0.35], ST_CHART = [0.78, 0.92, 0.42], ST_PALE = [0.60, 0.86, 0.94];
+
+// ESTRELAS PULSANTES: pontos ASCII ( . + * o ) com ciclos próprios de brilho, espalhados pelo céu.
+const TW_CHARS = [".", "+", "*", "o"].map(CH_IDX);
+const TW_COLORS = [[1.00, 0.86, 0.45], [1.00, 0.95, 0.78], [0.68, 0.84, 1.00]];
+let twN = 0, twIdx, twPh, twPer, twCol, twO;
+function buildTwinkles() {
+  const max = Math.round(N / 300);
+  twIdx = new Int32Array(max); twPh = new Float32Array(max); twPer = new Float32Array(max);
+  twCol = new Uint8Array(max); twO = new Uint8Array(max); twN = 0;
+  for (let k = 0; k < max * 3 && twN < max; k++) {
+    const i = hash3(k, 41, 7) % N;
+    if (starIdx[i] >= 0) continue;                                              // Fora dos halos das estrelas grandes
+    twIdx[twN] = i; twPh[twN] = rnd(k * 3 + 5000) * TAU; twPer[twN] = 3 + rnd(k * 3 + 5001) * 4.5;
+    twCol[twN] = hash3(k, 3, 9) % 3; twO[twN] = rnd(k * 3 + 5002) < 0.2 ? 1 : 0; twN++;
+  }
+}
+
+function sky(t) {
+  fg.fill(0); ovr.fill(-1);
+  const w = t * (REDUCED ? 0.25 : 0.9), cw = Math.cos(w), sw = Math.sin(w);   // As pinceladas fluem continuamente
+  for (let i = 0, j = 0; i < N; i++, j += 3) {
+    let s = (bgS[i] * cw - bgC[i] * sw - 0.15) / 0.85;                          // sen(fase − ωt): só as cristas viram traço
+    s = s > 0 ? s * Math.sqrt(s) : 0;
+    lum[i] = 0.045 + bgA[i] * s;
+    const k = 0.62 + 0.45 * s;
+    rgb[j] = (bgC0[j] + (bgC1[j] - bgC0[j]) * s) * k;
+    rgb[j + 1] = (bgC0[j + 1] + (bgC1[j + 1] - bgC0[j + 1]) * s) * k;
+    rgb[j + 2] = (bgC0[j + 2] + (bgC1[j + 2] - bgC0[j + 2]) * s) * k;
+    const sk = starIdx[i];
+    if (sk < 0) continue;
+    const st = STARS[sk], d = starD[i], tw = 0.86 + 0.14 * Math.sin(t * st.f + st.ph);
+    if (d < st.core) {
+      if (!st.moon) set(i, 0.95 * tw, 1.0, 0.94, 0.50);
+      else if (moonLit[i]) set(i, 0.97, 1.0, 0.80, 0.16);
+      else set(i, 0.66, 0.98, 0.93, 0.48);
+    } else {
+      const e = (d - st.core) / (1 - st.core);
+      const ring = 0.5 + 0.5 * Math.cos(e * TAU * st.rings - t * (REDUCED ? 0.4 : 1.6));
+      const l = (0.14 + 0.40 * ring) * Math.pow(1 - e, 0.8) * tw;
+      if (l > lum[i]) {
+        const col = e < 0.5 ? lerp3(ST_YEL, ST_CHART, e * 2) : lerp3(ST_CHART, ST_PALE, (e - 0.5) * 2);
+        set(i, l, col[0], col[1], col[2]);
+      }
+    }
+  }
+  const slow = REDUCED ? 0.4 : 1;
+  for (let k = 0; k < twN; k++) {
+    const i = twIdx[k];
+    let b = 0.5 + 0.5 * Math.sin(t * slow * TAU / twPer[k] + twPh[k]);
+    b *= b;
+    const l = 0.1 + 0.62 * b;
+    if (l <= lum[i]) continue;
+    const col = TW_COLORS[twCol[k]];
+    setCh(i, l, col[0], col[1], col[2], TW_CHARS[b < 0.3 ? 0 : b < 0.68 ? 1 : twO[k] ? 3 : 2]);
+  }
+}
+
+// ESTRELAS CADENTES: eventos esporádicos (5 a 8 s), rastro diagonal curto na parte alta do céu.
+const meteoro = { ativo: false, t0: 0, dur: 1.1, x0: 0, y0: 0, ux: 0, uy: 0, dist: 0, trail: 0 };
+let proximoMeteoro = 3.5 + Math.random() * 2;
+const MT_HEAD = CH_IDX("*"), MT_PLUS = CH_IDX("+"), MT_DOT = CH_IDX("."), MT_DASH = CH_IDX("-");
+function meteoros(t) {
+  if (REDUCED || estado === "surpresa") { meteoro.ativo = false; return; }
+  if (!meteoro.ativo) {
+    if (t < proximoMeteoro) return;
+    const dir = Math.random() < 0.5 ? 1 : -1, ang = rad(16 + Math.random() * 16);
+    meteoro.dist = clamp(VIS_W * 0.2, 28, 70);
+    meteoro.ux = dir * Math.cos(ang); meteoro.uy = Math.sin(ang);
+    meteoro.x0 = VIS.x0 + VIS_W * (dir > 0 ? 0.06 + 0.5 * Math.random() : 0.44 + 0.5 * Math.random());
+    meteoro.y0 = VIS.y0 + VIS_H * (0.03 + 0.12 * Math.random());
+    meteoro.trail = ang > rad(24) ? CH_IDX(dir > 0 ? "\\" : "/") : MT_DASH;
+    meteoro.t0 = t; meteoro.ativo = true;
+  }
+  const m = meteoro, p = (t - m.t0) / m.dur;
+  if (p >= 1.3) { m.ativo = false; proximoMeteoro = t + 5 + Math.random() * 3; return; }
+  const env = Math.sin(Math.PI * clamp(p) * 0.5 + 0.2) * (p > 1 ? 1 - (p - 1) / 0.3 : 1);
+  const travel = m.dist * easeOut(Math.min(p, 1) * 0.9 + 0.1);
+  const hx = m.x0 + m.ux * travel, hy = m.y0 + m.uy * travel, K = 18, step = 0.55 * S;
+  for (let k = 0; k < K; k++) {
+    const x = hx - m.ux * k * step, y = hy - m.uy * k * step;
+    const r = Math.floor((y - Y0) / S), c = Math.floor((x - X_MID) * 2 / S + COLS / 2);
+    if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
+    const fall = Math.pow(1 - k / K, 1.4) * env;
+    if (fall < 0.08) continue;
+    const i = r * COLS + c, col = lerp3([1, 0.97, 0.82], [0.62, 0.80, 1.0], k / K * 1.4);
+    setCh(i, 0.18 + 0.72 * fall, col[0], col[1], col[2], k === 0 ? MT_HEAD : k < 3 ? MT_PLUS : k < 12 ? m.trail : MT_DOT);
+  }
+}
+
+// Desenha uma forma afinada ao longo de uma curva; a função recebe célula, posição, lateral, linha e coluna.
+const SEG = new Float64Array(16 * 9);            // Dados dos segmentos, calculados uma vez por desenho
+function brush(pts, hws, av, fn) {
+  const n = pts.length, ns = n - 1;
+  if (n < 2) return;
+  let xmin = 1e9, xmax = -1e9, ymin = 1e9, ymax = -1e9, maxw = 0;
+  for (let k = 0; k < n; k++) {
+    const x = pts[k][0], y = pts[k][1];
+    if (x < xmin) xmin = x; if (x > xmax) xmax = x; if (y < ymin) ymin = y; if (y > ymax) ymax = y;
+    if (hws[k] > maxw) maxw = hws[k];
+  }
+  for (let s = 0; s < ns; s++) {
+    const o = s * 9, ax = pts[s][0], ay = pts[s][1], dx = pts[s + 1][0] - ax, dy = pts[s + 1][1] - ay;
+    SEG[o] = ax; SEG[o + 1] = ay; SEG[o + 2] = dx; SEG[o + 3] = dy; SEG[o + 4] = 1 / (dx * dx + dy * dy + 1e-9);
+    SEG[o + 5] = hws[s]; SEG[o + 6] = hws[s + 1] - hws[s]; SEG[o + 7] = av[s]; SEG[o + 8] = av[s + 1] - av[s];
+  }
+  const pad = Math.max(maxw, HW_MIN) + S;
+  const r0 = Math.max(0, Math.floor((ymin - pad - Y0) / S)), r1 = Math.min(ROWS, Math.ceil((ymax + pad - Y0) / S) + 1);
+  for (let r = r0; r < r1; r++) {
+    const py = Yr[r], sh = rowShift[r];                // Deslocamento horizontal da linha causado pelo vento
+    let rx0 = 1e9, rx1 = -1e9;                          // Intervalo horizontal realmente ocupado pela forma nesta linha
+    for (let s = 0, o = 0; s < ns; s++, o += 9) {
+      const pw = Math.max(SEG[o + 5], SEG[o + 5] + SEG[o + 6], HW_MIN) + S;
+      const ya = SEG[o + 1], yb = ya + SEG[o + 3];
+      if (py < Math.min(ya, yb) - pw || py > Math.max(ya, yb) + pw) continue;
+      const xa = SEG[o], xb = xa + SEG[o + 2];
+      rx0 = Math.min(rx0, Math.min(xa, xb) - pw); rx1 = Math.max(rx1, Math.max(xa, xb) + pw);
+    }
+    if (rx0 > rx1) continue;
+    const c0 = Math.max(0, Math.floor((rx0 + sh - X_MID) * 2 / S + COLS / 2));
+    const c1 = Math.min(COLS, Math.ceil((rx1 + sh - X_MID) * 2 / S + COLS / 2) + 1);
+    for (let c = c0; c < c1; c++) {
+      const px = Xc[c] - sh;
+      let best = 1, bestS = -1, bestU = 0;            // Distâncias ao quadrado, sem calcular a raiz inicialmente
+      for (let s = 0, o = 0; s < ns; s++, o += 9) {
+        const qx = px - SEG[o], qy = py - SEG[o + 1], dx = SEG[o + 2], dy = SEG[o + 3];
+        let u = (qx * dx + qy * dy) * SEG[o + 4];
+        u = u < 0 ? 0 : u > 1 ? 1 : u;
+        const ex = qx - dx * u, ey = qy - dy * u;
+        let hw = SEG[o + 5] + SEG[o + 6] * u;
+        if (hw < HW_MIN) hw = HW_MIN;
+        const q2 = (ex * ex + ey * ey) / (hw * hw);
+        if (q2 < best) { best = q2; bestS = s; bestU = u; }
+      }
+      if (bestS < 0) continue;
+      const o = bestS * 9;
+      const cr = SEG[o + 2] * (py - SEG[o + 1]) - SEG[o + 3] * (px - SEG[o]);
+      const side = cr > 0 ? 1 : cr < 0 ? -1 : 0;
+      fn(r * COLS + c, SEG[o + 7] + SEG[o + 8] * bestU, Math.sqrt(best) * side, r, c);
+    }
+  }
+}
+
+// CAULES E FOLHAS
+function tube(pts, w0, w1, col) {
+  const n = pts.length;
+  if (n < 2) return;
+  const hws = lin(n).map((k) => w0 + (w1 - w0) * k);
+  const dark = mul(col, 0.6), lite = mul(col, 1.35);
+  brush(pts, hws, lin(n), (i, a, q) => {
+    const k = clamp(0.5 - 0.5 * q);
+    set(i, 0.42 + 0.35 * (1 - Math.abs(q)) - 0.18 * q,
+      dark[0] + (lite[0] - dark[0]) * k, dark[1] + (lite[1] - dark[1]) * k, dark[2] + (lite[2] - dark[2]) * k);
+  });
+}
+function curve(p0, p1, bulge, grow, n = 10) {
+  const dx = p1[0] - p0[0], dy = p1[1] - p0[1], L = Math.hypot(dx, dy) + 1e-9;
+  const nx = -dy / L, ny = dx / L, out = [];
+  for (let k = 0; k < n; k++) {
+    const s = (k / (n - 1)) * grow, b = bulge * Math.sin(Math.PI * s);
+    out.push([p0[0] + dx * s + nx * b, p0[1] + dy * s + ny * b]);
+  }
+  return out;
+}
+// Folhas no verde-escuro do cipreste, com luz verde-azulada das colinas e pontas ocre.
+const LEAF_D = [0.05, 0.17, 0.15], LEAF_L = [0.28, 0.62, 0.48], UNDER = [0.36, 0.58, 0.72], OLD_TIP = [0.80, 0.72, 0.26];
+// Folhas naturais, compridas e pontiagudas; podem curvar, dobrar ou mostrar o verso.
+function leaf(L, t, unfurl) {
+  if (unfurl <= 0.01) return;
+  const n = 12, len = L.len * (0.3 + 0.7 * unfurl), wid = L.wid * (0.4 + 0.6 * unfurl);
+  const ang0 = L.stemAng + (L.ang - L.stemAng) * unfurl;                  // A folha se abre a partir da direção do caule
+  const sway = rad(4) * wave(t, 3, L.seed);
+  const pts = [], hws = [];
+  let x = L.x, y = L.y;
+  for (let k = 0; k < n; k++) {
+    const a = k / (n - 1);
+    pts.push([x, y]);
+    const tw = Math.cos(L.twist * a + L.phase);                            // A torção altera a largura visível da folha
+    hws.push(Math.max(0.06, wid * Math.pow(Math.sin(Math.PI * Math.pow(a, 0.5)), 0.85) * (0.2 + 0.8 * Math.abs(tw))));
+    const bend = L.droop * Math.pow(a, 1.6) + L.kink * smoothstep(L.kinkAt - 0.05, L.kinkAt + 0.05, a);   // Curvatura descendente e dobras na folha
+    const ang = ang0 + sway * a + L.dir * bend * unfurl;
+    x += Math.cos(ang) * len / (n - 1); y += Math.sin(ang) * len / (n - 1);
+  }
+  brush(pts, hws, lin(n), (i, a, q) => {
+    const aq = Math.abs(q), back = Math.cos(L.twist * a + L.phase) < 0;
+    const lit = (q > 0) !== back ? 1 : 0;                                  // Folha em V: uma metade recebe mais luz
+    let l = (0.42 + 0.28 * lit + 0.22 * Math.pow(1 - aq, 0.7)) * (0.88 + 0.12 * Math.cos(q * Math.PI * 6));
+    if (aq < 0.08) l = back ? 0.78 : 0.34;                                  // Nervura central: sulco na frente e relevo no verso
+    else if (aq > 0.88) l += 0.12;                                          // As bordas recebem luz
+    l *= 0.8 + 0.2 * clamp(a * 6);                                          // A base da folha fica sombreada pelo caule
+    let c = back ? lerp3(mul(UNDER, 0.8), UNDER, 0.4 + 0.6 * (1 - aq))      // Verso da folha com tom azul-esverdeado
+                 : lerp3(LEAF_D, LEAF_L, 0.3 + 0.45 * lit + 0.25 * (1 - aq));
+    if (L.old) c = lerp3(c, OLD_TIP, (a - 0.8) * 4);                        // Folhas mais velhas podem ter pontas em ocre
+    set(i, clamp(l), c[0], c[1], c[2]);
+  });
+}
+
+// FLORES EM 3D
+const BUD09 = mul(BUD, 0.9), STAMEN = [0.86, 0.82, 0.56];
+function lily(center, axis, size, openness, ripe, t, seed, pal, bright) {
+  if (size <= 0.3) return;
+  const anther = pal.anther || ANTHER, spotRate = pal.spots;
+  const a3 = norm(axis), ref = Math.abs(a3[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0];
+  const u3 = norm(cross(a3, ref)), v3 = cross(a3, u3), c3 = [center[0], center[1], 0];
+  const spin = rad(15) + rad(3) * wave(t, 3, seed);
+  const petals = [];
+  for (let k = 0; k < 6; k++) {
+    const inner = k % 2 === 1, phi = spin + k * Math.PI / 3;
+    const radial = add(mul(u3, Math.cos(phi)), mul(v3, Math.sin(phi))), tangent = cross(a3, radial);
+    const theta = rad(5 + (inner ? 70 : 78) * openness);                  // Ângulo de abertura das pétalas
+    const curl = rad(50) * Math.pow(Math.max(openness, 0), 1.5);           // Curvatura das pontas das pétalas
+    const L = size * (inner ? 0.94 : 1), W = size * (inner ? 0.26 : 0.2), n = 9;
+    const pts3 = [], hws = [];
+    let p = add(c3, mul(radial, size * 0.04));
+    for (let i = 0; i < n; i++) {
+      const a = i / (n - 1);
+      pts3.push(p);
+      hws.push(W * Math.pow(Math.sin(Math.PI * Math.pow(Math.min(a, 0.999), 0.65)), 0.85));
+      const th = theta + curl * a * a;
+      p = add(p, mul(add(mul(a3, Math.cos(th)), mul(radial, Math.sin(th))), L / (n - 1)));
+    }
+    const normal = norm(cross(norm(sub(pts3[4], pts3[0])), tangent)), facing = normal[2];
+    const tproj = Math.hypot(tangent[0], tangent[1]);                       // Pétalas vistas de lado parecem mais estreitas
+    petals.push({
+      depth: pts3.reduce((s, q) => s + q[2], 0) / n, pts: pts3.map((q) => [q[0], q[1]]),
+      hws: hws.map((h) => Math.max(h * Math.max(tproj, 0.3), 0.08)), normal, facing, pseed: seed * 10 + k,
+    });
+  }
+  petals.sort((a, b) => a.depth - b.depth);                                // Desenha primeiro as pétalas de trás e depois as da frente
+  const dim = 0.55 + 0.45 * bright, av = lin(9);
+  for (const pt of petals) {
+    const sg = pt.facing < 0 ? -1 : 1;
+    const light = 0.35 + 0.65 * Math.max(0, dot(mul(pt.normal, sg), LIGHT));
+    const back = pt.facing < 0;
+    brush(pt.pts, pt.hws, av, (i, a, q, r, c) => {
+      const aq = Math.abs(q);
+      let l = light * (0.62 + 0.38 * Math.pow(1 - aq, 0.6)) * (back ? 0.8 : 1);
+      l *= 0.75 + 0.35 * clamp(a * 2);                                      // A base da pétala é mais escura
+      if (aq < 0.1) l *= 0.65;                                              // Sulco central da pétala
+      let col = lerp3(pal.deep, pal.mid, a * 2.4);
+      col = lerp3(col, pal.tip, (a - 0.55) * 1.8 + (aq - 0.7) * 1.6);
+      col = lerp3(col, pal.sheen, (light - 0.75) * 2.5 * (1 - aq));       // Realce nas áreas iluminadas
+      col = lerp3(BUD09, col, ripe * clamp(0.3 + a * 1.5) + ripe * 0.3);    // Botões jovens ainda possuem tonalidade verde
+      if (a < 0.4 && a > 0.08 && openness > 0.4 && hash3(c, r, pt.pseed) % 100 < spotRate) l = 0.2;   // Pequenas pintas nas pétalas, quando definidas na paleta
+      set(i, clamp(l) * bright, col[0] * dim, col[1] * dim, col[2] * dim);
+    });
+  }
+  const show = smoothstep(0.35, 0.85, openness);                          // Exibição dos estames
+  if (show <= 0) return;
+  for (let k = 0; k < 7; k++) {
+    const pistil = k === 6, phi = k * TAU / 6 + 0.3;
+    const radial = add(mul(u3, Math.cos(phi)), mul(v3, Math.sin(phi)));
+    const th = pistil ? 0 : rad(28) * openness;
+    const d3 = add(mul(a3, Math.cos(th)), mul(radial, Math.sin(th)));
+    const ln = size * (pistil ? 0.62 : 0.55) * show;
+    const mid = add(add(c3, mul(d3, ln * 0.5)), mul(radial, pistil ? 0 : 0.4)), tip = add(c3, mul(d3, ln));
+    brush([[c3[0], c3[1]], [mid[0], mid[1]], [tip[0], tip[1]]], [0.22, 0.18, 0.15], [0, 0.5, 1],
+      (i) => set(i, 0.55 * bright, STAMEN[0], STAMEN[1], STAMEN[2]));
+    if (!pistil) brush([[tip[0] - d3[0] * 0.9, tip[1] - d3[1] * 0.9], [tip[0] + d3[0] * 0.4, tip[1] + d3[1] * 0.4]],
+      [0.55, 0.55], [0, 1], (i) => set(i, 0.9 * bright, anther[0], anther[1], anther[2]));
+  }
+}
+
+// LAÇO DOURADO QUE AMARRA OS CAULES
+const RIB_D = [0.62, 0.30, 0.04], RIB_L = [1.00, 0.86, 0.30], TIE_Y = 150;
+function ribbon(grow) {
+  if (grow <= 0.01) return;
+  const g = grow, paint = (pts, w) => brush(pts, pts.map(() => w * g), lin(pts.length), (i, a, q) => {
+    const k = clamp(0.55 - 0.45 * q);
+    set(i, 0.5 + 0.3 * (1 - Math.abs(q)) - 0.12 * q, ...lerp3(RIB_D, RIB_L, k));
+  });
+  const y = TIE_Y, m = (pts) => pts.map(([x, yy]) => [-x, yy]);
+  const loop = [[-1, y - 0.5], [-6, y - 6 * g], [-13, y - 8 * g], [-16 * g, y - 3 * g], [-11 * g, y + 1], [-1, y]];
+  const tail = [[-1, y + 1], [-4, y + 9 * g], [-8, y + 18 * g], [-6.5, y + 21 * g]];
+  paint([[-8.5, y - 0.5], [8.5, y + 0.5]], 2.2);   // Faixa em volta dos caules
+  paint(loop, 1.4); paint(m(loop), 1.4);
+  paint(tail, 1.3); paint(m(tail), 1.3);
+  paint([[0, y - 1.6], [0, y + 1.6]], 2.1);        // Nó central
+}
+
+// ORGANIZAÇÃO DO BUQUÊ
+const STEM_DUR = 1.0;                                   // Tempo de crescimento completo do caule, em segundos
+const BASE_Y = 178;                                     // Ponta cortada dos caules, dentro da área visível
+const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3);   // Crescimento rápido no início e mais lento no final
+let FLOWERS = [], BUDS = [];
+
+function pathAt(path, frac) {                           // Posição e direção do caule em uma fração do percurso
+  const f = frac * (path.length - 1), k = Math.min(path.length - 2, Math.floor(f)), u = f - k;
+  const a = path[k], b = path[k + 1];
+  return { x: a[0] + (b[0] - a[0]) * u, y: a[1] + (b[1] - a[1]) * u, ang: Math.atan2(b[1] - a[1], b[0] - a[0]) };
+}
+
+function buildLayout() {
+  const fl = FLOWERS_BASE.map(([pos, size, axis, col, tOpen, bright], i) => ({     // Flores com os caules reunidos na base
+    pos, size, axis, col, bright, baseX: pos[0] * 0.12, bulge: 2.5 * Math.sign(pos[0] || 1) * (i % 2 ? 1 : -0.6),
+    start: 0.05 + 0.035 * i, tOpen: 1.7 + (tOpen - 3.9) * 0.55,
+  }));
+  const bd = BUDS_BASE.map(([pos, size, axis, ripe, col], i) => ({
+    pos, size, axis, ripe, col, baseX: pos[0] * 0.12, bulge: 2.5 * Math.sign(pos[0] || 1) * (i % 2 ? -0.6 : 1),
+    start: 0.15 + 0.05 * i,
+  }));
+  for (const o of [...fl, ...bd]) {
+    o.end = o.start + STEM_DUR;                                     // Instante em que o caule termina de crescer
+    o.path = curve([o.baseX, BASE_Y], o.pos, o.bulge, 1, 14);
+  }
+  fl.forEach((f, i) => {
+    f.tOpen = Math.max(f.tOpen, f.end + 0.6);                       // A flor só se abre depois de o caule estar completo
+    const front = f.bright > 0.8;
+    // As folhas nascem acima do laço.
+    const fv0 = clamp((BASE_Y - (TIE_Y - 10)) / (BASE_Y - f.pos[1]), 0.04, 0.6), fv1 = Math.min(0.78, fv0 + 0.62);
+    const fracs = front ? [0, 0.25, 0.5, 0.75, 1].map((u) => fv0 + (fv1 - fv0) * u) : [0.55, 0.72];
+    f.leaves = fracs.map((fr, j) => {
+      const sd = i * 31 + j * 7 + 3, frac = clamp(fr + (rnd(sd) - 0.5) * 0.05, 0.04, 0.82);
+      const p = pathAt(f.path, frac), side = (i + j) % 2 ? 1 : -1;
+      const ang = p.ang + side * rad(28 + rnd(sd + 1) * 30);
+      return {
+        x: p.x, y: p.y, stemAng: p.ang, ang, dir: Math.cos(ang) >= 0 ? 1 : -1, seed: sd,
+        len: (34 - j * 4.5) * (0.8 + rnd(sd + 2) * 0.4) * (front ? 1 : 0.75), wid: 3.0 + rnd(sd + 3) * 1.1,
+        droop: rad(25 + rnd(sd + 4) * 45) * (1 - frac * 0.6),
+        kink: rnd(sd + 5) < 0.45 ? rad(40 + rnd(sd + 6) * 45) : 0, kinkAt: 0.4 + rnd(sd + 7) * 0.3,
+        twist: 1 + rnd(sd + 8) * 2.6, phase: rnd(sd + 9) * TAU, old: rnd(sd + 10) < 0.25,
+        tAt: f.start + STEM_DUR * (1 - Math.cbrt(1 - frac)),         // Momento em que o caule alcança a posição da folha
+      };
+    });
+  });
+  FLOWERS = fl; BUDS = bd;
+}
+buildLayout();
+
+// CENA ANIMADA
+function scene(t) {
+  for (let r = 0; r < ROWS; r++) {                                         // Vento: as partes mais altas balançam mais
+    const h = clamp((BASE_Y + 8 - Yr[r]) / 150), w = t - 0.4 * h;
+    rowShift[r] = settings.wind * (0.6 * wave(w, 2) + 0.3 * wave(w, 3, 1) + 0.1 * wave(w, 5, 2)) * Math.pow(h, 1.5);
+  }
+  sky(t);
+  meteoros(t);
+  const growOf = (o) => easeOut((t - o.start) / STEM_DUR);
+
+  for (const f of FLOWERS) for (const L of f.leaves) leaf(L, t, smoothstep(L.tAt, L.tAt + 0.55, t));   // As folhas se abrem conforme o caule cresce
+  for (const b of BUDS) tube(curve([b.baseX, BASE_Y], b.pos, b.bulge, growOf(b), 14), 0.7, 0.45, STEM);
+  for (const f of FLOWERS) tube(curve([f.baseX, BASE_Y], f.pos, f.bulge, growOf(f), 14), 0.85, 0.5, STEM);
+  ribbon(easeOut((t - 1.1) / 0.7));
+
+  FLOWERS.forEach((f, i) => {                                              // Desenha as flores de trás para frente
+    if (t < f.end) return;                                                 // A flor aparece depois que seu caule cresce
+    const swell = smoothstep(f.end, f.end + 0.6, t);
+    const ripe = smoothstep(f.tOpen - 1.0, f.tOpen + 0.3, t);
+    const opening = smoothstep(f.tOpen, f.tOpen + 1.6, t);
+    const breathe = BREATH_DEPTH * (0.5 - 0.5 * Math.cos(TAU * (t - f.tOpen - 3) / BREATH + i * 0.9))
+      * smoothstep(f.tOpen + 1.6, f.tOpen + 3, t);
+    const openness = opening * (1 - breathe);
+    const s = f.size * settings.size * (0.35 + 0.65 * swell) * (0.5 + 0.5 * Math.max(openness, ripe * 0.6));
+    lily(f.pos, f.axis, s, openness, ripe, t, i * 7 + 3, PALETTES[f.col], f.bright);
+  });
+  BUDS.forEach((b, i) => {                                                 // Desenha os botões florais
+    if (t < b.end) return;
+    const swell = smoothstep(b.end, b.end + 0.6, t);
+    lily(b.pos, b.axis, b.size * (0.4 + 0.6 * swell), 0.04 + 0.03 * wave(t, 2, i),
+      b.ripe * swell, t, 90 + i, PALETTES[b.col], 0.9);
+  });
+
+  const pv = 0.5 * smoothstep(3, 4.5, t), off = Math.floor(t * 4);       // Faíscas amarelas e azul-claras sobem como vaga-lumes
+  if (pv > 0) for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const i = r * COLS + c;
+    if (fg[i]) continue;
+    const h = hash3(c, r + off, 77) % 1000;
+    if (h < 2) h ? set(i, pv, 0.70, 0.92, 0.96) : set(i, pv, 1, 0.88, 0.25);
+  }
+  const fade = smoothstep(0, 0.2, t);
+  if (fade < 1) for (let i = 0; i < N; i++) lum[i] *= fade;
+}
+
+// CONVERSÃO DE CARACTERES ASCII EM IMAGEM
+const view = document.getElementById("view"), ctx = view.getContext("2d");
+const START = [], COUNT = BUCKETS.map((b) => b.length);
+BUCKETS.reduce((s, b, k) => { START[k] = s; return s + b.length; }, 0);
+const MASKS = [...CHARS].map((ch) => {                                     // Cria antecipadamente as máscaras de cada caractere
+  const g = document.createElement("canvas"); g.width = CW; g.height = CH;
+  const gx = g.getContext("2d");
+  gx.font = FONT; gx.textBaseline = "top"; gx.fillStyle = "#fff"; gx.fillText(ch, 0, 0);
+  const d = gx.getImageData(0, 0, CW, CH).data, m = new Uint8Array(CW * CH);
+  for (let k = 0; k < m.length; k++) m[k] = d[k * 4 + 3];
+  return m;
+});
+const ascii = document.createElement("canvas");                            // Camada ASCII com fundo transparente
+const actx = ascii.getContext("2d");
+const glowA = document.createElement("canvas"), glowB = document.createElement("canvas"), glowC = document.createElement("canvas");
+let W, H, img, px32;
+
+// Cria (ou recria) a grade, o céu, as estrelas e os buffers para o tamanho atual da tela.
+function setupGrid() {
+  const vw = innerWidth || 1, vh = innerHeight || 1;
+  GRID_ASPECT = vw / vh;
+  ({ cols: COLS, rows: ROWS } = gridFor(vw, vh));
+  N = COLS * ROWS;
+  S = Math.max(BOX_W / (COLS * 0.5), BOX_H / ROWS);          // Unidades do mundo por linha da grade
+  // A base dos caules fica sempre rente à borda inferior; a altura que sobrar (celular em pé) vira céu acima do buquê.
+  Y0 = BASE_Y + 1 - ROWS * S;                                 // Coordenada do topo da tela no mundo
+  VIS = { x0: X_MID - COLS * 0.25 * S, x1: X_MID + COLS * 0.25 * S, y0: Y0, y1: Y0 + ROWS * S };
+  VIS_W = VIS.x1 - VIS.x0; VIS_H = VIS.y1 - VIS.y0; VMIN = Math.min(VIS_W, VIS_H);
+  HW_MIN = S > 1.15 ? 0.3 * S : 1e-3;                          // Em grades mais grossas, traços finos continuam visíveis
+  Xc = new Float32Array(COLS); Yr = new Float32Array(ROWS);
+  for (let c = 0; c < COLS; c++) Xc[c] = X_MID + (c + 0.5 - COLS / 2) * 0.5 * S;   // Cada célula tem metade da largura de sua altura
+  for (let r = 0; r < ROWS; r++) Yr[r] = Y0 + (r + 0.5) * S;
+  lum = new Float32Array(N); rgb = new Float32Array(N * 3); rowShift = new Float32Array(ROWS);
+  fg = new Uint8Array(N); ovr = new Int16Array(N).fill(-1);
+  buildSky(); buildStars(); buildTwinkles();
+  W = COLS * CW; H = ROWS * CH;
+  view.width = W; view.height = H; ascii.width = W; ascii.height = H;
+  img = actx.createImageData(W, H); px32 = new Uint32Array(img.data.buffer);
+  [[glowA, 2], [glowB, 4], [glowC, 8]].forEach(([g, s]) => { g.width = Math.ceil(W / s); g.height = Math.ceil(H / s); });
+  meteoro.ativo = false;
+}
+
+function draw(frame) {
+  px32.fill(0);
+  const fidx = Math.floor(frame / 3);
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const i = r * COLS + c, L = lum[i];
+    let level = 0;
+    while (level < LEVELS.length && L >= LEVELS[level]) level++;
+    if (level === 0) continue;
+    // Estrelas usam caractere fixo; no céu, o caractere segue a pincelada; no buquê, varia com a luminosidade.
+    const o = ovr[i];
+    const ch = o >= 0 ? o : fg[i] ? START[level] + hash3(r, c, fidx) % COUNT[level] : bgDir[i], m = MASKS[ch];
+    const k = (0.45 + 0.75 * L) * 1.6, j = i * 3;
+    const pr = Math.min(255, 255 * rgb[j] * k) | 0, pg = Math.min(255, 255 * rgb[j + 1] * k) | 0, pb = Math.min(255, 255 * rgb[j + 2] * k) | 0;
+    const rgb32 = (pb << 16) | (pg << 8) | pr;
+    let o0 = (r * CH) * W + c * CW, mi = 0;
+    for (let y = 0; y < CH; y++, o0 += W) {               // Escreve um pixel por vez, usando quatro bytes
+      for (let x = 0; x < CW; x++, mi++) {
+        const v = m[mi];
+        if (v) px32[o0 + x] = (v << 24) | rgb32;           // A opacidade segue o desenho do caractere
+      }
+    }
+  }
+  actx.putImageData(img, 0, 0);
+  ctx.fillStyle = "#040a26"; ctx.fillRect(0, 0, W, H);
+  ctx.drawImage(ascii, 0, 0);
+  if (settings.glow > 0) {                                                 // Brilho difuso, usando imagens reduzidas e ampliadas
+    let src = ascii;
+    for (const g of [glowA, glowB, glowC]) {
+      const gx = g.getContext("2d");
+      gx.imageSmoothingEnabled = true; gx.clearRect(0, 0, g.width, g.height);
+      gx.drawImage(src, 0, 0, g.width, g.height); src = g;
+    }
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = Math.min(1, settings.glow);
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(glowC, 0, 0, W, H);
+    if (settings.glow > 1) { ctx.globalAlpha = settings.glow - 1; ctx.drawImage(glowC, 0, 0, W, H); }
+    ctx.restore();
+  }
+}
+
+// SURPRESA: A NOITE ESTRELADA EM ASCII (conteúdo original de "ascii-art(1).txt", 100 × 41, sem alterações)
+const ARTE = [
+  "@@@#*:::==+=@@@@@@@*-*@@@@@@@*@+##*%+@*@@%@@:%+*%*+@#@%@%%@@@#%@#*%@@@#@@#%@*@@@@#@%@@@@##%#*%%@@@@@",
+  "@@#++-.:===%@@@@@@@%*%#@@@@@@*-*:=++@.-%+=@#%@@=#%*%#@@%##%#*@=**@%%%##@#%@@@+@%@%##@%@**#%#+++*%%:@",
+  "@@@*#*#*==*+@@@@@@@@@%#%@@@@@=*#-*-*#-=:.:-+@%@@@%#@@@@@++-.::+=#%%@@@%@*%@@@@@#@@*###-:+:.:-+:-*+-%",
+  "@%@.%-@%#@%@@%%@@@@=@%@%*#@*%##+@@@@@@%@+@@@%%@@%#@@+@%*==-.+.::+#*@#@@%@@@@*@@#@@-*+*.#.:.....-+::.",
+  "@@%%@@@@@@@##@@@@@@@@@@@@@%%@@%-@*%@@@%@@@%@@@@%@@@@@@%%+#-+=##**-@@@@@@@%%%@%##+-=+=.........=::.:@",
+  "%@%%@%%%@@@@%%%@@+%+:*%=@%@@@%@%@@@#@#*#%@%@@#@@-%@**%@@@@#+==#@#%@@@%@@@@@%%%%*##+::-..=:.-.-..-.=.",
+  "%@%@#@@@@%%@@@@@%-:-..+*#@@@@@@%%@%##*###@*--.#*%@#@**#@@%@*%%%#%@#%@%%@@@@%%%#%%+=:....:.:.....::.#",
+  "%%*@@@@%@#@@@%#@#%-+.-++@@%%%%%%*%#%%*+..::::*:.::#%--%+-##%@@@@%%+%%-+*.#%##%*=+=-:...:........::-:",
+  "=%@@@%%@%%@@@@@@@@%-*-*@%@#%#***#%##+**+*=:-*=**%*@.#*%%##=*@%@@%*#=.:***#++*%#%:+.-......:......:=.",
+  "#+#*@@@@@@@@@@@@@#@@%@@%#*%-%-**%**#==:*%+#*#*+#+.%+.%**#%:%+-+%@%#+:..:..#+#*@*+##.+=.....::.::-.::",
+  "**%+=##%@%@%@@%@@%%+--#*##==:-+*%+-=%%@@@@*%%%@#*#%%+=#%@@%=%%##%%@:==#:.++###%%%#==%=+-.......-:.=:",
+  "%+++*+-#+**=#=#*@@#:=+%*-:*##+%-:=@@@@%=*@%#%@#-*:@*%+%:%:-#@*=%+%%#****#*@=%=*%%##*%%+=:.::..%.:-%#",
+  "#%%=#+#%#*@%#+#@@@%+##+*=##%+#=#=@@@#*-*%#+#@#-##%#%=@+-*%.%#@@%%%*%@%@%%#-###%@%#@-#%*::%#:.+%-+%%%",
+  "#*+@@##@+==@*=@@@@@+#%#*:=:.:.:++@@+%%%*%=+*.*:%+==-+%+-:=%-+%+@%%%%##%@%#@#%%@@%=#%%%%###%@%%#@%@##",
+  ":=**+*+#%+#@+*@@@@@+=*#%@@+@=+:%%%##:=*-+#@*#@+*@=#%=:.-%=:::@@@#*##%%##%%%%@#%*%+%%%+#%@+@%@%@@%*@#",
+  "+#=#++-=+**@*%@@@@%*%@@@@@@@%+@#%%*@.-#**#@#@+%*+%.-@%%-=+#%@*%#@%@*=*#@%%##%@@*%%#*%%%#%@%@%%%#*@@%",
+  "++=%+*-+#**@@*@@@@@@#@*@@%@#*#@@@#%#+=+*-#+**@###%+**%%=+=*%=+%@+:==::+.=@%=%+#%%*=%%%%%%%%%###%##:.",
+  "#%%##%%%#@%@@@@@@@@%#@@@%@#@%@%#%##+=####=#+#*@+@#@=%#%%@@%*#*#%##-*##:*%=*#%##%@+#+#*%#*%=+=.-=::.-",
+  "=:%%%@#%+=*@@@@@@#@@@#@%*#%%#=@%*###%=*-==%+#==*%#%+%%%#@@##=%@****%*#@++=*%##*%***%%-#::=+=-.:.-.-:",
+  ".%%@*%:-:.*:%@@@@@@@*#=**#%%.*.#*.=:=-%#*+#-+*+*#%*+-:=#%+#%%#@+%=.-+#%*@=#-%%*%#*%%:-.:..=-..-....:",
+  "%%@%+*%-=::+@@@@@@@@@@%%%%+:+*-....-::*%#@%%*#+##%#+@%%+%#**@@#*=:%*%##:=%**%%%%%:%.#=--=.:.-..=-%=:",
+  "@%##*@@%=-*@@@@@%@@@@#%*#%+..:.......:.@#@###:%:*@#@@%@@#@##%%#+*+=+%*=##%=*@@@#.%.:--*.+==-#:*%.#%%",
+  "%@#%#@@%%@*#@@@@@@@@@%%@##*=:....:....=@%#%###@@+**%@*%*@@@@=@##=*#=#=-:-%@@@%-=.-..=-.*:%@-+@@@@@@@",
+  "**%#%@@@%%@@@@@@@@@@@+##%@+:..::#.:...-*##%-=%%@%%#*%@%@%%:*%*%-*:*.:%=+%+--+*--:--%=##*=+-@@@@@@@@@",
+  "=.:+#%@%#%*@@@@%%@@@@@#@%@*%:=*=..-..=.##*+#%#=#:-=+%%**+=:.%:*#=+:---:--@--=-:*-+#@-#=*=@%@@%@@@@@@",
+  "#:@::*=+#@@@@@@@@@@@@%#@#=@@#:-...=*%=:*.-=%=-*=*#.=.=:*-:::#-=--#%%::+:%*=%+%=%:++:%@@@@@@@@@@@@@@@",
+  "#%--+*.+*#*@@@@@@%@@@%-%%@@##+::+:+:.=+==-*==+%#-#=..:-.@%#%@@%:*@@@@=+-*@%@@@@%@@@@@@@@@%#@##@%%*%@",
+  ":@*%=**++#*@@@@@@@@@@%@@@@@@**#+:=-=++@%*%##=#++-%%=%*+%.%@@@@@@@@+@@@@@@%%@@@@@@@@@@@%%%%#%%%%%*%*#",
+  "@*%*%@#%*@#@@@@@@@@@@@@@@@@#@@-*=*+%#%%*#%#-+@*=%@%-+#*@%@%@@%@@%%@@@@@@+@@@#@@@@%%@@#%%%%#%%%+%%@%#",
+  "@@%++@=*#%=+@@@@@@+@+@@@@%@@@#@%@@@%@*#@@@@@@@:%@%%@@@#@%#@%@@@*@@@@@@@=@%*%%%%*%%@%@%@@#**%++#@#@%%",
+  "+@@%#:#+*+*@*@@@@@@@@@@@@@@@@@@@@@#@@@@@%@@@@@@@@+@@@@#%@#%%@@@@-@@%@@%@@+@%@%%@@@+@@@@@-#@%%%#:#@@@",
+  "@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@%@@@@@@@@#@@@%%%@@@@@%@@@@@@@%@%@@+@@@@@@@@@@@=@@@@%@@#@@@%@@##*%%#*=",
+  "@@@@@@@@%@@@@@@@@@@@@@@@@@%#@@@@@@@*@@@@@@@@%@@:+%@#@#@**#*+@%#%#@@@%%%@+@%=@*%@@%%#%@@@@@@#%%@+*##@",
+  "@@@@@@@@@@@@@@@@@@@@@@@@@@@%@@@@@@#@@%@@@*@@%@%@%@@@@@@@@%-%@%=@@@@%@*@@@@@@@@@@%=%@@#@@=@##@@=@@%#@",
+  "@@@@@@@@@@@@%%*@@%@@@@@@@@@@@@@@@@@@#@#%@%#@@%@*@@@@*@%%@@@%@@@#@@#%%%%#%@@%@@@@@@@@@%@#%@%%+%@@@#%@",
+  "@%@@@@%%%@@%@@@@@@@@@@@@@@@@@#@@@@%#%@@@@@#%@@@@*##@#+*+@@@@*%@@@@+%@@%@@@@@@%@@@@@@@@*@@@@@@*@@#%%@",
+  "%%@@@@@@@@@@@@@@@@%@@@@@@@=@@@@@*@@@@@@@@@@@@@-==@=@-@%@@@*@@@@@@@%%#@%%%@@@@@@@@@@@@@@@%@@@@@@@@@@@",
+  "@@@@@%%@@@@@@@@@@@@@@@*@+@@@%@@@%@#@@@@@@@@@@@@@@@@%@@+@@@@@@%@@@@@@@@@@@@@@*:%#@@@@@@@@@@+=*%#*+*-:",
+  "%@@@+#@#@@@@@@@@@@@%@@@@@@@@@@@%+@@@@@@@%@@*@@@@@%*****@@@@@@@@@@@@@@@@@@%@@%@@%#=+++#=@*+*@@@@@@@@#",
+  "@@%*@*@%%@@@@@@@@@-@%@@@@@@@@@@@@@@@@@%@@@@@@@@%@@@@@@@@@#@:.@%%@%%@%%@@@@@@@@@@@@@@@@@@@@-@@@@@@@@@",
+  "%:*:%#*#%@@-@=@*@%:-@@@#@@@@@@@@@@@@@@@@@@@@@@@%@@@@@@@@.+@@@@#%@*@@#@@%#@@@%@@@@@%@#%+*#%@@@@@@@@@@",
+];
+const A_ROWS = ARTE.length, A_COLS = ARTE[0].length;
+const A_ASPECT = 4 / 3;                                   // Proporção da pintura de referência (largura / altura)
+const A_CELL = A_COLS / (A_ROWS * A_ASPECT);              // Altura da célula em relação à largura
+const MONO_ARTE = 'Consolas, Menlo, "DejaVu Sans Mono", "Liberation Mono", "Courier New", monospace';
+const arte = document.getElementById("arte"), gArte = arte.getContext("2d");
+const arteGlow = document.createElement("canvas"), gGlow = arteGlow.getContext("2d");
+let arteFill = null, arteKind, artePh, arteChar, arteLayout = null, arteUltima = -1;
+
+// Densidade do caractere → claridade: no arquivo, "@" marca áreas escuras e "." as mais claras.
+const DENS = { "@": 0, "%": 0.12, "#": 0.24, "*": 0.36, "+": 0.48, "=": 0.58, "-": 0.68, ":": 0.8, ".": 0.92 };
+// Estrelas da pintura (x, y como fração da largura/altura; raio como fração da altura).
+const ARTE_ESTRELAS = [
+  [0.07, 0.035, 0.05], [0.20, 0.02, 0.035], [0.325, 0.035, 0.04], [0.395, 0.05, 0.045], [0.205, 0.16, 0.055],
+  [0.31, 0.33, 0.045], [0.095, 0.47, 0.05], [0.345, 0.55, 0.10], [0.62, 0.065, 0.065], [0.72, 0.225, 0.065],
+  [0.005, 0.45, 0.04],
+];
+const ARTE_LUA = [0.915, 0.15, 0.075];
+const ARTE_LUZES = [[0.43, 0.87], [0.47, 0.91], [0.52, 0.88], [0.60, 0.95], [0.68, 0.86], [0.74, 0.89], [0.79, 0.92], [0.83, 0.86], [0.71, 0.94]];
+// Contorno do cipreste à esquerda: [y, x esquerdo, x direito], interpolado entre as linhas.
+const CIPRESTE = [[0.0, 0.150, 0.170], [0.1, 0.140, 0.185], [0.3, 0.115, 0.215], [0.5, 0.100, 0.245], [0.7, 0.085, 0.300], [0.85, 0.080, 0.360], [1.0, 0.070, 0.420]];
+function noCipreste(u, v) {
+  let k = 1;
+  while (k < CIPRESTE.length - 1 && v > CIPRESTE[k][0]) k++;
+  const [y0, a0, b0] = CIPRESTE[k - 1], [y1, a1, b1] = CIPRESTE[k], f = clamp((v - y0) / (y1 - y0));
+  const wob = 0.012 * Math.sin(v * 46) + 0.008 * Math.sin(v * 97 + 1.3);      // Contorno em chamas, irregular
+  return u > a0 + (a1 - a0) * f - wob && u < b0 + (b1 - b0) * f + wob;
+}
+const linhaMorros = (u) => (u < 0.38 ? 0.74 : 0.74 - 0.21 * smoothstep(0.38, 1, u)) + 0.012 * Math.sin(u * 23);
+// Céu: do azul-marinho/índigo profundo ao cobalto, azul-claro, ciano e creme das pinceladas mais claras.
+const CEU_ARTE = [
+  [0.00, [0.10, 0.15, 0.50]], [0.22, [0.15, 0.17, 0.62]], [0.40, [0.12, 0.32, 0.88]], [0.58, [0.24, 0.50, 0.98]],
+  [0.74, [0.48, 0.76, 1.00]], [0.88, [0.60, 0.92, 0.90]], [1.00, [0.95, 0.98, 0.86]],
+];
+function rampa(stops, k) {
+  k = clamp(k);
+  for (let s = 1; s < stops.length; s++)
+    if (k <= stops[s][0]) return lerp3(stops[s - 1][1], stops[s][1], (k - stops[s - 1][0]) / (stops[s][0] - stops[s - 1][0]));
+  return stops[stops.length - 1][1];
+}
+// Cor de cada caractere por região da composição, com variações orgânicas dentro de cada região.
+// kind: 0 céu, 1 estrela/lua, 2 cipreste, 3 morros e vila, 4 luz de janela
+function corDaArte(c, r, ch) {
+  const u = (c + 0.5) / A_COLS, v = (r + 0.5) / A_ROWS, b = DENS[ch] ?? 1;
+  const n = hash3(c, r, 3) / 4294967296, n2 = hash3(c, r, 8) / 4294967296;
+  const campo = 0.5 + 0.5 * Math.sin(u * 11 + v * 7 + 1.5 * Math.sin(v * 9 + u * 3));   // Variação lenta, como pinceladas
+  const dist = (x, y) => Math.hypot((u - x) * A_ASPECT, v - y);
+
+  if (noCipreste(u, v)) {                                                       // Cipreste: verdes quase pretos
+    let col = lerp3([0.05, 0.11, 0.08], [0.13, 0.30, 0.22], clamp(b * 1.8 + 0.25 * campo));
+    if (n < 0.22) col = lerp3(col, [0.20, 0.15, 0.07], 0.55);                    // Toques terrosos
+    if (b > 0.5) col = lerp3(col, [0.22, 0.46, 0.40], (b - 0.5) * 1.6);          // Bordas iluminadas em azul-esverdeado
+    return [col, 2];
+  }
+  const dl = dist(ARTE_LUA[0], ARTE_LUA[1]), Rl = ARTE_LUA[2];
+  if (dl < Rl * 2.1) {                                                          // Lua: núcleo dourado e halo concêntrico
+    if (dl < Rl) {
+      let col = lerp3([0.95, 0.60, 0.08], [1.00, 0.92, 0.30], 0.35 + 0.65 * b + 0.15 * (n - 0.5));
+      col = lerp3(col, [1.00, 0.97, 0.74], (b - 0.75) * 3);
+      return [col, 1];
+    }
+    const e = (dl - Rl) / (Rl * 1.1), anel = 0.5 + 0.5 * Math.cos(e * TAU * 1.5);
+    const col = lerp3(lerp3([0.98, 0.88, 0.32], [0.70, 0.90, 0.48], e * 1.3), [0.62, 0.86, 0.82], e * anel);
+    return [lerp3(col, rampa(CEU_ARTE, 0.3 + 0.6 * b), e * e * 0.8), 1];
+  }
+  for (const [sx, sy, sr] of ARTE_ESTRELAS) {                                  // Estrelas: amarelo-claro, creme e halos
+    const d = dist(sx, sy);
+    if (d >= sr) continue;
+    const e = d / sr;
+    if (e < 0.45) return [lerp3([1.00, 0.86, 0.28], [1.00, 0.98, 0.80], b * 0.9 + 0.2 * n), 1];
+    const halo = lerp3([0.96, 0.92, 0.45], n2 < 0.5 ? [0.72, 0.92, 0.55] : [0.80, 0.94, 0.98], (e - 0.45) * 1.8);
+    return [lerp3(halo, rampa(CEU_ARTE, 0.3 + 0.6 * b), clamp((e - 0.7) * 3) * 0.7), 1];
+  }
+  if (v > linhaMorros(u)) {                                                    // Morros e vila
+    for (const [lx, ly] of ARTE_LUZES)
+      if (Math.abs(u - lx) < 0.011 && Math.abs(v - ly) < 0.018) return [[1.00, 0.80, 0.28], 4];
+    if (v > 0.8 && b > 0.5 && n < 0.6) return [[1.00, 0.84, 0.36], 4];          // Janelas acesas
+    if (Math.abs(u - 0.565) < 0.008 && v > 0.66 && v < 0.86) return [[0.62, 0.70, 0.86], 3];   // Torre da igreja
+    let col = lerp3([0.07, 0.11, 0.38], [0.18, 0.36, 0.80], clamp(0.2 + 0.7 * b + 0.25 * (campo - 0.5)));
+    if (v > 0.8 && n2 < 0.35) col = lerp3(col, [0.12, 0.34, 0.26], 0.6);       // Vegetação verde-escura
+    else if (n2 > 0.85) col = lerp3(col, [0.22, 0.20, 0.45], 0.5);              // Telhados em violeta-acinzentado
+    return [col, 3];
+  }
+  // Céu: claridade do caractere + faixa luminosa diagonal + redemoinhos.
+  const faixa = u > 0.18 ? Math.exp(-(((v - (0.62 - 0.2 * u)) / 0.07) ** 2)) : 0;
+  const redem = Math.max(Math.exp(-((dist(0.5, 0.33) / 0.15) ** 2)), Math.exp(-((dist(0.66, 0.47) / 0.1) ** 2)));
+  let tom = 0.06 + 0.86 * b + 0.12 * (campo - 0.5) + 0.1 * (n - 0.5) + 0.12 * faixa * b + 0.08 * redem * b;
+  let col = rampa(CEU_ARTE, tom);
+  if (n2 < 0.12) col = lerp3(col, [0.30, 0.78, 0.82], 0.45);                   // Toques de ciano
+  else if (n2 > 0.92) col = lerp3(col, [0.16, 0.12, 0.50], 0.5);               // Toques de índigo
+  return [col, 0];
+}
+function prepararArte() {
+  if (arteFill) return;
+  const n = A_ROWS * A_COLS;
+  arteFill = new Array(n); arteKind = new Uint8Array(n); artePh = new Float32Array(n); arteChar = new Array(n);
+  for (let r = 0; r < A_ROWS; r++) for (let c = 0; c < A_COLS; c++) {
+    const i = r * A_COLS + c, ch = ARTE[r][c];
+    arteChar[i] = ch;
+    const [col, kind] = corDaArte(c, r, ch);
+    arteFill[i] = `rgb(${Math.round(col[0] * 255)},${Math.round(col[1] * 255)},${Math.round(col[2] * 255)})`;
+    arteKind[i] = kind;
+    artePh[i] = kind === 0 ? (c / A_COLS) * 9 + (r / A_ROWS) * 6 : hash3(c, r, 21) / 4294967296 * TAU;
+  }
+}
+// Encaixa a matriz 100 × 41 cobrindo a tela inteira ("cover"), sem deformar os caracteres.
+// O que sobra para fora da tela é percorrido por uma panorâmica lenta: no celular em pé, a câmera
+// passeia do redemoinho central até a lua e volta ao cipreste; em telas largas, sobe e desce entre céu e vila.
+function ajustarArte() {
+  const vw = innerWidth || 1, vh = innerHeight || 1, dpr = Math.min(2, devicePixelRatio || 1);
+  arte.width = Math.round(vw * dpr); arte.height = Math.round(vh * dpr);
+  const cw = Math.max(vw / A_COLS, vh / (A_ROWS * A_CELL)), ch = cw * A_CELL;
+  gArte.font = `bold 100px ${MONO_ARTE}`;
+  const adv = gArte.measureText("@").width / 100 || 0.6;
+  const sobraX = Math.max(0, cw * A_COLS - vw), sobraY = Math.max(0, ch * A_ROWS - vh);
+  // Velocidade de cerca de 16 px/s; ciclo de ida e volta com no mínimo 40 s.
+  const ciclo = Math.max(40, 2 * Math.max(sobraX, sobraY) / 16);
+  arteLayout = { dpr, vw, vh, cw, ch, sobraX, sobraY, ciclo, fs: Math.min(cw / adv, ch * 1.05) };
+  arteGlow.width = Math.ceil(arte.width / 6); arteGlow.height = Math.ceil(arte.height / 6);
+  arteUltima = -1;
+}
+function pintarArte(t) {
+  const L = arteLayout, g = gArte;
+  // Posição da panorâmica (0 = início, 1 = fim do trecho que sobra); começa no centro da obra.
+  const k = REDUCED ? 0.5 : 0.5 + 0.5 * Math.sin(TAU * (t - tSurpresa) / L.ciclo);
+  const ox = -L.sobraX * k, oy = -L.sobraY * k;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
+  g.clearRect(0, 0, arte.width, arte.height);
+  g.setTransform(L.dpr, 0, 0, L.dpr, 0, 0);
+  g.font = `bold ${L.fs}px ${MONO_ARTE}`; g.textAlign = "center"; g.textBaseline = "middle";
+  const anim = REDUCED ? 0 : 1;
+  // Desenha apenas as células visíveis (com uma de margem).
+  const c0 = Math.max(0, Math.floor(-ox / L.cw) - 1), c1 = Math.min(A_COLS, Math.ceil((L.vw - ox) / L.cw) + 1);
+  const r0 = Math.max(0, Math.floor(-oy / L.ch) - 1), r1 = Math.min(A_ROWS, Math.ceil((L.vh - oy) / L.ch) + 1);
+  for (let r = r0; r < r1; r++) {
+    const y = oy + (r + 0.5) * L.ch;
+    for (let c = c0; c < c1; c++) {
+      const i = r * A_COLS + c, ch = arteChar[i];
+      if (ch === " ") continue;
+      const kind = arteKind[i], ph = artePh[i];
+      // Brilho vivo: o céu ondula devagar; estrelas, lua e janelas cintilam com fases próprias.
+      g.globalAlpha = kind === 0 ? 0.84 + 0.16 * anim * Math.sin(t * 1.1 - ph)
+        : kind === 1 ? 0.8 + 0.2 * (anim ? Math.sin(t * 2.3 + ph) : 1)
+        : kind === 4 ? 0.85 + 0.15 * (anim ? Math.sin(t * 3.1 + ph) : 1) : 0.95;
+      g.fillStyle = arteFill[i];
+      g.fillText(ch, ox + (c + 0.5) * L.cw, y);
+    }
+  }
+  // Brilho difuso: cópia reduzida e ampliada, somada por cima.
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1;
+  gGlow.clearRect(0, 0, arteGlow.width, arteGlow.height); gGlow.imageSmoothingEnabled = true;
+  gGlow.drawImage(arte, 0, 0, arteGlow.width, arteGlow.height);
+  g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.85; g.imageSmoothingEnabled = true;
+  g.drawImage(arteGlow, 0, 0, arte.width, arte.height);
+  g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
+}
+
+// NARRATIVA: intro (0–10 s) → presente (10–20 s) → convite (a partir de 20 s) → surpresa (após o clique)
+const FRASES = {
+  intro: "Dizem que Van Gogh enxergava beleza até nas noites mais escuras...",
+  presente: "Então pensei em te dar um pedacinho desse céu.",
+};
+const JANELAS = { intro: [0, 10], presente: [10, 20] };
+const palco = document.getElementById("palco"), mensagem = document.getElementById("mensagem");
+const elDigitado = mensagem.querySelector(".digitado"), elResto = mensagem.querySelector(".resto");
+const botao = document.getElementById("convite"), leitor = document.getElementById("leitor"), finalEl = document.getElementById("final");
+let estado = null, fraseAtual = "", digitados = -1, opMsg = -1, opBotao = -1, tSurpresa = 0;
+
+function entrar(novo) {
+  estado = novo;
+  document.body.dataset.estado = novo;
+  if (FRASES[novo]) {
+    fraseAtual = FRASES[novo]; digitados = -1;
+    leitor.textContent = fraseAtual;                     // Leitores de tela recebem a frase inteira de uma vez
+  } else if (novo === "convite") {
+    fraseAtual = ""; mensagem.style.opacity = "0"; opMsg = 0;
+  }
+}
+function narrativa(t) {
+  if (estado === "surpresa") return;
+  const novo = t < 10 ? "intro" : t < 20 ? "presente" : "convite";
+  if (novo !== estado) entrar(novo);
+  if (novo === "convite") {
+    const op = Math.round(smoothstep(20, REDUCED ? 20.4 : 21.2, t) * 100) / 100;
+    if (op !== opBotao) { opBotao = op; botao.style.opacity = op; }
+    return;
+  }
+  const [a, b] = JANELAS[novo];
+  // A janela inteira dura 10 s: entrada gradual, digitação nos primeiros segundos, saída suave no fim.
+  const op = Math.round(smoothstep(a + 0.25, a + 1.1, t) * (1 - smoothstep(b - 0.8, b - 0.05, t)) * 100) / 100;
+  if (op !== opMsg) { opMsg = op; mensagem.style.opacity = op; }
+  const total = fraseAtual.length;
+  const n = REDUCED ? total : Math.min(total, Math.floor(total * clamp((t - a - 0.45) / 2.8)));
+  if (n !== digitados) {
+    digitados = n;
+    elDigitado.textContent = fraseAtual.slice(0, n); elResto.textContent = fraseAtual.slice(n);
+    mensagem.classList.toggle("completo", n >= total);
+  }
+}
+function abrirSurpresa() {
+  if (estado === "surpresa" || estado !== "convite") return;  // Abre uma única vez, só depois do convite
+  tSurpresa = clock;
+  prepararArte(); ajustarArte(); pintarArte(clock);           // A pintura já está pronta antes do crossfade
+  estado = "surpresa";
+  document.body.dataset.estado = "surpresa";
+  botao.disabled = true;
+  leitor.textContent = "";
+  setTimeout(() => finalEl.focus({ preventScroll: true }), REDUCED ? 400 : 1400);
+}
+botao.addEventListener("click", abrirSurpresa);
+
+// CÂMERA SELFIE: abre a câmera frontal e mostra, em tela cheia e espelhada, quem está olhando o site.
+// A imagem fica só no aparelho: nada é gravado nem enviado.
+const btnCamera = document.getElementById("camera"), selfie = document.getElementById("selfie");
+const selfieVideo = document.getElementById("selfie-video"), selfieMsg = document.getElementById("selfie-msg");
+const selfieFechar = document.getElementById("selfie-fechar");
+let streamCamera = null, abrindoCamera = false;
+function mostrarSelfie() {
+  selfie.hidden = false;
+  requestAnimationFrame(() => selfie.classList.add("visivel"));
+  selfieFechar.focus({ preventScroll: true });
+}
+async function abrirCamera() {
+  if (abrindoCamera || streamCamera) return;
+  abrindoCamera = true;
+  selfieMsg.textContent = "";
+  mostrarSelfie();                       // A tela escura já aparece enquanto o navegador pede a permissão
+  try {
+    if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw Object.assign(new Error("indisponível"), { name: "Inseguro" });
+    }
+    streamCamera = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false,
+    });
+    if (selfie.hidden) { streamCamera.getTracks().forEach((tr) => tr.stop()); streamCamera = null; return; }   // Fechou antes de liberar
+    selfieVideo.srcObject = streamCamera;
+    await selfieVideo.play().catch(() => {});
+  } catch (e) {
+    streamCamera = null;
+    selfieMsg.textContent =
+      e.name === "NotAllowedError" || e.name === "SecurityError"
+        ? "Para ver a estrela, permita o acesso à câmera nas configurações do navegador e toque no botão de novo."
+        : e.name === "NotFoundError" || e.name === "OverconstrainedError"
+        ? "Não encontrei uma câmera frontal neste aparelho."
+        : e.name === "Inseguro"
+        ? "A câmera só pode ser aberta quando o site está em https:// (ou localhost)."
+        : "Não foi possível abrir a câmera agora. Tente novamente.";
+  } finally {
+    abrindoCamera = false;
+  }
+}
+function fecharCamera() {
+  if (streamCamera) streamCamera.getTracks().forEach((tr) => tr.stop());   // Desliga a câmera de verdade
+  streamCamera = null; selfieVideo.srcObject = null;
+  selfie.classList.remove("visivel");
+  setTimeout(() => { selfie.hidden = true; }, REDUCED ? 0 : 800);
+  btnCamera.focus({ preventScroll: true });
+}
+btnCamera.addEventListener("click", abrirCamera);
+selfieFechar.addEventListener("click", fecharCamera);
+selfie.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharCamera(); });
+addEventListener("pagehide", () => { if (streamCamera) streamCamera.getTracks().forEach((tr) => tr.stop()); });
+
+// MÚSICA DE FUNDO: fundo_site.mp3 em loop infinito, iniciada automaticamente ao abrir.
+// Se o navegador bloquear o áudio automático (Chrome, Safari e Firefox exigem um toque antes do som),
+// a música começa no primeiro toque, clique ou tecla em qualquer lugar da página.
+const musica = document.getElementById("musica"), btnSom = document.getElementById("som");
+let somDesejado = true;
+musica.volume = 0.75;
+function atualizarSom() {
+  const tocando = !musica.paused;
+  btnSom.textContent = tocando ? "[ som: ligado ]" : somDesejado ? "[ ativar som ]" : "[ som: desligado ]";
+  btnSom.setAttribute("aria-pressed", String(tocando));
+  btnSom.classList.toggle("bloqueado", !tocando && somDesejado);
+}
+function tocarMusica() {
+  const p = musica.play();
+  if (p && p.catch) p.catch(atualizarSom);
+}
+const GESTOS = ["pointerdown", "keydown", "touchend"];
+function destravar(e) {
+  if (e.target && e.target.closest && e.target.closest("#som")) return;   // O botão de som decide sozinho
+  if (somDesejado && musica.paused) tocarMusica();
+}
+GESTOS.forEach((ev) => addEventListener(ev, destravar, { capture: true, passive: true }));
+musica.addEventListener("play", atualizarSom);
+musica.addEventListener("pause", atualizarSom);
+musica.addEventListener("playing", () => GESTOS.forEach((ev) => removeEventListener(ev, destravar, { capture: true })), { once: true });
+btnSom.addEventListener("click", () => {
+  if (musica.paused) { somDesejado = true; tocarMusica(); }
+  else { somDesejado = false; musica.pause(); }
+  atualizarSom();
+});
+atualizarSom();
+tocarMusica();
+
+// Posiciona o palco de textos no centro das flores, acompanhando o "contain" do canvas.
+function posicionarPalco() {
+  const vw = innerWidth || 1, vh = innerHeight || 1, sc = Math.min(vw / W, vh / H);
+  const ox = (vw - W * sc) / 2, oy = (vh - H * sc) / 2;
+  const x = ox + ((X_MID - X_MID) * 2 / S + COLS / 2) * CW * sc;
+  const y = oy + ((68 - Y0) / S) * CH * sc;                   // Altura do miolo do buquê, no mundo
+  const bw = 124 * 2 / S * CW * sc;                           // Largura aproximada do buquê aberto, em pixels
+  palco.style.setProperty("--ax", `${x}px`);
+  palco.style.setProperty("--ay", `${clamp(y, vh * 0.22, vh * 0.78)}px`);
+  palco.style.setProperty("--bw", `${bw}px`);
+}
+
+// EXECUÇÃO DA ANIMAÇÃO
+// O relógio só avança com a aba visível, para a narrativa não "pular" etapas em segundo plano.
+setupGrid();
+posicionarPalco();
+let clock = 0, lastNow = performance.now(), lastDraw = -1e9, lastArte = -1e9, rafId = 0;
+function tick(now) {
+  rafId = requestAnimationFrame(tick);
+  clock += Math.min(0.1, Math.max(0, (now - lastNow) / 1000));
+  lastNow = now;
+  narrativa(clock);
+  const tS = clock - tSurpresa, emSurpresa = estado === "surpresa";
+  if ((!emSurpresa || tS < 2.2) && now - lastDraw >= 1000 / FPS - 2) {   // O buquê para de ser desenhado após o crossfade
+    lastDraw = now;
+    scene(clock);
+    draw(Math.floor(clock * FPS));
+  }
+  if (emSurpresa && arteLayout && (REDUCED ? arteUltima < 0 : now - lastArte >= 1000 / 24)) {
+    lastArte = now; arteUltima = clock;
+    pintarArte(clock);
+  }
+}
+rafId = requestAnimationFrame(tick);
+document.addEventListener("visibilitychange", () => {
+  cancelAnimationFrame(rafId);
+  if (!document.hidden) { lastNow = performance.now(); rafId = requestAnimationFrame(tick); }
+});
+
+// Redimensionamento: textos e pintura se ajustam sempre; a grade do buquê só é recriada
+// quando a proporção muda bastante (ex.: girar o celular). Nada reinicia a narrativa.
+let resizeTimer = 0;
+const onResize = () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const a = (innerWidth || 1) / (innerHeight || 1);
+    if (estado !== "surpresa" && Math.abs(Math.log(a / GRID_ASPECT)) > 0.15) { setupGrid(); lastDraw = -1e9; }
+    posicionarPalco();
+    if (arteLayout) ajustarArte();
+  }, 200);
+};
+addEventListener("resize", onResize);
+addEventListener("orientationchange", onResize);
+</script>
+</body>
+</html>
