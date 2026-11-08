@@ -109,6 +109,10 @@
   /* O vídeo fica invisível; a imagem (com contorno e efeitos) é desenhada no canvas */
   #selfie video { position: absolute; left: 0; top: 0; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
   #selfie-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #coroa { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  #coroa[hidden] { display: none; }
+  #coroa img { position: absolute; left: 0; top: 0; will-change: transform;
+    filter: drop-shadow(0 0 6px rgba(255,210,90,.75)); }
   #selfie::after { content: ""; position: absolute; inset: 0; pointer-events: none;   /* Moldura suave azul-noite */
     background: radial-gradient(ellipse at center, rgba(4,10,38,0) 55%, rgba(4,10,38,.55) 100%);
     box-shadow: inset 0 0 0 1px rgba(255,214,102,.35), inset 0 0 60px rgba(255,200,80,.12); }
@@ -159,6 +163,7 @@
 <div id="selfie" hidden role="dialog" aria-modal="true" aria-label="Câmera frontal">
   <video id="selfie-video" autoplay playsinline muted></video>
   <canvas id="selfie-canvas" aria-hidden="true"></canvas>
+  <div id="coroa" aria-hidden="true" hidden></div>
   <p id="selfie-msg" role="status"></p>
   <button id="selfie-fechar" type="button">[ fechar câmera ]</button>
 </div>
@@ -1189,7 +1194,14 @@ addEventListener("pagehide", () => { if (streamCamera) streamCamera.getTracks().
 const selfieCanvas = document.getElementById("selfie-canvas"), gSelfie = selfieCanvas.getContext("2d");
 const novoCanvas = () => { const c = document.createElement("canvas"); return [c, c.getContext("2d", { willReadFrequently: false })]; };
 const [mascC, gMasc] = novoCanvas(), [b0C, gB0] = novoCanvas(), [b1C, gB1] = novoCanvas(), [b2C, gB2] = novoCanvas(), [tmpC, gTmp] = novoCanvas();
-const [entradaC, gEntrada] = novoCanvas();
+const [entradaC, gEntrada] = novoCanvas(), [pessoaC, gPessoa] = novoCanvas();
+const quadroFundo = new Image();                                       // Fundo da selfie: A Noite Estrelada
+quadroFundo.src = "ANoiteEstrelada_VanGogh.jpg";
+const coroa = document.getElementById("coroa");
+const estrelasCoroa = Array.from({ length: 7 }, () => {
+  const img = new Image(); img.src = "estrelinha.gif"; img.alt = ""; img.decoding = "async";
+  coroa.appendChild(img); return img;
+});
 let acumFaiscas = 0;
 const MP_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const MODELO = "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite";
@@ -1286,6 +1298,7 @@ function iniciarEfeitos() {
 }
 function pararEfeitos() {
   cancelAnimationFrame(rafSelfie); rafSelfie = 0;
+  coroa.hidden = true;
   gSelfie.setTransform(1, 0, 0, 1, 0, 0); gSelfie.clearRect(0, 0, selfieCanvas.width, selfieCanvas.height);
 }
 let ultimoQuadroSelfie = 0;
@@ -1315,17 +1328,27 @@ function desenharSelfie(t, dt, W, H, dpr) {
   // Converte um ponto da máscara (fração 0–1) para a tela, já espelhada como um espelho.
   const telaX = (fx) => W - (dx + fx * dw), telaY = (fy) => dy + fy * dh;
 
-  g.setTransform(-1, 0, 0, 1, W, 0);                                 // Espelho
   g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
-  g.drawImage(v, dx, dy, dw, dh);
   g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
 
   if (mascPronta) {
-    // Fundo vira céu noturno: azul-noite translúcido fora da pessoa.
-    gTmp.globalCompositeOperation = "source-over"; gTmp.clearRect(0, 0, mascW, mascH);
-    gTmp.fillStyle = "rgba(4,10,38,0.55)"; gTmp.fillRect(0, 0, mascW, mascH);
-    gTmp.globalCompositeOperation = "destination-out"; gTmp.drawImage(mascC, 0, 0);
-    g.drawImage(tmpC, dx, dy, dw, dh);
+    // Fundo: A Noite Estrelada cobrindo a tela inteira, escurecida em 50%.
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    if (quadroFundo.complete && quadroFundo.naturalWidth) {
+      const qw = quadroFundo.naturalWidth, qh = quadroFundo.naturalHeight, qs = Math.max(W / qw, H / qh);
+      g.drawImage(quadroFundo, (W - qw * qs) / 2, (H - qh * qs) / 2, qw * qs, qh * qs);
+    } else { g.fillStyle = "#040a26"; g.fillRect(0, 0, W, H); }
+    g.fillStyle = "rgba(0,0,0,0.5)"; g.fillRect(0, 0, W, H);
+    // A pessoa, recortada pela máscara, por cima do quadro.
+    if (pessoaC.width !== W || pessoaC.height !== H) { pessoaC.width = W; pessoaC.height = H; }
+    gPessoa.setTransform(1, 0, 0, 1, 0, 0); gPessoa.globalCompositeOperation = "source-over"; gPessoa.clearRect(0, 0, W, H);
+    gPessoa.setTransform(-1, 0, 0, 1, W, 0);                             // Espelho
+    gPessoa.drawImage(v, dx, dy, dw, dh);
+    gPessoa.globalCompositeOperation = "destination-in"; gPessoa.imageSmoothingEnabled = true; gPessoa.imageSmoothingQuality = "high";
+    gPessoa.drawImage(mascC, dx, dy, dw, dh);
+    gPessoa.globalCompositeOperation = "source-over"; gPessoa.setTransform(1, 0, 0, 1, 0, 0);
+    g.drawImage(pessoaC, 0, 0);
+    g.setTransform(-1, 0, 0, 1, W, 0);                                 // Espelho, para o halo e o contorno
     // Desfoques da silhueta.
     for (const [c, gc] of [[b0C, gB0], [b1C, gB1], [b2C, gB2]]) {
       gc.clearRect(0, 0, c.width, c.height); gc.imageSmoothingEnabled = true; gc.drawImage(mascC, 0, 0, c.width, c.height);
@@ -1344,6 +1367,9 @@ function desenharSelfie(t, dt, W, H, dpr) {
     gTmp.globalCompositeOperation = "source-in"; gTmp.fillStyle = "rgb(255,236,170)"; gTmp.fillRect(0, 0, mascW, mascH);
     gTmp.globalCompositeOperation = "destination-out"; gTmp.drawImage(mascC, 0, 0);
     g.globalAlpha = 0.95; g.drawImage(tmpC, dx, dy, dw, dh); g.drawImage(tmpC, dx, dy, dw, dh);
+  } else {
+    g.setTransform(-1, 0, 0, 1, W, 0);                                 // Sem máscara: o vídeo inteiro, espelhado
+    g.drawImage(v, dx, dy, dw, dh);
   }
   g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
 
@@ -1356,14 +1382,9 @@ function desenharSelfie(t, dt, W, H, dpr) {
 
   const fonte = (px) => `bold ${Math.round(px * dpr)}px ${MONO_ARTE}`;
   g.textAlign = "center"; g.textBaseline = "middle";
-  // Estrelinhas do céu ao fundo: só aparecem fora da pessoa.
-  for (const e of ceuSelfie) {
+  // Estrelinhas ASCII piscando: só enquanto o quadro ainda não está atrás da pessoa (ele já tem as estrelas dele).
+  if (!mascPronta) for (const e of ceuSelfie) {
     const X = e.x * W, Y = e.y * H * 0.92;
-    if (mascPronta) {
-      const fx = (W - X - dx) / dw, fy = (Y - dy) / dh;
-      const mx = Math.floor(fx * mascW), my = Math.floor(fy * mascH);
-      if (mx >= 0 && my >= 0 && mx < mascW && my < mascH && mascVal[my * mascW + mx] > 0.3) continue;
-    }
     const b = REDUCED ? 0.7 : 0.5 + 0.5 * Math.sin(t * e.f + e.ph);
     g.globalAlpha = 0.25 + 0.75 * b * b; g.fillStyle = `rgb(${e.cor})`; g.font = fonte(10 + 8 * e.s * (0.6 + 0.4 * b));
     g.fillText(e.ch, X, Y);
@@ -1398,24 +1419,25 @@ function desenharSelfie(t, dt, W, H, dpr) {
     g.fillStyle = g.shadowColor = `rgb(${p.cor})`; g.font = fonte(p.tam * (0.7 + 0.5 * env));
     g.fillText(p.ch, p.x, p.y);
   }
-  // Coroa de estrelas girando devagar sobre a cabeça.
-  if (mascPronta && cabeca.ok) {
-    const rx = cabeca.w * dw * 0.58, ry = rx * 0.22, cx = telaX(cabeca.x);
-    const cy = Math.max(30 * dpr + ry, telaY(cabeca.y) - rx * 0.08);     // Logo acima do topo da cabeça, sem sair da tela
-    const giro = REDUCED ? 0 : t * 0.6, escala = clamp(cabeca.w * 5.5, 1, 2);
-    g.shadowColor = "rgb(255,200,80)"; g.shadowBlur = 16 * dpr;
-    for (let k = 0; k < 7; k++) {
-      const a = giro + (k / 7) * TAU, z = Math.sin(a);                  // z < 0: estrela "atrás" da cabeça
-      const b = REDUCED ? 0.8 : 0.5 + 0.5 * Math.sin(t * 3 + k * 1.7);
-      g.globalAlpha = (z < 0 ? 0.4 : 1) * (0.6 + 0.4 * b);
-      g.fillStyle = k % 3 === 1 ? "rgb(255,246,210)" : "rgb(255,214,102)";
-      g.font = fonte((34 + 16 * b) * (z < 0 ? 0.7 : 1) * escala);
-      const sx = cx + Math.cos(a) * rx, sy = cy + z * ry;
-      g.fillText("*", sx, sy);
-      if (z >= 0) { g.globalAlpha *= 0.6; g.fillText("*", sx, sy); }   // Estrelas da frente brilham mais
-    }
-  }
   g.shadowBlur = 0; g.globalAlpha = 1;
+  // Coroa de estrelinhas (estrelinha.gif) girando devagar sobre a cabeça. São <img> sobre o canvas,
+  // porque um GIF desenhado no canvas ficaria parado no primeiro quadro.
+  if (mascPronta && cabeca.ok) {
+    const css = 1 / dpr;                                                // Pixels do canvas → pixels CSS
+    const rx = cabeca.w * dw * 0.6 * css, ry = rx * 0.24, cx = telaX(cabeca.x) * css;
+    const base = clamp(cabeca.w * dw * css * 0.26, 30, 90);            // Tamanho proporcional à cabeça
+    const cy = Math.max(base * 0.6 + ry, telaY(cabeca.y) * css - rx * 0.12);   // Logo acima da cabeça, sem sair da tela
+    const giro = REDUCED ? 0 : t * 0.6;
+    coroa.hidden = false;
+    estrelasCoroa.forEach((img, k) => {
+      const a = giro + (k / estrelasCoroa.length) * TAU, z = Math.sin(a);   // z < 0: estrela "atrás" da cabeça
+      const tam = base * (z < 0 ? 0.68 : 1) * (0.92 + 0.08 * Math.sin(t * 3 + k * 1.7));
+      img.style.width = img.style.height = `${tam.toFixed(1)}px`;
+      img.style.transform = `translate(${(cx + Math.cos(a) * rx - tam / 2).toFixed(1)}px, ${(cy + z * ry - tam / 2).toFixed(1)}px)`;
+      img.style.opacity = z < 0 ? "0.55" : "1";
+      img.style.zIndex = z < 0 ? "1" : "2";
+    });
+  } else coroa.hidden = true;
 }
 
 // MÚSICA DE FUNDO: fundo_site.mp3 em loop infinito, iniciada automaticamente ao abrir.
