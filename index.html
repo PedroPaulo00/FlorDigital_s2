@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Um pedacinho do céu</title>
+<title>A Noite Estrelada</title>
 <style>
   :root {
     --noite: #040a26;
@@ -66,23 +66,26 @@
   #final { position: relative; margin: 0; outline: none; width: min(100%, 23ch);
     font: 700 clamp(1.35rem, 3.6vw + .5rem, 3.3rem) / 1.32 var(--mono); text-align: center; letter-spacing: .01em;
     text-wrap: balance; overflow-wrap: normal; word-break: normal; hyphens: none;
-    color: #fff4cf;
-    text-shadow: 0 0 2px #020617, 0 2px 4px #020617, 0 0 18px rgba(2,6,23,.95), 0 0 40px rgba(4,10,38,.9), 0 0 60px rgba(255,214,102,.18); }
-  #final::before { content: ""; position: absolute; inset: -.8em -1.4em; z-index: -1; border-radius: 50%;
-    background: radial-gradient(ellipse at center, rgba(3,8,30,.62) 0%, rgba(3,8,30,.36) 50%, rgba(3,8,30,0) 74%); }
+    color: #fff9e3;
+    /* Contorno escuro nítido + halo dourado: a frase se destaca de qualquer ponto do céu */
+    text-shadow: 0 0 1px #01030c, 1px 1px 0 #01030c, -1px -1px 0 #01030c, 1px -1px 0 #01030c, -1px 1px 0 #01030c,
+      0 3px 6px rgba(1,3,12,.95), 0 0 22px rgba(1,3,12,.95), 0 0 26px rgba(255,214,102,.38), 0 0 60px rgba(255,200,80,.22); }
+  #final::before { content: ""; position: absolute; inset: -1em -1.8em; z-index: -1; border-radius: 50%;
+    -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+    background: radial-gradient(ellipse at center, rgba(1,3,14,.86) 0%, rgba(1,3,14,.66) 45%, rgba(1,3,14,.25) 66%, rgba(1,3,14,0) 76%); }
 
   /* Botão da câmera: mesma linguagem do convite, com quebra de linha equilibrada em telas estreitas */
   #camera { pointer-events: auto; cursor: pointer; max-width: min(100%, 64ch); text-wrap: balance;
-    font: 600 clamp(.95rem, 1.1vw + .6rem, 1.25rem) / 1.4 var(--mono); letter-spacing: .02em;
-    color: #ffe9a3; background: rgba(4,10,38,.82);
-    border: 1px solid rgba(255,214,102,.45); border-radius: 3px; padding: .8em 1.2em;
-    box-shadow: 0 0 18px rgba(255,200,80,.16), inset 0 0 14px rgba(40,80,200,.28);
-    text-shadow: 0 0 8px rgba(255,214,102,.35); opacity: 0; visibility: hidden;
+    font: 700 clamp(1rem, 1.2vw + .65rem, 1.35rem) / 1.4 var(--mono); letter-spacing: .02em;
+    color: #fff3c4; background: rgba(10,22,72,.93);
+    border: 1.5px solid rgba(255,214,102,.85); border-radius: 4px; padding: .85em 1.3em;
+    box-shadow: 0 0 0 1px rgba(1,3,14,.8), 0 0 24px rgba(255,200,80,.38), inset 0 0 16px rgba(60,110,230,.35);
+    text-shadow: 0 0 10px rgba(255,214,102,.55), 0 1px 2px #01030c; opacity: 0; visibility: hidden;
     transition: color .25s, border-color .25s, box-shadow .25s, background .25s; }
   #camera::before { content: "* "; color: var(--azul-claro); }
   #camera::after  { content: " *"; color: var(--azul-claro); }
-  #camera:hover, #camera:focus-visible { color: #fff6d6; border-color: var(--dourado); background: rgba(8,20,64,.9);
-    box-shadow: 0 0 26px rgba(255,214,102,.34), inset 0 0 16px rgba(60,110,230,.35); }
+  #camera:hover, #camera:focus-visible { color: #fffaf0; border-color: #ffe08a; background: rgba(18,34,100,.96);
+    box-shadow: 0 0 0 1px rgba(1,3,14,.8), 0 0 34px rgba(255,214,102,.55), inset 0 0 18px rgba(80,130,240,.4); }
   #camera:focus-visible { outline: 2px solid #ffe08a; outline-offset: 5px; }
 
   body[data-estado="surpresa"] #view { opacity: 0; }
@@ -92,7 +95,8 @@
   body[data-estado="surpresa"] #mensagem { display: none; }
   body[data-estado="surpresa"] #final-bloco { opacity: 1; visibility: visible; transform: translate(-50%, -50%);
     transition: opacity 1.6s ease 1.3s, transform 1.8s ease 1.3s; }
-  body[data-estado="surpresa"] #camera { opacity: 1; visibility: visible; animation: brilho 3.6s ease-in-out 4s infinite;
+  @keyframes brilhoCamera { 50% { box-shadow: 0 0 0 1px rgba(1,3,14,.8), 0 0 36px rgba(255,200,80,.6), inset 0 0 18px rgba(70,120,235,.4); } }
+  body[data-estado="surpresa"] #camera { opacity: 1; visibility: visible; animation: brilhoCamera 3.2s ease-in-out 4s infinite;
     transition: opacity 1.2s ease 3s, visibility 0s 3s, color .25s, border-color .25s, box-shadow .25s, background .25s; }
 
   /* Selfie: a câmera frontal ocupa a tela inteira, espelhada como um espelho */
@@ -861,7 +865,9 @@ const A_CELL = A_COLS / (A_ROWS * A_ASPECT);              // Altura da célula e
 const MONO_ARTE = 'Consolas, Menlo, "DejaVu Sans Mono", "Liberation Mono", "Courier New", monospace';
 const arte = document.getElementById("arte"), gArte = arte.getContext("2d");
 const arteGlow = document.createElement("canvas"), gGlow = arteGlow.getContext("2d");
+const arteGlow2 = document.createElement("canvas"), gGlow2 = arteGlow2.getContext("2d");
 let arteFill = null, arteKind, artePh, arteChar, arteLayout = null, arteUltima = -1;
+let arteHi, arteSp, arteB, arteS, arteC;
 
 // Densidade do caractere → claridade: no arquivo, "@" marca áreas escuras e "." as mais claras.
 const DENS = { "@": 0, "%": 0.12, "#": 0.24, "*": 0.36, "+": 0.48, "=": 0.58, "-": 0.68, ":": 0.8, ".": 0.92 };
@@ -883,10 +889,11 @@ function noCipreste(u, v) {
   return u > a0 + (a1 - a0) * f - wob && u < b0 + (b1 - b0) * f + wob;
 }
 const linhaMorros = (u) => (u < 0.38 ? 0.74 : 0.74 - 0.21 * smoothstep(0.38, 1, u)) + 0.012 * Math.sin(u * 23);
-// Céu: do azul-marinho/índigo profundo ao cobalto, azul-claro, ciano e creme das pinceladas mais claras.
+// Céu noturno: quase preto-azulado nas áreas densas, subindo para índigo, ultramar e o ciano-menta
+// das pinceladas claras — escuro o bastante para as estrelas e a lua se destacarem.
 const CEU_ARTE = [
-  [0.00, [0.10, 0.15, 0.50]], [0.22, [0.15, 0.17, 0.62]], [0.40, [0.12, 0.32, 0.88]], [0.58, [0.24, 0.50, 0.98]],
-  [0.74, [0.48, 0.76, 1.00]], [0.88, [0.60, 0.92, 0.90]], [1.00, [0.95, 0.98, 0.86]],
+  [0.00, [0.012, 0.025, 0.09]], [0.30, [0.025, 0.055, 0.20]], [0.52, [0.06, 0.13, 0.40]],
+  [0.70, [0.13, 0.28, 0.64]], [0.85, [0.26, 0.52, 0.78]], [1.00, [0.58, 0.82, 0.84]],
 ];
 function rampa(stops, k) {
   k = clamp(k);
@@ -895,7 +902,7 @@ function rampa(stops, k) {
   return stops[stops.length - 1][1];
 }
 // Cor de cada caractere por região da composição, com variações orgânicas dentro de cada região.
-// kind: 0 céu, 1 estrela/lua, 2 cipreste, 3 morros e vila, 4 luz de janela
+// kind: 0 céu, 1 estrela/lua, 2 cipreste, 3 morros e vila, 4 luz de janela, 5 ponto do céu que pisca
 function corDaArte(c, r, ch) {
   const u = (c + 0.5) / A_COLS, v = (r + 0.5) / A_ROWS, b = DENS[ch] ?? 1;
   const n = hash3(c, r, 3) / 4294967296, n2 = hash3(c, r, 8) / 4294967296;
@@ -903,9 +910,9 @@ function corDaArte(c, r, ch) {
   const dist = (x, y) => Math.hypot((u - x) * A_ASPECT, v - y);
 
   if (noCipreste(u, v)) {                                                       // Cipreste: verdes quase pretos
-    let col = lerp3([0.05, 0.11, 0.08], [0.13, 0.30, 0.22], clamp(b * 1.8 + 0.25 * campo));
-    if (n < 0.22) col = lerp3(col, [0.20, 0.15, 0.07], 0.55);                    // Toques terrosos
-    if (b > 0.5) col = lerp3(col, [0.22, 0.46, 0.40], (b - 0.5) * 1.6);          // Bordas iluminadas em azul-esverdeado
+    let col = lerp3([0.012, 0.03, 0.022], [0.05, 0.13, 0.10], clamp(b * 1.8 + 0.25 * campo));
+    if (n < 0.22) col = lerp3(col, [0.10, 0.07, 0.03], 0.55);                    // Toques terrosos
+    if (b > 0.5) col = lerp3(col, [0.14, 0.32, 0.28], (b - 0.5) * 1.6);          // Bordas iluminadas em azul-esverdeado
     return [col, 2];
   }
   const dl = dist(ARTE_LUA[0], ARTE_LUA[1]), Rl = ARTE_LUA[2];
@@ -932,31 +939,59 @@ function corDaArte(c, r, ch) {
       if (Math.abs(u - lx) < 0.011 && Math.abs(v - ly) < 0.018) return [[1.00, 0.80, 0.28], 4];
     if (v > 0.8 && b > 0.5 && n < 0.6) return [[1.00, 0.84, 0.36], 4];          // Janelas acesas
     if (Math.abs(u - 0.565) < 0.008 && v > 0.66 && v < 0.86) return [[0.62, 0.70, 0.86], 3];   // Torre da igreja
-    let col = lerp3([0.07, 0.11, 0.38], [0.18, 0.36, 0.80], clamp(0.2 + 0.7 * b + 0.25 * (campo - 0.5)));
-    if (v > 0.8 && n2 < 0.35) col = lerp3(col, [0.12, 0.34, 0.26], 0.6);       // Vegetação verde-escura
-    else if (n2 > 0.85) col = lerp3(col, [0.22, 0.20, 0.45], 0.5);              // Telhados em violeta-acinzentado
+    let col = lerp3([0.02, 0.035, 0.11], [0.07, 0.15, 0.36], clamp(0.2 + 0.7 * b + 0.25 * (campo - 0.5)));
+    if (v > 0.8 && n2 < 0.35) col = lerp3(col, [0.04, 0.14, 0.11], 0.6);       // Vegetação verde-escura
+    else if (n2 > 0.85) col = lerp3(col, [0.10, 0.09, 0.22], 0.5);              // Telhados em violeta-acinzentado
     return [col, 3];
   }
   // Céu: claridade do caractere + faixa luminosa diagonal + redemoinhos.
   const faixa = u > 0.18 ? Math.exp(-(((v - (0.62 - 0.2 * u)) / 0.07) ** 2)) : 0;
   const redem = Math.max(Math.exp(-((dist(0.5, 0.33) / 0.15) ** 2)), Math.exp(-((dist(0.66, 0.47) / 0.1) ** 2)));
-  let tom = 0.06 + 0.86 * b + 0.12 * (campo - 0.5) + 0.1 * (n - 0.5) + 0.12 * faixa * b + 0.08 * redem * b;
+  let tom = 0.02 + 0.9 * b + 0.1 * (campo - 0.5) + 0.08 * (n - 0.5) + 0.12 * faixa * b + 0.1 * redem * b;
   let col = rampa(CEU_ARTE, tom);
-  if (n2 < 0.12) col = lerp3(col, [0.30, 0.78, 0.82], 0.45);                   // Toques de ciano
-  else if (n2 > 0.92) col = lerp3(col, [0.16, 0.12, 0.50], 0.5);               // Toques de índigo
+  if (n2 < 0.12) col = lerp3(col, [0.20, 0.55, 0.60], 0.4 * b);               // Toques de ciano
+  else if (n2 > 0.92) col = lerp3(col, [0.08, 0.06, 0.26], 0.5);               // Toques de índigo
+  if (b >= 0.68 && n < 0.24) return [col, 5];                                   // Pontos claros que piscam como estrelas
   return [col, 0];
+}
+// Fluxo do céu: espirais nos dois redemoinhos e uma correnteza ondulada no resto, combinadas como
+// [seno, cosseno] para que um único giro por quadro faça as pinceladas claras "andarem" pelo céu.
+const ARTE_REDEMOINHOS = [[0.50, 0.33, 0.17, 1], [0.66, 0.47, 0.11, -1], [0.86, 0.36, 0.09, 1]];
+function fluxoArte(c, r) {
+  const u = (c + 0.5) / A_COLS, v = (r + 0.5) / A_ROWS;
+  let sn = 0, cs = 0, W = 0;
+  for (const [x, y, R, dir] of ARTE_REDEMOINHOS) {
+    const dx = (u - x) * A_ASPECT, dy = v - y, d = Math.hypot(dx, dy);
+    const w = Math.exp(-((d / R) ** 2) * 1.2), a = d * 46 - dir * 2 * Math.atan2(dy, dx);
+    sn += w * Math.sin(a); cs += w * Math.cos(a); W += w;
+  }
+  const w0 = Math.max(0.15, 1 - W), p = u * 16 + 2.2 * Math.sin(v * 9 + u * 4) - v * 5;
+  sn += w0 * Math.sin(p); cs += w0 * Math.cos(p);
+  const m = Math.hypot(sn, cs) + 1e-6;
+  return [sn / m, cs / m];
 }
 function prepararArte() {
   if (arteFill) return;
   const n = A_ROWS * A_COLS;
   arteFill = new Array(n); arteKind = new Uint8Array(n); artePh = new Float32Array(n); arteChar = new Array(n);
+  arteHi = new Array(n); arteSp = new Float32Array(n); arteB = new Float32Array(n);
+  arteS = new Float32Array(n); arteC = new Float32Array(n);
+  const css = (col) => `rgb(${Math.round(clamp(col[0]) * 255)},${Math.round(clamp(col[1]) * 255)},${Math.round(clamp(col[2]) * 255)})`;
+  const CLAROES = [[1.00, 0.97, 0.84], [1.00, 0.88, 0.42], [0.74, 0.90, 1.00]];  // Creme, dourado e azul-claro
   for (let r = 0; r < A_ROWS; r++) for (let c = 0; c < A_COLS; c++) {
-    const i = r * A_COLS + c, ch = ARTE[r][c];
+    const i = r * A_COLS + c, ch = ARTE[r][c], rr = hash3(c, r, 21) / 4294967296;
     arteChar[i] = ch;
     const [col, kind] = corDaArte(c, r, ch);
-    arteFill[i] = `rgb(${Math.round(col[0] * 255)},${Math.round(col[1] * 255)},${Math.round(col[2] * 255)})`;
+    arteFill[i] = css(col);
     arteKind[i] = kind;
-    artePh[i] = kind === 0 ? (c / A_COLS) * 9 + (r / A_ROWS) * 6 : hash3(c, r, 21) / 4294967296 * TAU;
+    arteB[i] = DENS[ch] ?? 1;
+    artePh[i] = rr * TAU;
+    arteSp[i] = 0.8 + (hash3(c, r, 22) / 4294967296) * 2.4;                    // Cada estrela no seu ritmo
+    [arteS[i], arteC[i]] = fluxoArte(c, r);
+    // Clarão de cada estrela, desenhado por cima no pico do brilho.
+    if (kind === 1) arteHi[i] = css(lerp3(col, [1.00, 0.98, 0.88], 0.65));
+    else if (kind === 5) arteHi[i] = css(CLAROES[hash3(c, r, 23) % 3]);
+    else if (kind === 4) arteHi[i] = css([1.00, 0.93, 0.62]);
   }
 }
 // Encaixa a matriz 100 × 41 cobrindo a tela inteira ("cover"), sem deformar os caracteres.
@@ -972,7 +1007,8 @@ function ajustarArte() {
   // Velocidade de cerca de 16 px/s; ciclo de ida e volta com no mínimo 40 s.
   const ciclo = Math.max(40, 2 * Math.max(sobraX, sobraY) / 16);
   arteLayout = { dpr, vw, vh, cw, ch, sobraX, sobraY, ciclo, fs: Math.min(cw / adv, ch * 1.05) };
-  arteGlow.width = Math.ceil(arte.width / 6); arteGlow.height = Math.ceil(arte.height / 6);
+  arteGlow.width = Math.ceil(arte.width / 8); arteGlow.height = Math.ceil(arte.height / 8);
+  arteGlow2.width = Math.ceil(arte.width / 3); arteGlow2.height = Math.ceil(arte.height / 3);
   arteUltima = -1;
 }
 function pintarArte(t) {
@@ -985,6 +1021,7 @@ function pintarArte(t) {
   g.setTransform(L.dpr, 0, 0, L.dpr, 0, 0);
   g.font = `bold ${L.fs}px ${MONO_ARTE}`; g.textAlign = "center"; g.textBaseline = "middle";
   const anim = REDUCED ? 0 : 1;
+  const w = (t - tSurpresa) * 0.75 * anim, cw = Math.cos(w), sw = Math.sin(w);   // Giro do fluxo do céu
   // Desenha apenas as células visíveis (com uma de margem).
   const c0 = Math.max(0, Math.floor(-ox / L.cw) - 1), c1 = Math.min(A_COLS, Math.ceil((L.vw - ox) / L.cw) + 1);
   const r0 = Math.max(0, Math.floor(-oy / L.ch) - 1), r1 = Math.min(A_ROWS, Math.ceil((L.vh - oy) / L.ch) + 1);
@@ -993,21 +1030,39 @@ function pintarArte(t) {
     for (let c = c0; c < c1; c++) {
       const i = r * A_COLS + c, ch = arteChar[i];
       if (ch === " ") continue;
-      const kind = arteKind[i], ph = artePh[i];
-      // Brilho vivo: o céu ondula devagar; estrelas, lua e janelas cintilam com fases próprias.
-      g.globalAlpha = kind === 0 ? 0.84 + 0.16 * anim * Math.sin(t * 1.1 - ph)
-        : kind === 1 ? 0.8 + 0.2 * (anim ? Math.sin(t * 2.3 + ph) : 1)
-        : kind === 4 ? 0.85 + 0.15 * (anim ? Math.sin(t * 3.1 + ph) : 1) : 0.95;
-      g.fillStyle = arteFill[i];
-      g.fillText(ch, ox + (c + 0.5) * L.cw, y);
+      const kind = arteKind[i], x = ox + (c + 0.5) * L.cw;
+      let a = 0.95, flash = 0;
+      if (kind === 0 || kind === 5) {
+        // Céu em movimento: as cristas da onda acendem as pinceladas claras, girando nos redemoinhos.
+        const onda = anim ? arteS[i] * cw - arteC[i] * sw : 0.4;
+        const crista = onda > 0 ? onda * onda : 0;
+        a = 0.42 + 0.58 * crista * (0.35 + 0.65 * arteB[i]);
+        if (kind === 5) {                                        // Estrela que pisca: um clarão curto e nítido
+          const p = anim ? Math.sin(t * arteSp[i] + artePh[i]) : 0.6;
+          flash = p > 0 ? Math.pow(p, 6) : 0;
+        }
+      } else if (kind === 1) {                                   // Estrelas e lua: pulsam e brilham
+        const p = anim ? 0.5 + 0.5 * Math.sin(t * (1.2 + arteSp[i] * 0.6) + artePh[i]) : 0.7;
+        a = 0.62 + 0.38 * p; flash = p * p * p;
+      } else if (kind === 4) {                                   // Janelas da vila tremeluzem de leve
+        const p = anim ? 0.5 + 0.5 * Math.sin(t * 2.6 + artePh[i]) : 0.6;
+        a = 0.8 + 0.2 * p; flash = p * 0.35;
+      }
+      g.globalAlpha = a; g.fillStyle = arteFill[i];
+      g.fillText(ch, x, y);
+      if (flash > 0.02) { g.globalAlpha = flash; g.fillStyle = arteHi[i]; g.fillText(ch, x, y); }
     }
   }
-  // Brilho difuso: cópia reduzida e ampliada, somada por cima.
+  // Brilho difuso em duas escalas: um halo próximo e um mais amplo. Como o céu é escuro,
+  // o brilho vem quase só das estrelas, da lua e das pinceladas acesas.
   g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1;
+  gGlow2.clearRect(0, 0, arteGlow2.width, arteGlow2.height); gGlow2.imageSmoothingEnabled = true;
+  gGlow2.drawImage(arte, 0, 0, arteGlow2.width, arteGlow2.height);
   gGlow.clearRect(0, 0, arteGlow.width, arteGlow.height); gGlow.imageSmoothingEnabled = true;
-  gGlow.drawImage(arte, 0, 0, arteGlow.width, arteGlow.height);
-  g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.85; g.imageSmoothingEnabled = true;
-  g.drawImage(arteGlow, 0, 0, arte.width, arte.height);
+  gGlow.drawImage(arteGlow2, 0, 0, arteGlow.width, arteGlow.height);
+  g.globalCompositeOperation = "lighter"; g.imageSmoothingEnabled = true;
+  g.globalAlpha = 0.5; g.drawImage(arteGlow2, 0, 0, arte.width, arte.height);
+  g.globalAlpha = 1; g.drawImage(arteGlow, 0, 0, arte.width, arte.height);
   g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
 }
 
