@@ -3,29 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="icon" type="image/jpeg" href="ANoiteEstrelada_VanGogh.jpg">
-<link rel="apple-touch-icon" href="ANoiteEstrelada_VanGogh.jpg">
-<title>A Noite Estrelada</title>
+<link rel="icon" type="image/gif" href="peixe.gif">
+<link rel="apple-touch-icon" href="peixe.gif">
+<title>Aquário</title>
 <style>
   :root {
-    --noite: #040a26;
-    --creme: #fff2c8;
-    --dourado: #ffd666;
-    --azul-claro: #8fb6ff;
+    --fundo: #021320;
+    --espuma: #eafcff;
+    --agua: #7fe7ff;
+    --coral: #ffa07a;
     --mono: Consolas, Menlo, "DejaVu Sans Mono", "Liberation Mono", "Courier New", monospace;
   }
-  html, body { margin: 0; height: 100%; background: var(--noite); overflow: hidden; }
-  body { font-family: var(--mono); color: var(--creme); }
+  html, body { margin: 0; height: 100%; background: var(--fundo); overflow: hidden; }
+  body { font-family: var(--mono); color: var(--espuma); }
 
-  /* Camadas: buquê (0) → pintura da surpresa (1) → textos e botão (2) */
+  /* Camadas: recife (0) → mar da surpresa (1) → textos e botão (2) */
   canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
   /* A grade é calculada para a proporção da tela; "contain" garante que nada seja cortado. */
-  #view { object-fit: contain; background: var(--noite); z-index: 0; transition: opacity 1.6s ease; }
-  #arte { z-index: 1; opacity: 0; visibility: hidden; background: var(--noite);
+  #view { object-fit: contain; background: var(--fundo); z-index: 0; transition: opacity 1.6s ease; }
+  #arte { z-index: 1; opacity: 0; visibility: hidden; background: var(--fundo);
     transition: opacity 1.8s ease .3s, visibility 0s 2.1s; }
 
-  /* Palco centralizado sobre o buquê; a posição (--ax, --ay) é calculada no script. */
-  #palco { position: fixed; z-index: 2; left: var(--ax, 50%); top: var(--ay, 45%);
+  /* Palco centralizado na água aberta, acima do recife; a posição (--ax, --ay) é calculada no script. */
+  #palco { position: fixed; z-index: 2; left: var(--ax, 50%); top: var(--ay, 40%);
     transform: translate(-50%, -50%); width: min(92vw, max(19rem, calc(var(--bw, 60vw) * 1.05)));
     display: grid; place-items: center; text-align: center; pointer-events: none; }
   #palco > * { grid-area: 1 / 1; }
@@ -33,32 +33,32 @@
   #mensagem { position: relative; margin: 0; padding: .7em .9em; opacity: 0;
     font: 600 clamp(1.05rem, 2.2vw + .55rem, 1.8rem) / 1.45 var(--mono);
     letter-spacing: .01em; text-wrap: balance; overflow-wrap: normal; word-break: normal; hyphens: none;
-    color: var(--creme);
-    text-shadow: 0 0 2px var(--noite), 0 1px 3px var(--noite), 0 0 16px rgba(4,10,38,.95), 0 0 34px rgba(4,10,38,.85); }
-  /* Leve área escurecida apenas atrás das letras, para leitura sobre as flores. */
+    color: var(--espuma);
+    text-shadow: 0 0 2px var(--fundo), 0 1px 3px var(--fundo), 0 0 16px rgba(2,19,32,.95), 0 0 34px rgba(2,19,32,.85); }
+  /* Leve área escurecida apenas atrás das letras, para leitura sobre a água. */
   #mensagem::before { content: ""; position: absolute; inset: -.6em -1.2em; z-index: -1; border-radius: 50%;
-    background: radial-gradient(ellipse at center, rgba(4,10,38,.62) 0%, rgba(4,10,38,.35) 45%, rgba(4,10,38,0) 72%); }
+    background: radial-gradient(ellipse at center, rgba(2,19,32,.62) 0%, rgba(2,19,32,.35) 45%, rgba(2,19,32,0) 72%); }
   #mensagem .resto { color: transparent; text-shadow: none; }
   #mensagem .cursor { display: inline-block; width: 0; position: relative; }
-  #mensagem .cursor::after { content: "_"; position: absolute; left: .05em; bottom: -.05em; color: var(--dourado);
+  #mensagem .cursor::after { content: "_"; position: absolute; left: .05em; bottom: -.05em; color: var(--agua);
     animation: piscar 1s steps(1) infinite; }
   #mensagem.completo .cursor { display: none; }
   @keyframes piscar { 50% { opacity: 0; } }
 
   #convite { pointer-events: auto; visibility: hidden; opacity: 0; cursor: pointer; white-space: nowrap; max-width: 94vw;
     font: 600 clamp(1rem, 1.6vw + .6rem, 1.4rem) / 1.2 var(--mono); letter-spacing: .04em;
-    color: #ffe9a3; background: rgba(4,10,38,.78);
-    border: 1px solid rgba(255,214,102,.42); border-radius: 3px; padding: .85em 1.3em;
-    box-shadow: 0 0 18px rgba(255,200,80,.14), inset 0 0 14px rgba(40,80,200,.28);
-    text-shadow: 0 0 8px rgba(255,214,102,.35);
+    color: #d9fbff; background: rgba(2,19,32,.8);
+    border: 1px solid rgba(127,231,255,.45); border-radius: 3px; padding: .85em 1.3em;
+    box-shadow: 0 0 18px rgba(127,231,255,.16), inset 0 0 14px rgba(20,120,170,.3);
+    text-shadow: 0 0 8px rgba(127,231,255,.4);
     transition: color .25s, border-color .25s, box-shadow .25s, background .25s;
     animation: brilho 3.6s ease-in-out infinite; }
-  #convite::before { content: "*~ "; color: var(--azul-claro); }
-  #convite::after  { content: " ~*"; color: var(--azul-claro); }
-  #convite:hover, #convite:focus-visible { color: #fff6d6; border-color: var(--dourado); background: rgba(8,20,64,.86);
-    box-shadow: 0 0 26px rgba(255,214,102,.32), inset 0 0 16px rgba(60,110,230,.35); }
-  #convite:focus-visible { outline: 2px solid #ffe08a; outline-offset: 5px; }
-  @keyframes brilho { 50% { box-shadow: 0 0 26px rgba(255,200,80,.26), inset 0 0 14px rgba(40,80,200,.32); } }
+  #convite::before { content: "><> "; color: var(--coral); }
+  #convite::after  { content: " <><"; color: var(--coral); }
+  #convite:hover, #convite:focus-visible { color: #fff; border-color: var(--agua); background: rgba(4,40,62,.88);
+    box-shadow: 0 0 26px rgba(127,231,255,.34), inset 0 0 16px rgba(40,160,210,.38); }
+  #convite:focus-visible { outline: 2px solid #aef3ff; outline-offset: 5px; }
+  @keyframes brilho { 50% { box-shadow: 0 0 26px rgba(127,231,255,.28), inset 0 0 14px rgba(20,120,170,.36); } }
   body[data-estado="convite"] #convite { visibility: visible; }
 
   /* Surpresa final: frase e, logo abaixo, o botão da câmera */
@@ -68,27 +68,27 @@
   #final { position: relative; margin: 0; outline: none; width: min(100%, 23ch);
     font: 700 clamp(1.35rem, 3.6vw + .5rem, 3.3rem) / 1.32 var(--mono); text-align: center; letter-spacing: .01em;
     text-wrap: balance; overflow-wrap: normal; word-break: normal; hyphens: none;
-    color: #fff9e3;
-    /* Contorno escuro nítido + halo dourado: a frase se destaca de qualquer ponto do céu */
-    text-shadow: 0 0 1px #01030c, 1px 1px 0 #01030c, -1px -1px 0 #01030c, 1px -1px 0 #01030c, -1px 1px 0 #01030c,
-      0 3px 6px rgba(1,3,12,.95), 0 0 22px rgba(1,3,12,.95), 0 0 26px rgba(255,214,102,.38), 0 0 60px rgba(255,200,80,.22); }
+    color: #f4feff;
+    /* Contorno escuro nítido + halo azul-água: a frase se destaca de qualquer ponto do mar */
+    text-shadow: 0 0 1px #010a12, 1px 1px 0 #010a12, -1px -1px 0 #010a12, 1px -1px 0 #010a12, -1px 1px 0 #010a12,
+      0 3px 6px rgba(1,10,18,.95), 0 0 22px rgba(1,10,18,.95), 0 0 26px rgba(127,231,255,.4), 0 0 60px rgba(80,200,255,.22); }
   #final::before { content: ""; position: absolute; inset: -1em -1.8em; z-index: -1; border-radius: 50%;
     -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
-    background: radial-gradient(ellipse at center, rgba(1,3,14,.86) 0%, rgba(1,3,14,.66) 45%, rgba(1,3,14,.25) 66%, rgba(1,3,14,0) 76%); }
+    background: radial-gradient(ellipse at center, rgba(1,10,20,.86) 0%, rgba(1,10,20,.66) 45%, rgba(1,10,20,.25) 66%, rgba(1,10,20,0) 76%); }
 
   /* Botão da câmera: mesma linguagem do convite, com quebra de linha equilibrada em telas estreitas */
   #camera { pointer-events: auto; cursor: pointer; max-width: min(100%, 64ch); text-wrap: balance;
     font: 700 clamp(1rem, 1.2vw + .65rem, 1.35rem) / 1.4 var(--mono); letter-spacing: .02em;
-    color: #fff3c4; background: rgba(10,22,72,.93);
-    border: 1.5px solid rgba(255,214,102,.85); border-radius: 4px; padding: .85em 1.3em;
-    box-shadow: 0 0 0 1px rgba(1,3,14,.8), 0 0 24px rgba(255,200,80,.38), inset 0 0 16px rgba(60,110,230,.35);
-    text-shadow: 0 0 10px rgba(255,214,102,.55), 0 1px 2px #01030c; opacity: 0; visibility: hidden;
+    color: #e6fdff; background: rgba(3,36,58,.93);
+    border: 1.5px solid rgba(127,231,255,.85); border-radius: 4px; padding: .85em 1.3em;
+    box-shadow: 0 0 0 1px rgba(1,10,18,.8), 0 0 24px rgba(127,231,255,.38), inset 0 0 16px rgba(40,160,210,.35);
+    text-shadow: 0 0 10px rgba(127,231,255,.55), 0 1px 2px #010a12; opacity: 0; visibility: hidden;
     transition: color .25s, border-color .25s, box-shadow .25s, background .25s; }
-  #camera::before { content: "* "; color: var(--azul-claro); }
-  #camera::after  { content: " *"; color: var(--azul-claro); }
-  #camera:hover, #camera:focus-visible { color: #fffaf0; border-color: #ffe08a; background: rgba(18,34,100,.96);
-    box-shadow: 0 0 0 1px rgba(1,3,14,.8), 0 0 34px rgba(255,214,102,.55), inset 0 0 18px rgba(80,130,240,.4); }
-  #camera:focus-visible { outline: 2px solid #ffe08a; outline-offset: 5px; }
+  #camera::before { content: "><> "; color: var(--coral); }
+  #camera::after  { content: " <><"; color: var(--coral); }
+  #camera:hover, #camera:focus-visible { color: #fff; border-color: #aef3ff; background: rgba(6,56,86,.96);
+    box-shadow: 0 0 0 1px rgba(1,10,18,.8), 0 0 34px rgba(127,231,255,.55), inset 0 0 18px rgba(60,190,240,.4); }
+  #camera:focus-visible { outline: 2px solid #aef3ff; outline-offset: 5px; }
 
   body[data-estado="surpresa"] #view { opacity: 0; }
   body[data-estado="surpresa"] #arte { opacity: 1; visibility: visible; transition: opacity 1.8s ease .3s, visibility 0s; }
@@ -97,42 +97,42 @@
   body[data-estado="surpresa"] #mensagem { display: none; }
   body[data-estado="surpresa"] #final-bloco { opacity: 1; visibility: visible; transform: translate(-50%, -50%);
     transition: opacity 1.6s ease 1.3s, transform 1.8s ease 1.3s; }
-  @keyframes brilhoCamera { 50% { box-shadow: 0 0 0 1px rgba(1,3,14,.8), 0 0 36px rgba(255,200,80,.6), inset 0 0 18px rgba(70,120,235,.4); } }
+  @keyframes brilhoCamera { 50% { box-shadow: 0 0 0 1px rgba(1,10,18,.8), 0 0 36px rgba(127,231,255,.6), inset 0 0 18px rgba(60,190,240,.4); } }
   body[data-estado="surpresa"] #camera { opacity: 1; visibility: visible; animation: brilhoCamera 3.2s ease-in-out 4s infinite;
     transition: opacity 1.2s ease 3s, visibility 0s 3s, color .25s, border-color .25s, box-shadow .25s, background .25s; }
 
   /* Selfie: a câmera frontal ocupa a tela inteira, espelhada como um espelho */
-  #selfie { position: fixed; inset: 0; z-index: 5; background: var(--noite); opacity: 0;
+  #selfie { position: fixed; inset: 0; z-index: 5; background: var(--fundo); opacity: 0;
     transition: opacity .8s ease; display: grid; place-items: center; }
   #selfie[hidden] { display: none; }
   #selfie.visivel { opacity: 1; }
   /* O vídeo fica invisível; a imagem (com contorno e efeitos) é desenhada no canvas */
   #selfie video { position: absolute; left: 0; top: 0; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
   #selfie-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  #coroa { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-  #coroa[hidden] { display: none; }
-  #coroa img { position: absolute; left: 0; top: 0; will-change: transform;
-    filter: drop-shadow(0 0 6px rgba(255,210,90,.75)); }
-  #selfie::after { content: ""; position: absolute; inset: 0; pointer-events: none;   /* Moldura suave azul-noite */
-    background: radial-gradient(ellipse at center, rgba(4,10,38,0) 55%, rgba(4,10,38,.55) 100%);
-    box-shadow: inset 0 0 0 1px rgba(255,214,102,.35), inset 0 0 60px rgba(255,200,80,.12); }
+  #cardume-selfie { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  #cardume-selfie[hidden] { display: none; }
+  #cardume-selfie img { position: absolute; left: 0; top: 0; will-change: transform;
+    filter: drop-shadow(0 0 6px rgba(127,231,255,.6)); }
+  #selfie::after { content: ""; position: absolute; inset: 0; pointer-events: none;   /* Moldura suave azul-mar */
+    background: radial-gradient(ellipse at center, rgba(2,19,32,0) 55%, rgba(2,19,32,.55) 100%);
+    box-shadow: inset 0 0 0 1px rgba(127,231,255,.35), inset 0 0 60px rgba(80,200,255,.12); }
   #selfie-msg { position: relative; z-index: 1; max-width: min(88vw, 34ch); margin: 0; text-align: center;
-    font: 600 clamp(1rem, 1.4vw + .6rem, 1.4rem) / 1.45 var(--mono); color: var(--creme); }
+    font: 600 clamp(1rem, 1.4vw + .6rem, 1.4rem) / 1.45 var(--mono); color: var(--espuma); }
   #selfie-msg:empty { display: none; }
-  #selfie-fechar { position: absolute; z-index: 2; left: 50%; bottom: max(1.2rem, env(safe-area-inset-bottom));
+  #selfie-fechar { position: absolute; z-index: 3; left: 50%; bottom: max(1.2rem, env(safe-area-inset-bottom));
     transform: translateX(-50%); cursor: pointer; white-space: nowrap;
-    font: 600 clamp(.85rem, .8vw + .55rem, 1rem) / 1.2 var(--mono); color: #ffe9a3;
-    background: rgba(4,10,38,.72); border: 1px solid rgba(255,214,102,.4); border-radius: 3px; padding: .7em 1.1em; }
-  #selfie-fechar:hover, #selfie-fechar:focus-visible { border-color: var(--dourado); color: #fff6d6; }
-  #selfie-fechar:focus-visible { outline: 2px solid #ffe08a; outline-offset: 4px; }
+    font: 600 clamp(.85rem, .8vw + .55rem, 1rem) / 1.2 var(--mono); color: #d9fbff;
+    background: rgba(2,19,32,.72); border: 1px solid rgba(127,231,255,.4); border-radius: 3px; padding: .7em 1.1em; }
+  #selfie-fechar:hover, #selfie-fechar:focus-visible { border-color: var(--agua); color: #fff; }
+  #selfie-fechar:focus-visible { outline: 2px solid #aef3ff; outline-offset: 4px; }
 
   /* Controle discreto do som (necessário quando o navegador bloqueia a reprodução automática) */
   #som { position: fixed; z-index: 6; right: max(.6rem, env(safe-area-inset-right)); top: max(.6rem, env(safe-area-inset-top));
-    cursor: pointer; font: 600 .78rem / 1 var(--mono); letter-spacing: .03em; color: rgba(255,242,200,.78);
-    background: rgba(4,10,38,.55); border: 1px solid rgba(143,182,255,.28); border-radius: 3px; padding: .55em .8em; }
-  #som:hover, #som:focus-visible { color: #fff6d6; border-color: rgba(255,214,102,.6); }
-  #som:focus-visible { outline: 2px solid #ffe08a; outline-offset: 3px; }
-  #som.bloqueado { color: #ffe9a3; border-color: rgba(255,214,102,.55); animation: brilho 2.4s ease-in-out infinite; }
+    cursor: pointer; font: 600 .78rem / 1 var(--mono); letter-spacing: .03em; color: rgba(234,252,255,.78);
+    background: rgba(2,19,32,.55); border: 1px solid rgba(127,231,255,.28); border-radius: 3px; padding: .55em .8em; }
+  #som:hover, #som:focus-visible { color: #fff; border-color: rgba(127,231,255,.65); }
+  #som:focus-visible { outline: 2px solid #aef3ff; outline-offset: 3px; }
+  #som.bloqueado { color: #d9fbff; border-color: rgba(127,231,255,.6); animation: brilho 2.4s ease-in-out infinite; }
 
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
     clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
@@ -148,26 +148,26 @@
 </style>
 </head>
 <body>
-<canvas id="view" role="img" aria-label="Buquê animado desenhado com caracteres ASCII nas cores de A Noite Estrelada, de Van Gogh, sob um céu de redemoinhos e estrelas"></canvas>
-<canvas id="arte" role="img" aria-label="A Noite Estrelada, de Van Gogh, recriada com caracteres ASCII coloridos"></canvas>
+<canvas id="view" role="img" aria-label="Recife de corais animado, desenhado com caracteres ASCII: algas balançando, corais, anêmonas, peixes nadando e bolhas subindo no fundo do mar"></canvas>
+<canvas id="arte" role="img" aria-label="O mar sob um céu azul, recriado com caracteres ASCII coloridos, com ondas e reflexos de sol"></canvas>
 
 <main id="palco">
   <p id="mensagem" aria-hidden="true"><span class="digitado"></span><span class="cursor"></span><span class="resto"></span></p>
-  <button id="convite" type="button" aria-label="Uma última estrela...">Uma última estrela...</button>
+  <button id="convite" type="button" aria-label="Um último mergulho...">Um último mergulho...</button>
 </main>
 <p id="leitor" class="sr-only" aria-live="polite"></p>
 <div id="final-bloco">
-  <p id="final" tabindex="-1">Não sei pintar um céu estrelado, mas sei programar um pra você.</p>
-  <button id="camera" type="button">Clique aqui pra ver a estrela mais bonita do universo!</button>
+  <p id="final" tabindex="-1">Não sei desenhar o oceano, mas sei programar um pra você.</p>
+  <button id="camera" type="button">Clique aqui pra ver o tesouro mais bonito do oceano!</button>
 </div>
 <div id="selfie" hidden role="dialog" aria-modal="true" aria-label="Câmera frontal">
   <video id="selfie-video" autoplay playsinline muted></video>
   <canvas id="selfie-canvas" aria-hidden="true"></canvas>
-  <div id="coroa" aria-hidden="true" hidden></div>
+  <div id="cardume-selfie" aria-hidden="true" hidden></div>
   <p id="selfie-msg" role="status"></p>
   <button id="selfie-fechar" type="button">[ fechar câmera ]</button>
 </div>
-<audio id="musica" src="fundo_site.mp3" loop autoplay preload="auto"></audio>
+<audio id="musica" src="oceano.mp3" loop autoplay preload="auto"></audio>
 <button id="som" type="button" aria-pressed="true">[ som: ligado ]</button>
 
 <script>
@@ -178,19 +178,19 @@ const FONT = `${FONT_SIZE}px Menlo, Consolas, "DejaVu Sans Mono", "Courier New",
 const probe = document.createElement("canvas").getContext("2d");
 probe.font = FONT;
 const CW = Math.max(1, Math.round(probe.measureText("M").width)), CH = Math.round(FONT_SIZE * 1.15);
-const WAVE_PERIOD = 14, BREATH = 7, BREATH_DEPTH = 0.18;
-const settings = { wind: 3, size: 1.8, glow: 0.6 };   // intensidade do vento, tamanho das flores e brilho difuso
+const WAVE_PERIOD = 14;
+const settings = { corrente: 1, glow: 0.6 };   // intensidade da correnteza e do brilho difuso
 
-// Movimento reduzido: menos vento, céu mais lento, sem estrelas cadentes nem digitação.
+// Movimento reduzido: correnteza suave, água mais lenta, sem cardumes nem digitação.
 const reduceQuery = matchMedia("(prefers-reduced-motion: reduce)");
 let REDUCED = reduceQuery.matches;
-function aplicarMovimento() { REDUCED = reduceQuery.matches; settings.wind = REDUCED ? 0.8 : 3; }
+function aplicarMovimento() { REDUCED = reduceQuery.matches; settings.corrente = REDUCED ? 0.3 : 1; }
 aplicarMovimento();
 reduceQuery.addEventListener("change", aplicarMovimento);
 
 const BUCKETS = [" ", ".'`", ":;,-~", "!/\\|()[]{}<>?+=", "tfjrxnuvczil", "XYUJCLQ0OZmwqpdbkhao", "#MW&8%B", "@$"];
 const LEVELS = [0.06, 0.15, 0.30, 0.45, 0.60, 0.75, 0.90];
-const CHARS = BUCKETS.join("") + "*";            // "*" só é usado pelas estrelas pulsantes e cadentes
+const CHARS = BUCKETS.join("") + "*3";            // "3" forma os coraçõezinhos <3 das bolhas do buquê
 const CH_IDX = (ch) => CHARS.indexOf(ch);
 
 // FUNÇÕES MATEMÁTICAS
@@ -204,22 +204,24 @@ function hash3(a, b, c) {                       // Pseudoaleatoriedade determin�
   return (h ^ (h >>> 16)) >>> 0;
 }
 const rnd = (k) => hash3(k, 911, 37) / 4294967296;      // Número pseudoaleatório fixo no intervalo de 0 a 1
-const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
-const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const mul = (a, s) => [a[0] * s, a[1] * s, a[2] * s];
-const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-const norm = (v) => mul(v, 1 / (Math.hypot(v[0], v[1], v[2]) + 1e-9));
 const lin = (n) => Array.from({ length: n }, (_, k) => k / (n - 1));
 const lerp3 = (a, b, k) => { k = clamp(k); return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; };
-const LIGHT = norm([-0.5, -0.6, 0.62]);        // Luz vinda do canto superior esquerdo
+const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3);
+function rampa(stops, k) {
+  k = clamp(k);
+  for (let s = 1; s < stops.length; s++)
+    if (k <= stops[s][0]) return lerp3(stops[s - 1][1], stops[s][1], (k - stops[s - 1][0]) / (stops[s][0] - stops[s - 1][0]));
+  return stops[stops.length - 1][1];
+}
 
 // ENQUADRAMENTO RESPONSIVO
-// Caixa, em unidades do mundo, que contém o buquê inteiro (pétalas, folhas, laço e balanço do vento).
+// Caixa, em unidades do mundo, que contém o recife inteiro (algas, corais, anêmonas e o balanço da correnteza).
 // A grade ASCII é dimensionada para que essa caixa sempre caiba na tela, em qualquer proporção.
-const BOX = { x0: -65, x1: 65, y0: -7, y1: 184 };
+const BOX = { x0: -72, x1: 72, y0: -7, y1: 184 };
 const BOX_W = BOX.x1 - BOX.x0, BOX_H = BOX.y1 - BOX.y0;
-const X_MID = (BOX.x0 + BOX.x1) / 2, Y_MID = (BOX.y0 + BOX.y1) / 2;
+const X_MID = (BOX.x0 + BOX.x1) / 2;
+const BASE_Y = 178;                                     // Fundo do mar: fica sempre rente à borda inferior da tela
 function gridFor(w, h) {
   w = Math.max(1, w); h = Math.max(1, h);
   const A = w / h, R = CH / CW;                 // Proporção da tela e da célula
@@ -233,230 +235,136 @@ function gridFor(w, h) {
 }
 // Estado que depende do tamanho da tela; recriado por setupGrid() apenas quando a proporção muda bastante.
 let GRID_ASPECT, COLS, ROWS, N, S, Y0, VIS, VIS_W, VIS_H, VMIN, HW_MIN;
-let Xc, Yr, lum, rgb, rowShift, fg, ovr;
-
-// PALETA — A NOITE ESTRELADA (Van Gogh, 1889)
-// Amarelo-limão e ocre das estrelas e da lua, azul-ultramar e cobalto do céu,
-// turquesa e verde-menta dos redemoinhos, verde-escuro do cipreste.
-// Cada valor RGB é normalizado no intervalo de 0 a 1.
-const BUD = [0.42, 0.62, 0.42];
-const STEM = [0.13, 0.34, 0.30], ANTHER = [0.20, 0.18, 0.45];
-const PALETTES = {
-  lua:          { deep: [0.80, 0.42, 0.04], mid: [1.00, 0.80, 0.10], tip: [1.00, 0.94, 0.36], sheen: [1.00, 0.99, 0.72], spots: 0, anther: [0.10, 0.16, 0.55] },
-  estrela:      { deep: [0.66, 0.52, 0.04], mid: [0.95, 0.88, 0.18], tip: [0.80, 0.95, 0.42], sheen: [0.94, 1.00, 0.76], spots: 0, anther: [0.08, 0.20, 0.58] },
-  ocre:         { deep: [0.70, 0.30, 0.04], mid: [0.96, 0.60, 0.10], tip: [1.00, 0.82, 0.28], sheen: [1.00, 0.93, 0.60], spots: 0, anther: [0.12, 0.14, 0.50] },
-  ultramar:     { deep: [0.03, 0.06, 0.40], mid: [0.09, 0.22, 0.78], tip: [0.28, 0.48, 0.96], sheen: [0.62, 0.78, 1.00], spots: 0, anther: [1.00, 0.86, 0.22] },
-  redemoinho:   { deep: [0.05, 0.20, 0.55], mid: [0.18, 0.52, 0.82], tip: [0.48, 0.84, 0.80], sheen: [0.84, 0.97, 0.90], spots: 0, anther: [1.00, 0.88, 0.25] },
-  cobalto:      { deep: [0.03, 0.11, 0.50], mid: [0.12, 0.34, 0.90], tip: [0.44, 0.68, 0.98], sheen: [0.80, 0.92, 0.96], spots: 0, anther: [0.98, 0.80, 0.18] },
-};
-// (posição, tamanho, direção 3D, cor, início da floração, luminosidade), de trás para frente
-const FLOWERS_BASE = [
-  [[-25, 34], 15, [-0.5, -0.55, 0.68], "redemoinho", 5.4, 0.78],
-  [[24, 30], 15, [0.5, -0.6, 0.62], "lua", 5.8, 0.78],
-  [[0, 18], 13, [0.08, -0.85, 0.5], "ultramar", 6.2, 0.78],
-  [[-32, 64], 18, [-0.72, -0.2, 0.66], "estrela", 4.8, 0.9],
-  [[32, 60], 18, [0.68, -0.25, 0.68], "cobalto", 5.1, 0.9],
-  [[-3, 46], 19, [-0.12, -0.42, 0.9], "ocre", 4.5, 0.9],
-  [[-36, 112], 16, [-0.82, 0.1, 0.55], "redemoinho", 5.2, 1.0],
-  [[37, 114], 16, [0.82, 0.12, 0.55], "lua", 5.5, 1.0],
-  [[-16, 86], 22, [-0.3, -0.18, 0.93], "ultramar", 3.9, 1.0],
-  [[18, 88], 21, [0.3, -0.14, 0.94], "estrela", 4.2, 1.0],
-  [[1, 114], 20, [0.02, -0.28, 0.96], "cobalto", 4.6, 1.0],
-];
-// Botões florais: posição, tamanho, direção, maturação e cor
-const BUDS_BASE = [
-  [[-12, 10], 9, [-0.3, -0.95, 0.1], 0.0, "estrela"],
-  [[13, 7], 9, [0.35, -0.93, 0.1], 0.9, "redemoinho"],
-  [[39, 40], 8, [0.8, -0.55, 0.2], 0.0, "ocre"],
-  [[-41, 42], 8, [-0.8, -0.5, 0.2], 0.7, "ultramar"],
-  [[24, 68], 7, [0.6, -0.7, 0.3], 0.0, "lua"],
-];
+let Xc, Yr, lum, rgb, rowShift, fg, ovr, topoAreia;
 
 // TELA: LUMINOSIDADE E COR DE CADA CÉLULA
-// fg = 1: célula ocupada pelo buquê, estrelas ou vaga-lumes. ovr: caractere fixo (estrelas pulsantes e cadentes).
+// fg = 1: célula ocupada pelo recife, peixes ou bolhas. ovr: caractere fixo (bolhas, cardumes, superfície).
 function set(i, l, cr, cg, cb) { lum[i] = l; fg[i] = 1; ovr[i] = -1; const j = i * 3; rgb[j] = cr; rgb[j + 1] = cg; rgb[j + 2] = cb; }
 function setCh(i, l, cr, cg, cb, ch) { set(i, l, cr, cg, cb); ovr[i] = ch; }
+const celula = (x, y) => {                              // Índice da célula de um ponto do mundo (ou -1, fora da tela)
+  const r = Math.floor((y - Y0) / S), c = Math.floor((x - X_MID) * 2 / S + COLS / 2);
+  return r < 0 || r >= ROWS || c < 0 || c >= COLS ? -1 : r * COLS + c;
+};
 
-// FUNDO: CÉU EM REDEMOINHOS
-// Rampa de cores do céu, do azul mais profundo ao branco-menta das pinceladas iluminadas.
-const SKY = [
-  [0.00, [0.02, 0.05, 0.24]], [0.28, [0.06, 0.15, 0.60]], [0.50, [0.14, 0.33, 0.86]],
-  [0.68, [0.28, 0.58, 0.86]], [0.84, [0.52, 0.84, 0.78]], [1.00, [0.92, 0.95, 0.70]],
+// ÁGUA: degradê do azul-turquesa iluminado perto da superfície ao azul-marinho profundo,
+// com cáusticas (a rede de luz que dança no mar) e raios de sol entrando pela superfície.
+const AGUA = [
+  [0.00, [0.10, 0.42, 0.60]], [0.22, [0.05, 0.26, 0.44]], [0.50, [0.02, 0.13, 0.27]],
+  [0.80, [0.01, 0.07, 0.16]], [1.00, [0.02, 0.09, 0.15]],
 ];
-function skyColor(k) {
-  k = clamp(k);
-  for (let s = 1; s < SKY.length; s++)
-    if (k <= SKY[s][0]) return lerp3(SKY[s - 1][1], SKY[s][1], (k - SKY[s - 1][0]) / (SKY[s][0] - SKY[s - 1][0]));
-  return SKY[SKY.length - 1][1];
-}
-const at = (fx, fy) => [VIS.x0 + VIS_W * fx, VIS.y0 + VIS_H * fy];   // Posição relativa à tela visível
-let VORTICES = [];
-// Campo de pinceladas: ondas horizontais que se enrolam em espirais perto de cada redemoinho.
-// Retorna [seno, cosseno] da fase combinada, para animar tudo com uma única rotação por quadro.
-function skyField(x, y) {
-  const ph = y * 0.45 + 7 * Math.sin(x * 0.02 + y * 0.008) + 1.2 * Math.sin(x * 0.055 - y * 0.02);
-  let sn = 0, cs = 0, W = 0;
-  for (const v of VORTICES) {
-    const dx = x - v.p[0], dy = y - v.p[1], r = Math.hypot(dx, dy);
-    const w = Math.exp(-((r / v.R) ** 2) * 1.3), a = r * 0.6 - v.dir * 2 * Math.atan2(dy, dx);   // Espiral de dois braços
-    sn += w * Math.sin(a); cs += w * Math.cos(a); W += w;
-  }
-  const w0 = Math.max(0.12, 1 - W);
-  return [sn + w0 * Math.sin(ph), cs + w0 * Math.cos(ph)];
-}
-let bgS, bgC, bgA, bgC0, bgC1, bgDir;
-const DIR_CHARS = ["-", "\\", "|", "/"].map(CH_IDX), TILDE = CH_IDX("~");
-function buildSky() {
-  VORTICES = [                                                  // Redemoinhos: o duplo central e os menores
-    { p: at(0.40, 0.30), R: VMIN * 0.22, dir: 1 },
-    { p: at(0.60, 0.42), R: VMIN * 0.15, dir: -1 },
-    { p: at(0.82, 0.64), R: VMIN * 0.13, dir: 1 },
-    { p: at(0.15, 0.70), R: VMIN * 0.12, dir: -1 },
-  ];
-  bgS = new Float32Array(N); bgC = new Float32Array(N); bgA = new Float32Array(N);
-  bgC0 = new Float32Array(N * 3); bgC1 = new Float32Array(N * 3); bgDir = new Int16Array(N);
+let agS1, agC1, agS2, agC2, agTopo, agRaioK, agRaioW, agBase, agChar, agRuido;
+const N_RAIOS = 5;
+const CH_ONDA = CH_IDX("~"), CH_TRACO = CH_IDX("-"), CH_PONTO = CH_IDX("."), CH_RAIO = CH_IDX("\\");
+function buildAgua() {
+  agS1 = new Float32Array(N); agC1 = new Float32Array(N); agS2 = new Float32Array(N); agC2 = new Float32Array(N);
+  agTopo = new Float32Array(N); agRaioK = new Int8Array(N); agRaioW = new Float32Array(N);
+  agBase = new Float32Array(N * 3); agChar = new Int16Array(N); agRuido = new Float32Array(N);
+  const raios = Array.from({ length: N_RAIOS }, (_, k) => ({
+    x: VIS.x0 + VIS_W * (0.1 + 0.2 * k + (rnd(300 + k) - 0.5) * 0.08), w: 3 + rnd(310 + k) * 5,
+  }));
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-    const i = r * COLS + c, x = Xc[c], y = Yr[r];
-    const fx = (x - VIS.x0) / VIS_W, fy = (y - VIS.y0) / VIS_H;
-    const f = skyField(x, y), amp = Math.hypot(f[0], f[1]) + 1e-6;
-    bgS[i] = f[0] / amp; bgC[i] = f[1] / amp;
-    // Direção da pincelada: perpendicular ao gradiente da fase, convertida para pixels da tela.
-    const e = 0.6, fxp = skyField(x + e, y), fyp = skyField(x, y + e);
-    const gx = Math.atan2(fxp[0] * f[1] - fxp[1] * f[0], fxp[0] * f[0] + fxp[1] * f[1]);
-    const gy = Math.atan2(fyp[0] * f[1] - fyp[1] * f[0], fyp[0] * f[0] + fyp[1] * f[1]);
-    let ang = Math.atan2(gx * CH, -gy * 2 * CW);
-    if (ang < 0) ang += Math.PI;
-    const bin = Math.round(ang / (Math.PI / 4)) % 4, noise = hash3(r, c, 5) / 4294967296;
-    bgDir[i] = bin === 0 && noise < 0.35 ? TILDE : DIR_CHARS[bin];
-    // Tom: mais claro nos núcleos dos redemoinhos e na faixa diagonal luminosa; mais escuro embaixo.
-    let core = 0;
-    for (const v of VORTICES) core = Math.max(core, Math.exp(-((Math.hypot(x - v.p[0], y - v.p[1]) / (v.R * 0.45)) ** 2)));
-    const band = Math.exp(-(((fy - (0.66 - 0.32 * fx)) / 0.075) ** 2));
-    const tone = 0.32 + 0.22 * core + 0.32 * band + 0.14 * (noise - 0.5) - 0.18 * smoothstep(0.78, 1, fy);
-    bgC0.set(skyColor(tone), i * 3); bgC1.set(skyColor(tone + 0.32), i * 3);
-    const dim = 1 - 0.5 * Math.exp(-((x / 62) ** 2 + ((y - 78) / 90) ** 2) * 1.4);   // O céu recua atrás do buquê
-    // Pinceladas curtas: a linha é quebrada em traços de comprimentos variados, com pequenas falhas.
-    const dash = hash3(r, Math.floor((c + hash3(r, 0, 3) % 7) / 5), 13) / 4294967296 < 0.7 ? 1 : 0.2;
-    bgA[i] = (0.16 + 0.10 * band + 0.08 * core) * (0.6 + 0.4 * hash3(r >> 1, c >> 2, 9) / 4294967296) * dash * dim * clamp(amp * 1.4, 0.35, 1);
-  }
-}
-
-// Estrelas com halos concêntricos e a lua crescente no canto superior direito.
-let STARS = [], starIdx, starD, moonLit;
-function buildStars() {
-  STARS = [];
-  const moonR = clamp(VMIN * 0.16, 16, 36);
-  STARS.push({ x: VIS.x0 + VIS_W * 0.86, y: VIS.y0 + VIS_H * 0.11, R: moonR, core: 0.42, rings: 3, f: 0.6, ph: 0, moon: true });
-  const nStars = Math.round(clamp(VIS_W * VIS_H / 2600, 6, 13));
-  for (let k = 0, tries = 0; STARS.length < nStars + 1 && tries < 400; tries++, k++) {
-    const R = clamp(VMIN * (0.035 + rnd(700 + k * 5) * 0.035), 4, 13);
-    const x = VIS.x0 + VIS_W * (0.04 + 0.92 * rnd(701 + k * 5)), y = VIS.y0 + VIS_H * (0.03 + 0.80 * rnd(702 + k * 5));
-    if ((x / 62) ** 2 + ((y - 70) / 82) ** 2 < 1) continue;                     // Evita esconder estrelas atrás do buquê
-    if (STARS.some((s) => Math.hypot(s.x - x, s.y - y) < (s.R + R) * 1.05)) continue;
-    STARS.push({ x, y, R, core: 0.28, rings: 2 + (k % 2), f: 1.5 + rnd(703 + k * 5) * 2, ph: rnd(704 + k * 5) * TAU, moon: false });
-  }
-  starIdx = new Int16Array(N).fill(-1); starD = new Float32Array(N); moonLit = new Uint8Array(N);
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-    const i = r * COLS + c, x = Xc[c], y = Yr[r];
-    let best = 1;
-    STARS.forEach((s, k) => {
-      const d = Math.hypot(x - s.x, y - s.y) / s.R;
-      if (d < best) { best = d; starIdx[i] = k; starD[i] = d; }
+    const i = r * COLS + c, x = Xc[c], y = Yr[r], f = (y - VIS.y0) / VIS_H, n = hash3(r, c, 5) / 4294967296;
+    // Duas ondas bem distorcidas: onde elas se cruzam surge a rede irregular de luz das cáusticas.
+    const p1 = x * 0.34 + 2.6 * Math.sin(y * 0.19 + x * 0.07) + 1.3 * Math.sin(y * 0.41 - x * 0.13);
+    const p2 = y * 0.31 + 2.4 * Math.sin(x * 0.16 - y * 0.09) + 1.2 * Math.sin(x * 0.37 + y * 0.17) + x * 0.11;
+    agS1[i] = Math.sin(p1); agC1[i] = Math.cos(p1); agS2[i] = Math.sin(p2); agC2[i] = Math.cos(p2);
+    agTopo[i] = 0.1 + 0.9 * Math.exp(-f * 2.6);                 // Cáusticas mais fortes perto da superfície
+    let melhor = 0, k0 = 0;
+    raios.forEach((ra, k) => {                                  // Raios inclinados, que se apagam com a profundidade
+      const d = x - (ra.x + (y - VIS.y0) * 0.28), w = Math.exp(-((d / ra.w) ** 2)) * Math.exp(-f * 1.7);
+      if (w > melhor) { melhor = w; k0 = k; }
     });
-    const s = STARS[starIdx[i]];
-    if (s && s.moon && starD[i] < s.core) {                                       // Parte acesa da lua crescente
-      const cr = s.R * s.core;
-      moonLit[i] = Math.hypot(x - (s.x + cr * 0.45), y - (s.y - cr * 0.3)) > cr * 0.82 ? 1 : 0;
-    }
+    agRaioK[i] = k0; agRaioW[i] = melhor;
+    const cor = lerp3(rampa(AGUA, f), [0.02, 0.18, 0.30], (n - 0.5) * 0.4);
+    agBase.set(cor, i * 3);
+    agChar[i] = melhor > 0.35 && n < 0.55 ? CH_RAIO : n < 0.48 ? CH_ONDA : n < 0.8 ? CH_TRACO : CH_PONTO;
+    agRuido[i] = n;
   }
 }
-const ST_YEL = [1.00, 0.90, 0.35], ST_CHART = [0.78, 0.92, 0.42], ST_PALE = [0.60, 0.86, 0.94];
-
-// ESTRELAS PULSANTES: pontos ASCII ( . + * o ) com ciclos próprios de brilho, espalhados pelo céu.
-const TW_CHARS = [".", "+", "*", "o"].map(CH_IDX);
-const TW_COLORS = [[1.00, 0.86, 0.45], [1.00, 0.95, 0.78], [0.68, 0.84, 1.00]];
-let twN = 0, twIdx, twPh, twPer, twCol, twO;
-function buildTwinkles() {
-  const max = Math.round(N / 300);
-  twIdx = new Int32Array(max); twPh = new Float32Array(max); twPer = new Float32Array(max);
-  twCol = new Uint8Array(max); twO = new Uint8Array(max); twN = 0;
-  for (let k = 0; k < max * 3 && twN < max; k++) {
-    const i = hash3(k, 41, 7) % N;
-    if (starIdx[i] >= 0) continue;                                              // Fora dos halos das estrelas grandes
-    twIdx[twN] = i; twPh[twN] = rnd(k * 3 + 5000) * TAU; twPer[twN] = 3 + rnd(k * 3 + 5001) * 4.5;
-    twCol[twN] = hash3(k, 3, 9) % 3; twO[twN] = rnd(k * 3 + 5002) < 0.2 ? 1 : 0; twN++;
-  }
-}
-
-function sky(t) {
+const ampRaio = new Float32Array(N_RAIOS);
+function agua(t) {
   fg.fill(0); ovr.fill(-1);
-  const w = t * (REDUCED ? 0.25 : 0.9), cw = Math.cos(w), sw = Math.sin(w);   // As pinceladas fluem continuamente
+  const m = settings.corrente, a1 = t * 0.9 * m, a2 = -t * 0.7 * m;
+  const ca1 = Math.cos(a1), sa1 = Math.sin(a1), ca2 = Math.cos(a2), sa2 = Math.sin(a2);
+  for (let k = 0; k < N_RAIOS; k++) ampRaio[k] = 0.11 + 0.07 * Math.sin(t * 0.35 * m + k * 1.9);
   for (let i = 0, j = 0; i < N; i++, j += 3) {
-    let s = (bgS[i] * cw - bgC[i] * sw - 0.15) / 0.85;                          // sen(fase − ωt): só as cristas viram traço
-    s = s > 0 ? s * Math.sqrt(s) : 0;
-    lum[i] = 0.045 + bgA[i] * s;
-    const k = 0.62 + 0.45 * s;
-    rgb[j] = (bgC0[j] + (bgC1[j] - bgC0[j]) * s) * k;
-    rgb[j + 1] = (bgC0[j + 1] + (bgC1[j + 1] - bgC0[j + 1]) * s) * k;
-    rgb[j + 2] = (bgC0[j + 2] + (bgC1[j + 2] - bgC0[j + 2]) * s) * k;
-    const sk = starIdx[i];
-    if (sk < 0) continue;
-    const st = STARS[sk], d = starD[i], tw = 0.86 + 0.14 * Math.sin(t * st.f + st.ph);
-    if (d < st.core) {
-      if (!st.moon) set(i, 0.95 * tw, 1.0, 0.94, 0.50);
-      else if (moonLit[i]) set(i, 0.97, 1.0, 0.80, 0.16);
-      else set(i, 0.66, 0.98, 0.93, 0.48);
-    } else {
-      const e = (d - st.core) / (1 - st.core);
-      const ring = 0.5 + 0.5 * Math.cos(e * TAU * st.rings - t * (REDUCED ? 0.4 : 1.6));
-      const l = (0.14 + 0.40 * ring) * Math.pow(1 - e, 0.8) * tw;
-      if (l > lum[i]) {
-        const col = e < 0.5 ? lerp3(ST_YEL, ST_CHART, e * 2) : lerp3(ST_CHART, ST_PALE, (e - 0.5) * 2);
-        set(i, l, col[0], col[1], col[2]);
-      }
-    }
+    const v1 = agS1[i] * ca1 + agC1[i] * sa1, v2 = agS2[i] * ca2 + agC2[i] * sa2;   // sen(p1 + a1), sen(p2 + a2)
+    let cau = 1 - Math.abs(v1 + v2) * 0.9;                                          // Linhas onde as ondas se cruzam
+    cau = cau > 0 ? cau * cau * cau : 0;
+    const topo = agTopo[i], raio = agRaioW[i] * ampRaio[agRaioK[i]];
+    lum[i] = 0.035 + topo * 0.24 * cau + raio + 0.03 * agRuido[i];
+    const k = 0.75 + 1.1 * cau * topo + 3 * raio;
+    rgb[j] = agBase[j] * k + raio * 0.6; rgb[j + 1] = agBase[j + 1] * k + raio * 1.1; rgb[j + 2] = agBase[j + 2] * k + raio * 1.2;
   }
-  const slow = REDUCED ? 0.4 : 1;
-  for (let k = 0; k < twN; k++) {
-    const i = twIdx[k];
-    let b = 0.5 + 0.5 * Math.sin(t * slow * TAU / twPer[k] + twPh[k]);
-    b *= b;
-    const l = 0.1 + 0.62 * b;
-    if (l <= lum[i]) continue;
-    const col = TW_COLORS[twCol[k]];
-    setCh(i, l, col[0], col[1], col[2], TW_CHARS[b < 0.3 ? 0 : b < 0.68 ? 1 : twO[k] ? 3 : 2]);
+  // Superfície: uma linha de ondas no alto da tela, com a luz do céu acima dela.
+  const ys = VIS.y0 + 2.6;
+  for (let c = 0; c < COLS; c++) {
+    const x = Xc[c], h = ys + 1.1 * Math.sin(x * 0.14 + t * 1.4 * m) + 0.5 * Math.sin(x * 0.33 - t * 1.0 * m);
+    for (let r = 0; r < ROWS && Yr[r] < h + 1.5; r++) {
+      const i = r * COLS + c, y = Yr[r];
+      if (Math.abs(y - h) < 0.45 + 0.35 * S) setCh(i, 0.78, 0.72, 0.95, 1.0, CH_ONDA);
+      else if (y < h) { lum[i] = 0.16; const j = i * 3; rgb[j] = 0.35; rgb[j + 1] = 0.66; rgb[j + 2] = 0.82; }
+    }
   }
 }
 
-// ESTRELAS CADENTES: eventos esporádicos (5 a 8 s), rastro diagonal curto na parte alta do céu.
-const meteoro = { ativo: false, t0: 0, dur: 1.1, x0: 0, y0: 0, ux: 0, uy: 0, dist: 0, trail: 0 };
-let proximoMeteoro = 3.5 + Math.random() * 2;
-const MT_HEAD = CH_IDX("*"), MT_PLUS = CH_IDX("+"), MT_DOT = CH_IDX("."), MT_DASH = CH_IDX("-");
-function meteoros(t) {
-  if (REDUCED || estado === "surpresa") { meteoro.ativo = false; return; }
-  if (!meteoro.ativo) {
-    if (t < proximoMeteoro) return;
-    const dir = Math.random() < 0.5 ? 1 : -1, ang = rad(16 + Math.random() * 16);
-    meteoro.dist = clamp(VIS_W * 0.2, 28, 70);
-    meteoro.ux = dir * Math.cos(ang); meteoro.uy = Math.sin(ang);
-    meteoro.x0 = VIS.x0 + VIS_W * (dir > 0 ? 0.06 + 0.5 * Math.random() : 0.44 + 0.5 * Math.random());
-    meteoro.y0 = VIS.y0 + VIS_H * (0.03 + 0.12 * Math.random());
-    meteoro.trail = ang > rad(24) ? CH_IDX(dir > 0 ? "\\" : "/") : MT_DASH;
-    meteoro.t0 = t; meteoro.ativo = true;
+// CARDUMES: de vez em quando (6 a 9 s) um cardume de peixinhos ><> atravessa a água no alto.
+const PEIXINHOS = Array.from({ length: 12 }, (_, k) => ({ dx: (rnd(400 + k) - 0.5) * 24, dy: (rnd(420 + k) - 0.5) * 10, ph: rnd(440 + k) * TAU }));
+const cardume = { ativo: false, t0: 0, dir: 1, y: 0, vel: 0, x0: 0 };
+let proximoCardume = 4 + Math.random() * 2;
+const CH_MAIOR = CH_IDX(">"), CH_MENOR = CH_IDX("<");
+function cardumes(t) {
+  if (REDUCED || estado === "surpresa") { cardume.ativo = false; return; }
+  const cd = cardume;
+  if (!cd.ativo) {
+    if (t < proximoCardume) return;
+    cd.dir = Math.random() < 0.5 ? 1 : -1; cd.vel = 20 + Math.random() * 10;
+    cd.y = VIS.y0 + VIS_H * (0.1 + 0.22 * Math.random());
+    cd.x0 = cd.dir > 0 ? VIS.x0 - 16 : VIS.x1 + 16; cd.t0 = t; cd.ativo = true;
   }
-  const m = meteoro, p = (t - m.t0) / m.dur;
-  if (p >= 1.3) { m.ativo = false; proximoMeteoro = t + 5 + Math.random() * 3; return; }
-  const env = Math.sin(Math.PI * clamp(p) * 0.5 + 0.2) * (p > 1 ? 1 - (p - 1) / 0.3 : 1);
-  const travel = m.dist * easeOut(Math.min(p, 1) * 0.9 + 0.1);
-  const hx = m.x0 + m.ux * travel, hy = m.y0 + m.uy * travel, K = 18, step = 0.55 * S;
-  for (let k = 0; k < K; k++) {
-    const x = hx - m.ux * k * step, y = hy - m.uy * k * step;
-    const r = Math.floor((y - Y0) / S), c = Math.floor((x - X_MID) * 2 / S + COLS / 2);
-    if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
-    const fall = Math.pow(1 - k / K, 1.4) * env;
-    if (fall < 0.08) continue;
-    const i = r * COLS + c, col = lerp3([1, 0.97, 0.82], [0.62, 0.80, 1.0], k / K * 1.4);
-    setCh(i, 0.18 + 0.72 * fall, col[0], col[1], col[2], k === 0 ? MT_HEAD : k < 3 ? MT_PLUS : k < 12 ? m.trail : MT_DOT);
+  const x = cd.x0 + cd.dir * cd.vel * (t - cd.t0);
+  if (cd.dir > 0 ? x - 16 > VIS.x1 : x + 16 < VIS.x0) { cd.ativo = false; proximoCardume = t + 6 + Math.random() * 3; return; }
+  const forma = cd.dir > 0 ? [CH_MAIOR, CH_MENOR, CH_MAIOR] : [CH_MENOR, CH_MAIOR, CH_MENOR];   // ><> ou <><
+  for (const p of PEIXINHOS) {
+    const i = celula(x + p.dx, cd.y + p.dy + 1.2 * Math.sin(t * 2.2 + p.ph));
+    if (i < 0) continue;
+    const c = i % COLS;
+    for (let k = -1; k <= 1; k++) if (c + k >= 0 && c + k < COLS) setCh(i + k, 0.62, 0.74, 0.9, 0.98, forma[k + 1]);
+  }
+}
+
+// BOLHAS: sobem das anêmonas, das algas e da areia, crescendo um pouquinho e estourando na superfície.
+const BOLHAS = Array.from({ length: 80 }, () => ({ vivo: false }));
+const CH_BOLHA = [CH_IDX("."), CH_IDX("o"), CH_IDX("O")], CH_TRES = CH_IDX("3");
+let acumBolhas = 0, ultimoT = 0;
+function bolhas(t, dt) {
+  acumBolhas += (REDUCED ? 2 : 7) * dt * smoothstep(1, 3, t);
+  for (; acumBolhas >= 1; acumBolhas--) {
+    const b = BOLHAS.find((q) => !q.vivo);
+    if (!b) break;
+    const fonte = Math.random();
+    b.coracao = false;
+    if (fonte < 0.45) {                                                     // Do buquê sobem bolhas e coraçõezinhos <3
+      const f = FLORES_MAR[(Math.random() * FLORES_MAR.length) | 0];
+      if (t < f.t0 + 1) continue;
+      b.x = f.x + (Math.random() - 0.5) * f.R; b.y = f.y - f.R * 0.6; b.coracao = Math.random() < 0.4;
+    }
+    else if (fonte < 0.7) { const g = ALGAS[(Math.random() * ALGAS.length) | 0]; b.x = g.x; b.y = areia(g.x) - Math.random() * g.h * 0.6; }
+    else { b.x = VIS.x0 + Math.random() * VIS_W; b.y = 164; }
+    b.x0 = b.x; b.vy = -(6 + Math.random() * 8) * (REDUCED ? 0.4 : 1); b.ph = Math.random() * TAU;
+    b.tam = Math.random() * 0.5; b.vivo = true;
+  }
+  for (const b of BOLHAS) {
+    if (!b.vivo) continue;
+    b.y += b.vy * dt; b.tam = Math.min(1, b.tam + dt * 0.12);
+    b.x = b.x0 + Math.sin(t * 2.2 + b.ph) * 0.9;
+    if (b.y < VIS.y0 + 3.2) { b.vivo = false; continue; }                      // Estoura na superfície
+    const i = celula(b.x, b.y);
+    if (i < 0) continue;
+    if (b.coracao) {
+      setCh(i, 0.8, 1.0, 0.48, 0.68, CH_MENOR);
+      if ((i % COLS) + 1 < COLS) setCh(i + 1, 0.8, 1.0, 0.48, 0.68, CH_TRES);
+    } else setCh(i, 0.5 + 0.35 * b.tam, 0.78, 0.96, 1.0, CH_BOLHA[b.tam < 0.35 ? 0 : b.tam < 0.75 ? 1 : 2]);
   }
 }
 
@@ -479,8 +387,8 @@ function brush(pts, hws, av, fn) {
   const pad = Math.max(maxw, HW_MIN) + S;
   const r0 = Math.max(0, Math.floor((ymin - pad - Y0) / S)), r1 = Math.min(ROWS, Math.ceil((ymax + pad - Y0) / S) + 1);
   for (let r = r0; r < r1; r++) {
-    const py = Yr[r], sh = rowShift[r];                // Deslocamento horizontal da linha causado pelo vento
-    let rx0 = 1e9, rx1 = -1e9;                          // Intervalo horizontal realmente ocupado pela forma nesta linha
+    const py = Yr[r], sh = rowShift[r];                // Deslocamento horizontal da linha causado pela correnteza
+    let rx0 = 1e9, rx1 = -1e9;
     for (let s = 0, o = 0; s < ns; s++, o += 9) {
       const pw = Math.max(SEG[o + 5], SEG[o + 5] + SEG[o + 6], HW_MIN) + S;
       const ya = SEG[o + 1], yb = ya + SEG[o + 3];
@@ -493,7 +401,7 @@ function brush(pts, hws, av, fn) {
     const c1 = Math.min(COLS, Math.ceil((rx1 + sh - X_MID) * 2 / S + COLS / 2) + 1);
     for (let c = c0; c < c1; c++) {
       const px = Xc[c] - sh;
-      let best = 1, bestS = -1, bestU = 0;            // Distâncias ao quadrado, sem calcular a raiz inicialmente
+      let best = 1, bestS = -1, bestU = 0;
       for (let s = 0, o = 0; s < ns; s++, o += 9) {
         const qx = px - SEG[o], qy = py - SEG[o + 1], dx = SEG[o + 2], dy = SEG[o + 3];
         let u = (qx * dx + qy * dy) * SEG[o + 4];
@@ -513,231 +421,276 @@ function brush(pts, hws, av, fn) {
   }
 }
 
-// CAULES E FOLHAS
-function tube(pts, w0, w1, col) {
-  const n = pts.length;
-  if (n < 2) return;
-  const hws = lin(n).map((k) => w0 + (w1 - w0) * k);
-  const dark = mul(col, 0.6), lite = mul(col, 1.35);
-  brush(pts, hws, lin(n), (i, a, q) => {
-    const k = clamp(0.5 - 0.5 * q);
-    set(i, 0.42 + 0.35 * (1 - Math.abs(q)) - 0.18 * q,
-      dark[0] + (lite[0] - dark[0]) * k, dark[1] + (lite[1] - dark[1]) * k, dark[2] + (lite[2] - dark[2]) * k);
-  });
-}
-function curve(p0, p1, bulge, grow, n = 10) {
-  const dx = p1[0] - p0[0], dy = p1[1] - p0[1], L = Math.hypot(dx, dy) + 1e-9;
-  const nx = -dy / L, ny = dx / L, out = [];
+// RECIFE
+// Areia ondulada, rochas, algas compridas que balançam, corais ramificados que crescem e anêmonas que se abrem.
+const areia = (x) => 166 + 3.5 * Math.sin(x * 0.05 + 0.6) + 2.5 * Math.cos(x * 0.12 + 1.3);
+const ROCHAS = [[-32, 168, 17, 8], [24, 169, 19, 7.5], [-4, 167, 12, 6.5], [48, 171, 12, 5.5], [-54, 172, 11, 5]];
+const VERDES = [
+  [[0.06, 0.22, 0.10], [0.34, 0.66, 0.26]],        // Verde-alga
+  [[0.20, 0.20, 0.06], [0.64, 0.62, 0.22]],        // Oliva-dourado
+  [[0.04, 0.20, 0.17], [0.26, 0.64, 0.50]],        // Verde-azulado
+];
+// x, altura, fase do balanço, paleta, largura, plano (de fundo = mais escura), início do crescimento
+// As algas ficam nas laterais, emoldurando o buquê no centro.
+const ALGAS = [
+  { x: -63, h: 112, fase: 0.0, cor: 0, larg: 2.6, fundo: false, t0: 0.10 },
+  { x: -54, h: 146, fase: 1.2, cor: 1, larg: 2.9, fundo: false, t0: 0.25 },
+  { x: 54, h: 150, fase: 1.9, cor: 0, larg: 3.0, fundo: false, t0: 0.15 },
+  { x: 63, h: 104, fase: 2.8, cor: 2, larg: 2.4, fundo: false, t0: 0.45 },
+  { x: -32, h: 132, fase: 3.3, cor: 2, larg: 2.2, fundo: true, t0: 0.55 },
+  { x: 31, h: 138, fase: 4.1, cor: 1, larg: 2.3, fundo: true, t0: 0.35 },
+];
+function alga(g, t) {
+  const cresce = easeOut((t - g.t0) / 1.8);
+  if (cresce <= 0.01) return;
+  const n = 15, base = areia(g.x) + 1, H = g.h * cresce, m = settings.corrente;
+  const pts = [], hws = [];
   for (let k = 0; k < n; k++) {
-    const s = (k / (n - 1)) * grow, b = bulge * Math.sin(Math.PI * s);
-    out.push([p0[0] + dx * s + nx * b, p0[1] + dy * s + ny * b]);
+    const u = k / (n - 1);
+    // Onda que sobe pela alga (a ponta balança mais que a base), com uma ondulação própria, como uma fita.
+    const balanco = (6 * Math.pow(u, 1.3) * Math.sin(t * 0.9 * m + g.fase - u * 2.4) + 1.6 * Math.sin(u * 9 + g.fase) * u) * m;
+    pts.push([g.x + balanco, base - u * H]);
+    hws.push(g.larg * (0.55 + 0.45 * Math.sin(Math.PI * Math.min(0.97, 0.15 + u * 0.85))) * (0.78 + 0.22 * Math.sin(k * 1.3 + t * 1.5 * m)));
+  }
+  const [esc, cla] = VERDES[g.cor], plano = g.fundo ? 0.55 : 1;
+  const pinta = (i, a, q, extra = 0) => {
+    const aq = Math.abs(q);
+    let l = (0.4 + 0.32 * (1 - aq) - 0.12 * q + extra) * plano;
+    if (aq < 0.12) l += 0.08;                                                  // Nervura central
+    const c = lerp3(esc, cla, 0.35 + 0.4 * (1 - aq) + 0.25 * a);
+    set(i, clamp(l), c[0] * plano, c[1] * plano, c[2] * plano);
+  };
+  brush(pts, hws, lin(n), pinta);
+  // Folhas compridas alternadas ao longo da haste, ondulando com a correnteza.
+  for (let k = 2; k < n - 1; k++) {
+    const [x, y] = pts[k], lado = k % 2 ? 1 : -1, u = k / (n - 1);
+    const ang = rad(-90 + lado * (42 + 14 * Math.sin(t * 1.2 * m + k + g.fase))), len = (8 + 5 * (1 - u)) * cresce;
+    const ca = Math.cos(ang), sa = Math.sin(ang);
+    brush([[x, y], [x + ca * len * 0.5, y + sa * len * 0.5 - 0.8], [x + ca * len, y + sa * len - 2.2]],
+      [g.larg * 0.35, g.larg * 0.6, 0.1], [0.6, 0.8, 1], (i, a, q) => pinta(i, a, q, 0.05));
+  }
+}
+
+// Corais ramificados: cada galho se divide em dois ou três, e os galhos crescem em sequência.
+const CORAIS = [
+  { x: -46, ang: -84, len: 30, cor: [1.00, 0.40, 0.46], claro: [1.00, 0.80, 0.82], t0: 0.5 },
+  { x: 46, ang: -96, len: 30, cor: [0.64, 0.34, 0.92], claro: [0.92, 0.78, 1.00], t0: 0.8 },
+  { x: -64, ang: -80, len: 20, cor: [1.00, 0.60, 0.22], claro: [1.00, 0.92, 0.62], t0: 1.1 },
+  { x: 64, ang: -100, len: 20, cor: [1.00, 0.78, 0.25], claro: [1.00, 0.95, 0.70], t0: 1.0 },
+];
+function galho(lista, x, y, ang, len, w, prof, sem, t0) {
+  const x1 = x + Math.cos(ang) * len, y1 = y + Math.sin(ang) * len;
+  lista.push({ x0: x, y0: y, x1, y1, w0: w, w1: w * 0.74, prof, t0 });
+  if (prof >= 4) return;
+  const n = rnd(sem) < 0.3 ? 3 : 2;
+  for (let j = 0; j < n; j++) {
+    const a = ang + (j - (n - 1) / 2) * rad(26 + rnd(sem + j) * 16) + (rnd(sem + j + 7) - 0.5) * rad(10);
+    galho(lista, x1, y1, a, len * (0.66 + rnd(sem + j + 3) * 0.12), w * 0.74, prof + 1, sem * 3 + j + 1, t0 + 0.3);
+  }
+}
+for (const [k, co] of CORAIS.entries()) {
+  co.galhos = [];
+  galho(co.galhos, co.x, areia(co.x) - 1, rad(co.ang), co.len * 0.5, 2.8, 0, 50 + k * 97, co.t0);
+}
+function coral(co, t) {
+  for (const s of co.galhos) {
+    const g = clamp((t - s.t0) / 0.35);
+    if (g <= 0) continue;
+    const xe = s.x0 + (s.x1 - s.x0) * g, ye = s.y0 + (s.y1 - s.y0) * g;
+    const base = lerp3(mul(co.cor, 0.55), co.cor, s.prof / 4);
+    brush([[s.x0, s.y0], [xe, ye]], [s.w0, s.w0 + (s.w1 - s.w0) * g], [0, 1], (i, a, q) => {
+      const aq = Math.abs(q), c = lerp3(base, co.claro, (1 - aq) * 0.35 * (s.prof / 4));
+      set(i, clamp(0.42 + 0.3 * (1 - aq) - 0.1 * q), c[0], c[1], c[2]);
+    });
+    if (s.prof === 4 && g >= 1) {                                               // Pólipos acesos nas pontas
+      const p = 0.75 + 0.25 * Math.sin(t * 2.4 + s.x1);
+      brush([[xe, ye], [xe, ye - 0.01]], [1.2, 1.2], [0, 1], (i) => set(i, 0.88 * p, co.claro[0], co.claro[1], co.claro[2]));
+    }
+  }
+}
+
+// BUQUÊ DO MAR: flores de anêmona no alto de hastes verdes, amarradas com um laço rosa —
+// um buquê de fundo do mar para mandar pra alguém especial. As hastes crescem, depois as flores se abrem.
+const LACO_Y = 150, BASE_BUQUE = 165;
+// x, y (centro da flor), raio, nº de tentáculos, cor, ponta, miolo, quando começa a abrir
+const FLORES_MAR = [
+  { x: 0, y: 86, R: 12, n: 18, cor: [1.00, 0.30, 0.52], ponta: [1.00, 0.72, 0.84], miolo: [1.00, 0.86, 0.30], t0: 2.5 },
+  { x: -21, y: 103, R: 11, n: 16, cor: [0.92, 0.24, 0.72], ponta: [1.00, 0.70, 0.92], miolo: [1.00, 0.90, 0.42], t0: 2.1 },
+  { x: 21, y: 101, R: 11, n: 16, cor: [0.14, 0.78, 0.76], ponta: [0.70, 0.95, 0.95], miolo: [1.00, 0.72, 0.30], t0: 2.3 },
+  { x: -37, y: 124, R: 9, n: 14, cor: [1.00, 0.52, 0.10], ponta: [1.00, 0.84, 0.50], miolo: [1.00, 0.36, 0.30], t0: 1.8 },
+  { x: 37, y: 122, R: 9, n: 14, cor: [0.60, 0.36, 0.98], ponta: [0.86, 0.74, 1.00], miolo: [1.00, 0.86, 0.36], t0: 2.0 },
+  { x: -12, y: 125, R: 9, n: 14, cor: [1.00, 0.78, 0.14], ponta: [1.00, 0.92, 0.60], miolo: [1.00, 0.46, 0.30], t0: 2.7 },
+  { x: 13, y: 127, R: 8.5, n: 14, cor: [1.00, 0.40, 0.38], ponta: [1.00, 0.76, 0.72], miolo: [1.00, 0.90, 0.40], t0: 2.9 },
+].map((f, k) => ({ ...f, k, x: f.x * 1.15, y: LACO_Y - (LACO_Y - f.y) * 1.12, R: f.R * 1.15,   // Buquê 15% maior
+  inicio: 0.6 + k * 0.08, curva: (f.x >= 0 ? 1 : -1) * (k % 2 ? 3 : -2) }))
+ .sort((a, b) => a.y - b.y);                                                // As de cima ficam atrás
+const HASTE = [[0.07, 0.24, 0.13], [0.30, 0.66, 0.36]];
+function curvaHaste(f, cresce) {                                            // Da base, passando pelo laço, até a flor
+  const p0 = [f.x * 0.16, BASE_BUQUE], p1 = [f.x, f.y + f.R * 0.25], out = [];
+  for (let k = 0; k < 12; k++) {
+    const s = (k / 11) * cresce, b = f.curva * Math.sin(Math.PI * s);
+    const pinca = 1 - 0.8 * Math.exp(-(((p0[1] + (p1[1] - p0[1]) * s - LACO_Y) / 6) ** 2));   // Aperta no laço
+    out.push([(p0[0] + (p1[0] - p0[0]) * s + b) * pinca, p0[1] + (p1[1] - p0[1]) * s]);
   }
   return out;
 }
-// Folhas no verde-escuro do cipreste, com luz verde-azulada das colinas e pontas ocre.
-const LEAF_D = [0.05, 0.17, 0.15], LEAF_L = [0.28, 0.62, 0.48], UNDER = [0.36, 0.58, 0.72], OLD_TIP = [0.80, 0.72, 0.26];
-// Folhas naturais, compridas e pontiagudas; podem curvar, dobrar ou mostrar o verso.
-function leaf(L, t, unfurl) {
-  if (unfurl <= 0.01) return;
-  const n = 12, len = L.len * (0.3 + 0.7 * unfurl), wid = L.wid * (0.4 + 0.6 * unfurl);
-  const ang0 = L.stemAng + (L.ang - L.stemAng) * unfurl;                  // A folha se abre a partir da direção do caule
-  const sway = rad(4) * wave(t, 3, L.seed);
-  const pts = [], hws = [];
-  let x = L.x, y = L.y;
+function haste(f, t) {
+  const cresce = easeOut((t - f.inicio) / 1.2);
+  if (cresce <= 0.01) return;
+  brush(curvaHaste(f, cresce), lin(12).map((u) => 0.95 - 0.35 * u), lin(12), (i, a, q) => {
+    const c = lerp3(HASTE[0], HASTE[1], 0.5 - 0.5 * q);
+    set(i, clamp(0.42 + 0.33 * (1 - Math.abs(q)) - 0.15 * q), c[0], c[1], c[2]);
+  });
+}
+function florMar(f, t) {
+  if (t < f.inicio + 1.2) return;                                           // Abre só depois que a haste cresceu
+  const abre = smoothstep(f.t0, f.t0 + 1.4, t), m = settings.corrente;
+  const respira = REDUCED ? 0 : 0.07 * Math.sin(t * 0.9 + f.k * 1.3);
+  if (abre < 0.05) {                                                        // Botão fechado
+    brush([[f.x, f.y], [f.x, f.y - 0.01]], [2.2, 2.2], [0, 1], (i, a, q) =>
+      set(i, 0.5 + 0.25 * (1 - Math.abs(q)), f.cor[0] * 0.8, f.cor[1] * 0.8, f.cor[2] * 0.8));
+    return;
+  }
+  const giro = f.k * 0.7;
+  for (let k = 0; k < f.n; k++) {                                           // Tentáculos em volta, como pétalas
+    const a0 = giro + (k / f.n) * TAU;
+    const len = f.R * (0.82 + 0.18 * rnd(k * 13 + f.k * 7)) * (0.3 + 0.7 * abre) * (1 - respira);
+    const pts = [], hws = [];
+    let x = f.x + Math.cos(a0) * f.R * 0.2, y = f.y + Math.sin(a0) * f.R * 0.2;
+    for (let s = 0; s < 6; s++) {
+      const u = s / 5;
+      pts.push([x, y]); hws.push(1.3 - 0.8 * u);
+      const ang = a0 + rad(24) * m * u * Math.sin(t * 1.3 * m + k * 0.7 - u * 2);
+      x += Math.cos(ang) * len * 0.8 / 5; y += Math.sin(ang) * len * 0.8 / 5;
+    }
+    brush(pts, hws, lin(6), (i, a, q) => {
+      const c = lerp3(mul(f.cor, 0.8), f.ponta, Math.pow(a, 3) * 0.8);   // Cor viva até perto da ponta
+      set(i, clamp(0.44 + 0.26 * (1 - Math.abs(q)) + 0.08 * a), c[0], c[1], c[2]);
+    });
+    const p = 0.75 + 0.25 * Math.sin(t * 2 + k);
+    brush([[x, y], [x, y - 0.01]], [0.9, 0.9], [0, 1], (i) => set(i, 0.8 * p, f.ponta[0], f.ponta[1], f.ponta[2]));
+  }
+  const rm = f.R * 0.3 * Math.sqrt(abre);                                   // Miolo
+  brush([[f.x, f.y], [f.x, f.y - 0.01]], [rm, rm], [0, 1], (i, a, q) => {
+    const aq = Math.abs(q), c = lerp3(f.miolo, mul(f.cor, 0.6), aq * aq);
+    set(i, clamp(0.78 - 0.3 * aq), c[0], c[1], c[2]);
+  });
+}
+// Laço rosa que amarra as hastes.
+const LACO_E = [0.80, 0.18, 0.42], LACO_C = [1.00, 0.70, 0.84];
+function laco(cresce) {
+  if (cresce <= 0.01) return;
+  const g = cresce, pinta = (pts, w) => brush(pts, pts.map(() => w * g), lin(pts.length), (i, a, q) => {
+    const k = clamp(0.55 - 0.45 * q);
+    set(i, 0.52 + 0.3 * (1 - Math.abs(q)) - 0.12 * q, ...lerp3(LACO_E, LACO_C, k));
+  });
+  const y = LACO_Y, m = (pts) => pts.map(([x, yy]) => [-x, yy]);
+  const alca = [[-1, y - 0.5], [-6, y - 6 * g], [-13, y - 8 * g], [-16 * g, y - 3 * g], [-11 * g, y + 1], [-1, y]];
+  const ponta = [[-1, y + 1], [-4, y + 8 * g], [-8, y + 14 * g], [-6.5, y + 16 * g]];
+  pinta([[-5, y - 0.4], [5, y + 0.4]], 2.2);         // Faixa em volta das hastes
+  pinta(alca, 1.4); pinta(m(alca), 1.4);
+  pinta(ponta, 1.3); pinta(m(ponta), 1.3);
+  pinta([[0, y - 1.6], [0, y + 1.6]], 2.1);          // Nó central
+}
+
+// PEIXES ASCII: corpo, cauda que abana, nadadeira e olho; nadam de um lado ao outro sem parar.
+const ESPECIES = {
+  palhaco:   { corpo: [1.00, 0.48, 0.08], faixa: [1.00, 1.00, 1.00], cauda: [1.00, 0.56, 0.16], alto: 0.30, faixas: [[0.16, 0.27], [0.47, 0.59], [0.84, 0.95]] },
+  cirurgiao: { corpo: [0.12, 0.30, 0.95], faixa: [0.03, 0.05, 0.22], cauda: [1.00, 0.84, 0.18], alto: 0.34, faixas: [[0.28, 0.62]], centro: true },
+  amarelo:   { corpo: [1.00, 0.86, 0.16], faixa: [1.00, 0.95, 0.60], cauda: [1.00, 0.90, 0.30], alto: 0.38, faixas: [] },
+  anjo:      { corpo: [0.86, 0.88, 0.80], faixa: [0.16, 0.13, 0.12], cauda: [0.98, 0.86, 0.48], alto: 0.50, faixas: [[0.18, 0.26], [0.44, 0.52], [0.70, 0.78]] },
+  neon:      { corpo: [0.24, 0.86, 1.00], faixa: [1.00, 0.20, 0.30], cauda: [0.50, 0.90, 1.00], alto: 0.22, faixas: [[0.5, 1.0]] },
+};
+// espécie, altura no mundo, comprimento, direção, velocidade, entrada (s), plano (1 = frente)
+const PEIXES = [
+  ["palhaco", 112, 26, 1, 10, 2.2, 1],
+  ["cirurgiao", 82, 28, -1, 12, 3.0, 1],
+  ["amarelo", 100, 21, -1, 9, 3.8, 0.85],
+  ["anjo", 40, 26, 1, 8, 4.5, 0.9],
+  ["neon", 64, 14, 1, 15, 2.6, 0.7],
+  ["neon", 70, 13, 1, 15, 2.75, 0.7],
+  ["palhaco", 132, 16, -1, 7, 5.2, 0.75],
+].map(([esp, y, L, dir, vel, t0, plano], k) => ({ esp: ESPECIES[esp], y, L, dir, vel, t0, plano, sem: k * 2.3 }));
+const CH_OLHO = CH_IDX("o");
+function peixe(p, t) {
+  if (t < p.t0) return;
+  const margem = p.L * 1.6 + 6, vao = VIS_W + 2 * margem;
+  const inicio = p.dir > 0 ? VIS.x0 - margem : VIS.x1 + margem;
+  const x = inicio + p.dir * ((p.vel * (t - p.t0)) % vao), y = p.y + 2.5 * Math.sin(t * 0.7 + p.sem);
+  const e = p.esp, L = p.L, H = L * e.alto, d = p.dir, bri = p.plano, mv = REDUCED ? 0.3 : 1;
+  const pts = [], hws = [], n = 8;
   for (let k = 0; k < n; k++) {
     const a = k / (n - 1);
-    pts.push([x, y]);
-    const tw = Math.cos(L.twist * a + L.phase);                            // A torção altera a largura visível da folha
-    hws.push(Math.max(0.06, wid * Math.pow(Math.sin(Math.PI * Math.pow(a, 0.5)), 0.85) * (0.2 + 0.8 * Math.abs(tw))));
-    const bend = L.droop * Math.pow(a, 1.6) + L.kink * smoothstep(L.kinkAt - 0.05, L.kinkAt + 0.05, a);   // Curvatura descendente e dobras na folha
-    const ang = ang0 + sway * a + L.dir * bend * unfurl;
-    x += Math.cos(ang) * len / (n - 1); y += Math.sin(ang) * len / (n - 1);
+    pts.push([x - d * a * L * 0.78, y + Math.sin(t * 7 * mv + p.sem - a * 3) * a * L * 0.03]);
+    hws.push(H * Math.max(0.2, Math.pow(Math.sin(Math.PI * Math.pow(Math.min(a, 0.999), 0.7)), 0.8)));
   }
+  const cor = (a, aq) => {
+    for (const [f0, f1] of e.faixas) if (a >= f0 && a <= f1 && (!e.centro || aq < 0.5)) return e.faixa;
+    return e.corpo;
+  };
+  const dim = 0.55 + 0.45 * bri;
+  // Cauda em leque, abanando.
+  const [bx, by] = pts[n - 1], abana = Math.sin(t * 8 * mv + p.sem) * H * 0.5;
+  brush([[bx, by], [bx - d * L * 0.26, by + abana]], [H * 0.16, H * 0.82], [0, 1], (i, a, q) =>
+    set(i, clamp((0.5 + 0.25 * (1 - Math.abs(q))) * bri), e.cauda[0] * dim, e.cauda[1] * dim, e.cauda[2] * dim));
+  // Nadadeira dorsal.
+  brush([[x - d * L * 0.3, y - H * 0.8], [x - d * L * 0.5, y - H * 1.3]], [H * 0.32, 0.12], [0, 1], (i) =>
+    set(i, 0.5 * bri, e.cauda[0] * dim * 0.85, e.cauda[1] * dim * 0.85, e.cauda[2] * dim * 0.85));
+  // Corpo.
   brush(pts, hws, lin(n), (i, a, q) => {
-    const aq = Math.abs(q), back = Math.cos(L.twist * a + L.phase) < 0;
-    const lit = (q > 0) !== back ? 1 : 0;                                  // Folha em V: uma metade recebe mais luz
-    let l = (0.42 + 0.28 * lit + 0.22 * Math.pow(1 - aq, 0.7)) * (0.88 + 0.12 * Math.cos(q * Math.PI * 6));
-    if (aq < 0.08) l = back ? 0.78 : 0.34;                                  // Nervura central: sulco na frente e relevo no verso
-    else if (aq > 0.88) l += 0.12;                                          // As bordas recebem luz
-    l *= 0.8 + 0.2 * clamp(a * 6);                                          // A base da folha fica sombreada pelo caule
-    let c = back ? lerp3(mul(UNDER, 0.8), UNDER, 0.4 + 0.6 * (1 - aq))      // Verso da folha com tom azul-esverdeado
-                 : lerp3(LEAF_D, LEAF_L, 0.3 + 0.45 * lit + 0.25 * (1 - aq));
-    if (L.old) c = lerp3(c, OLD_TIP, (a - 0.8) * 4);                        // Folhas mais velhas podem ter pontas em ocre
-    set(i, clamp(l), c[0], c[1], c[2]);
+    const aq = Math.abs(q), c = cor(a, aq);
+    let l = (0.52 + 0.36 * Math.pow(1 - aq, 0.6)) * bri;
+    if (aq > 0.88) l *= 0.75;                                                   // Contorno levemente mais escuro
+    set(i, clamp(l), c[0] * dim, c[1] * dim, c[2] * dim);
   });
+  // Olho: um "o" escuro perto da cabeça.
+  const io = celula(x - d * L * 0.12, y - H * 0.2);
+  if (io >= 0) setCh(io, 0.95, 0.02, 0.03, 0.06, CH_OLHO);
 }
-
-// FLORES EM 3D
-const BUD09 = mul(BUD, 0.9), STAMEN = [0.86, 0.82, 0.56];
-function lily(center, axis, size, openness, ripe, t, seed, pal, bright) {
-  if (size <= 0.3) return;
-  const anther = pal.anther || ANTHER, spotRate = pal.spots;
-  const a3 = norm(axis), ref = Math.abs(a3[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0];
-  const u3 = norm(cross(a3, ref)), v3 = cross(a3, u3), c3 = [center[0], center[1], 0];
-  const spin = rad(15) + rad(3) * wave(t, 3, seed);
-  const petals = [];
-  for (let k = 0; k < 6; k++) {
-    const inner = k % 2 === 1, phi = spin + k * Math.PI / 3;
-    const radial = add(mul(u3, Math.cos(phi)), mul(v3, Math.sin(phi))), tangent = cross(a3, radial);
-    const theta = rad(5 + (inner ? 70 : 78) * openness);                  // Ângulo de abertura das pétalas
-    const curl = rad(50) * Math.pow(Math.max(openness, 0), 1.5);           // Curvatura das pontas das pétalas
-    const L = size * (inner ? 0.94 : 1), W = size * (inner ? 0.26 : 0.2), n = 9;
-    const pts3 = [], hws = [];
-    let p = add(c3, mul(radial, size * 0.04));
-    for (let i = 0; i < n; i++) {
-      const a = i / (n - 1);
-      pts3.push(p);
-      hws.push(W * Math.pow(Math.sin(Math.PI * Math.pow(Math.min(a, 0.999), 0.65)), 0.85));
-      const th = theta + curl * a * a;
-      p = add(p, mul(add(mul(a3, Math.cos(th)), mul(radial, Math.sin(th))), L / (n - 1)));
-    }
-    const normal = norm(cross(norm(sub(pts3[4], pts3[0])), tangent)), facing = normal[2];
-    const tproj = Math.hypot(tangent[0], tangent[1]);                       // Pétalas vistas de lado parecem mais estreitas
-    petals.push({
-      depth: pts3.reduce((s, q) => s + q[2], 0) / n, pts: pts3.map((q) => [q[0], q[1]]),
-      hws: hws.map((h) => Math.max(h * Math.max(tproj, 0.3), 0.08)), normal, facing, pseed: seed * 10 + k,
-    });
-  }
-  petals.sort((a, b) => a.depth - b.depth);                                // Desenha primeiro as pétalas de trás e depois as da frente
-  const dim = 0.55 + 0.45 * bright, av = lin(9);
-  for (const pt of petals) {
-    const sg = pt.facing < 0 ? -1 : 1;
-    const light = 0.35 + 0.65 * Math.max(0, dot(mul(pt.normal, sg), LIGHT));
-    const back = pt.facing < 0;
-    brush(pt.pts, pt.hws, av, (i, a, q, r, c) => {
-      const aq = Math.abs(q);
-      let l = light * (0.62 + 0.38 * Math.pow(1 - aq, 0.6)) * (back ? 0.8 : 1);
-      l *= 0.75 + 0.35 * clamp(a * 2);                                      // A base da pétala é mais escura
-      if (aq < 0.1) l *= 0.65;                                              // Sulco central da pétala
-      let col = lerp3(pal.deep, pal.mid, a * 2.4);
-      col = lerp3(col, pal.tip, (a - 0.55) * 1.8 + (aq - 0.7) * 1.6);
-      col = lerp3(col, pal.sheen, (light - 0.75) * 2.5 * (1 - aq));       // Realce nas áreas iluminadas
-      col = lerp3(BUD09, col, ripe * clamp(0.3 + a * 1.5) + ripe * 0.3);    // Botões jovens ainda possuem tonalidade verde
-      if (a < 0.4 && a > 0.08 && openness > 0.4 && hash3(c, r, pt.pseed) % 100 < spotRate) l = 0.2;   // Pequenas pintas nas pétalas, quando definidas na paleta
-      set(i, clamp(l) * bright, col[0] * dim, col[1] * dim, col[2] * dim);
-    });
-  }
-  const show = smoothstep(0.35, 0.85, openness);                          // Exibição dos estames
-  if (show <= 0) return;
-  for (let k = 0; k < 7; k++) {
-    const pistil = k === 6, phi = k * TAU / 6 + 0.3;
-    const radial = add(mul(u3, Math.cos(phi)), mul(v3, Math.sin(phi)));
-    const th = pistil ? 0 : rad(28) * openness;
-    const d3 = add(mul(a3, Math.cos(th)), mul(radial, Math.sin(th)));
-    const ln = size * (pistil ? 0.62 : 0.55) * show;
-    const mid = add(add(c3, mul(d3, ln * 0.5)), mul(radial, pistil ? 0 : 0.4)), tip = add(c3, mul(d3, ln));
-    brush([[c3[0], c3[1]], [mid[0], mid[1]], [tip[0], tip[1]]], [0.22, 0.18, 0.15], [0, 0.5, 1],
-      (i) => set(i, 0.55 * bright, STAMEN[0], STAMEN[1], STAMEN[2]));
-    if (!pistil) brush([[tip[0] - d3[0] * 0.9, tip[1] - d3[1] * 0.9], [tip[0] + d3[0] * 0.4, tip[1] + d3[1] * 0.4]],
-      [0.55, 0.55], [0, 1], (i) => set(i, 0.9 * bright, anther[0], anther[1], anther[2]));
-  }
-}
-
-// LAÇO DOURADO QUE AMARRA OS CAULES
-const RIB_D = [0.62, 0.30, 0.04], RIB_L = [1.00, 0.86, 0.30], TIE_Y = 150;
-function ribbon(grow) {
-  if (grow <= 0.01) return;
-  const g = grow, paint = (pts, w) => brush(pts, pts.map(() => w * g), lin(pts.length), (i, a, q) => {
-    const k = clamp(0.55 - 0.45 * q);
-    set(i, 0.5 + 0.3 * (1 - Math.abs(q)) - 0.12 * q, ...lerp3(RIB_D, RIB_L, k));
-  });
-  const y = TIE_Y, m = (pts) => pts.map(([x, yy]) => [-x, yy]);
-  const loop = [[-1, y - 0.5], [-6, y - 6 * g], [-13, y - 8 * g], [-16 * g, y - 3 * g], [-11 * g, y + 1], [-1, y]];
-  const tail = [[-1, y + 1], [-4, y + 9 * g], [-8, y + 18 * g], [-6.5, y + 21 * g]];
-  paint([[-8.5, y - 0.5], [8.5, y + 0.5]], 2.2);   // Faixa em volta dos caules
-  paint(loop, 1.4); paint(m(loop), 1.4);
-  paint(tail, 1.3); paint(m(tail), 1.3);
-  paint([[0, y - 1.6], [0, y + 1.6]], 2.1);        // Nó central
-}
-
-// ORGANIZAÇÃO DO BUQUÊ
-const STEM_DUR = 1.0;                                   // Tempo de crescimento completo do caule, em segundos
-const BASE_Y = 178;                                     // Ponta cortada dos caules, dentro da área visível
-const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3);   // Crescimento rápido no início e mais lento no final
-let FLOWERS = [], BUDS = [];
-
-function pathAt(path, frac) {                           // Posição e direção do caule em uma fração do percurso
-  const f = frac * (path.length - 1), k = Math.min(path.length - 2, Math.floor(f)), u = f - k;
-  const a = path[k], b = path[k + 1];
-  return { x: a[0] + (b[0] - a[0]) * u, y: a[1] + (b[1] - a[1]) * u, ang: Math.atan2(b[1] - a[1], b[0] - a[0]) };
-}
-
-function buildLayout() {
-  const fl = FLOWERS_BASE.map(([pos, size, axis, col, tOpen, bright], i) => ({     // Flores com os caules reunidos na base
-    pos, size, axis, col, bright, baseX: pos[0] * 0.12, bulge: 2.5 * Math.sign(pos[0] || 1) * (i % 2 ? 1 : -0.6),
-    start: 0.05 + 0.035 * i, tOpen: 1.7 + (tOpen - 3.9) * 0.55,
-  }));
-  const bd = BUDS_BASE.map(([pos, size, axis, ripe, col], i) => ({
-    pos, size, axis, ripe, col, baseX: pos[0] * 0.12, bulge: 2.5 * Math.sign(pos[0] || 1) * (i % 2 ? -0.6 : 1),
-    start: 0.15 + 0.05 * i,
-  }));
-  for (const o of [...fl, ...bd]) {
-    o.end = o.start + STEM_DUR;                                     // Instante em que o caule termina de crescer
-    o.path = curve([o.baseX, BASE_Y], o.pos, o.bulge, 1, 14);
-  }
-  fl.forEach((f, i) => {
-    f.tOpen = Math.max(f.tOpen, f.end + 0.6);                       // A flor só se abre depois de o caule estar completo
-    const front = f.bright > 0.8;
-    // As folhas nascem acima do laço.
-    const fv0 = clamp((BASE_Y - (TIE_Y - 10)) / (BASE_Y - f.pos[1]), 0.04, 0.6), fv1 = Math.min(0.78, fv0 + 0.62);
-    const fracs = front ? [0, 0.25, 0.5, 0.75, 1].map((u) => fv0 + (fv1 - fv0) * u) : [0.55, 0.72];
-    f.leaves = fracs.map((fr, j) => {
-      const sd = i * 31 + j * 7 + 3, frac = clamp(fr + (rnd(sd) - 0.5) * 0.05, 0.04, 0.82);
-      const p = pathAt(f.path, frac), side = (i + j) % 2 ? 1 : -1;
-      const ang = p.ang + side * rad(28 + rnd(sd + 1) * 30);
-      return {
-        x: p.x, y: p.y, stemAng: p.ang, ang, dir: Math.cos(ang) >= 0 ? 1 : -1, seed: sd,
-        len: (34 - j * 4.5) * (0.8 + rnd(sd + 2) * 0.4) * (front ? 1 : 0.75), wid: 3.0 + rnd(sd + 3) * 1.1,
-        droop: rad(25 + rnd(sd + 4) * 45) * (1 - frac * 0.6),
-        kink: rnd(sd + 5) < 0.45 ? rad(40 + rnd(sd + 6) * 45) : 0, kinkAt: 0.4 + rnd(sd + 7) * 0.3,
-        twist: 1 + rnd(sd + 8) * 2.6, phase: rnd(sd + 9) * TAU, old: rnd(sd + 10) < 0.25,
-        tAt: f.start + STEM_DUR * (1 - Math.cbrt(1 - frac)),         // Momento em que o caule alcança a posição da folha
-      };
-    });
-  });
-  FLOWERS = fl; BUDS = bd;
-}
-buildLayout();
 
 // CENA ANIMADA
+const fundo = PEIXES.filter((p) => p.plano < 0.8), frente = PEIXES.filter((p) => p.plano >= 0.8);
 function scene(t) {
-  for (let r = 0; r < ROWS; r++) {                                         // Vento: as partes mais altas balançam mais
-    const h = clamp((BASE_Y + 8 - Yr[r]) / 150), w = t - 0.4 * h;
-    rowShift[r] = settings.wind * (0.6 * wave(w, 2) + 0.3 * wave(w, 3, 1) + 0.1 * wave(w, 5, 2)) * Math.pow(h, 1.5);
+  const dt = Math.min(0.1, Math.max(0, t - ultimoT)); ultimoT = t;
+  const m = settings.corrente;
+  for (let r = 0; r < ROWS; r++) {                                         // Correnteza: ondula de leve as partes altas
+    const h = clamp((BASE_Y - Yr[r]) / 150);
+    rowShift[r] = 1.2 * m * (0.6 * wave(t, 2) + 0.4 * wave(t, 3, 1)) * h * h;
   }
-  sky(t);
-  meteoros(t);
-  const growOf = (o) => easeOut((t - o.start) / STEM_DUR);
-
-  for (const f of FLOWERS) for (const L of f.leaves) leaf(L, t, smoothstep(L.tAt, L.tAt + 0.55, t));   // As folhas se abrem conforme o caule cresce
-  for (const b of BUDS) tube(curve([b.baseX, BASE_Y], b.pos, b.bulge, growOf(b), 14), 0.7, 0.45, STEM);
-  for (const f of FLOWERS) tube(curve([f.baseX, BASE_Y], f.pos, f.bulge, growOf(f), 14), 0.85, 0.5, STEM);
-  ribbon(easeOut((t - 1.1) / 0.7));
-
-  FLOWERS.forEach((f, i) => {                                              // Desenha as flores de trás para frente
-    if (t < f.end) return;                                                 // A flor aparece depois que seu caule cresce
-    const swell = smoothstep(f.end, f.end + 0.6, t);
-    const ripe = smoothstep(f.tOpen - 1.0, f.tOpen + 0.3, t);
-    const opening = smoothstep(f.tOpen, f.tOpen + 1.6, t);
-    const breathe = BREATH_DEPTH * (0.5 - 0.5 * Math.cos(TAU * (t - f.tOpen - 3) / BREATH + i * 0.9))
-      * smoothstep(f.tOpen + 1.6, f.tOpen + 3, t);
-    const openness = opening * (1 - breathe);
-    const s = f.size * settings.size * (0.35 + 0.65 * swell) * (0.5 + 0.5 * Math.max(openness, ripe * 0.6));
-    lily(f.pos, f.axis, s, openness, ripe, t, i * 7 + 3, PALETTES[f.col], f.bright);
+  agua(t);
+  cardumes(t);
+  for (const g of ALGAS) if (g.fundo) alga(g, t);
+  for (const p of fundo) peixe(p, t);
+  // Areia (com a luz das cáusticas refletida nela).
+  for (let c = 0; c < COLS; c++) {
+    const top = topoAreia[c];
+    for (let r = ROWS - 1; r >= 0 && Yr[r] > top; r--) {
+      const i = r * COLS + c, y = Yr[r], x = Xc[c], n = hash3(r, c, 31) / 4294967296;
+      const luzAgua = lum[i], prof = clamp((y - top) / 14);
+      const ondula = 0.5 + 0.5 * Math.sin(x * 0.6 + y * 0.35);
+      const l = 0.2 + 0.12 * n + 0.08 * ondula + luzAgua * 0.9 + (y - top < 1.2 ? 0.12 : 0) - 0.08 * prof;
+      const col = lerp3([0.78, 0.68, 0.46], [0.22, 0.36, 0.42], 0.3 + 0.3 * prof);
+      set(i, clamp(l), col[0], col[1], col[2]);
+    }
+  }
+  for (const [x, y, rx, ry] of ROCHAS) brush([[x - rx * 0.55, y], [x + rx * 0.55, y]], [ry, ry], [0, 1], (i, a, q, r, c) => {
+    const n = hash3(r, c, 41) / 4294967296;
+    set(i, clamp(0.3 + 0.22 * (1 - Math.abs(q)) + 0.1 * n), 0.30 + 0.06 * n, 0.27, 0.36 + 0.05 * n);
   });
-  BUDS.forEach((b, i) => {                                                 // Desenha os botões florais
-    if (t < b.end) return;
-    const swell = smoothstep(b.end, b.end + 0.6, t);
-    lily(b.pos, b.axis, b.size * (0.4 + 0.6 * swell), 0.04 + 0.03 * wave(t, 2, i),
-      b.ripe * swell, t, 90 + i, PALETTES[b.col], 0.9);
-  });
-
-  const pv = 0.5 * smoothstep(3, 4.5, t), off = Math.floor(t * 4);       // Faíscas amarelas e azul-claras sobem como vaga-lumes
+  for (const co of CORAIS) coral(co, t);
+  for (const g of ALGAS) if (!g.fundo) alga(g, t);
+  for (const f of FLORES_MAR) haste(f, t);
+  laco(easeOut((t - 1.6) / 0.7));
+  for (const f of FLORES_MAR) florMar(f, t);
+  for (const p of frente) peixe(p, t);
+  bolhas(t, dt);
+  // Plâncton: pontinhos que cintilam na água.
+  const pv = 0.45 * smoothstep(3, 4.5, t), off = Math.floor(t * 3);
   if (pv > 0) for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
     const i = r * COLS + c;
     if (fg[i]) continue;
     const h = hash3(c, r + off, 77) % 1000;
-    if (h < 2) h ? set(i, pv, 0.70, 0.92, 0.96) : set(i, pv, 1, 0.88, 0.25);
+    if (h < 2) h ? set(i, pv, 0.62, 0.92, 0.95) : set(i, pv, 0.95, 1, 0.82);
   }
   const fade = smoothstep(0, 0.2, t);
   if (fade < 1) for (let i = 0; i < N; i++) lum[i] *= fade;
@@ -760,29 +713,29 @@ const actx = ascii.getContext("2d");
 const glowA = document.createElement("canvas"), glowB = document.createElement("canvas"), glowC = document.createElement("canvas");
 let W, H, img, px32;
 
-// Cria (ou recria) a grade, o céu, as estrelas e os buffers para o tamanho atual da tela.
+// Cria (ou recria) a grade, a água e os buffers para o tamanho atual da tela.
 function setupGrid() {
   const vw = innerWidth || 1, vh = innerHeight || 1;
   GRID_ASPECT = vw / vh;
   ({ cols: COLS, rows: ROWS } = gridFor(vw, vh));
   N = COLS * ROWS;
   S = Math.max(BOX_W / (COLS * 0.5), BOX_H / ROWS);          // Unidades do mundo por linha da grade
-  // A base dos caules fica sempre rente à borda inferior; a altura que sobrar (celular em pé) vira céu acima do buquê.
-  Y0 = BASE_Y + 1 - ROWS * S;                                 // Coordenada do topo da tela no mundo
+  // O fundo do mar fica sempre rente à borda inferior; a altura que sobrar (celular em pé) vira água acima.
+  Y0 = BASE_Y + 1 - ROWS * S;
   VIS = { x0: X_MID - COLS * 0.25 * S, x1: X_MID + COLS * 0.25 * S, y0: Y0, y1: Y0 + ROWS * S };
   VIS_W = VIS.x1 - VIS.x0; VIS_H = VIS.y1 - VIS.y0; VMIN = Math.min(VIS_W, VIS_H);
   HW_MIN = S > 1.15 ? 0.3 * S : 1e-3;                          // Em grades mais grossas, traços finos continuam visíveis
-  Xc = new Float32Array(COLS); Yr = new Float32Array(ROWS);
-  for (let c = 0; c < COLS; c++) Xc[c] = X_MID + (c + 0.5 - COLS / 2) * 0.5 * S;   // Cada célula tem metade da largura de sua altura
+  Xc = new Float32Array(COLS); Yr = new Float32Array(ROWS); topoAreia = new Float32Array(COLS);
+  for (let c = 0; c < COLS; c++) { Xc[c] = X_MID + (c + 0.5 - COLS / 2) * 0.5 * S; topoAreia[c] = areia(Xc[c]); }
   for (let r = 0; r < ROWS; r++) Yr[r] = Y0 + (r + 0.5) * S;
   lum = new Float32Array(N); rgb = new Float32Array(N * 3); rowShift = new Float32Array(ROWS);
   fg = new Uint8Array(N); ovr = new Int16Array(N).fill(-1);
-  buildSky(); buildStars(); buildTwinkles();
+  buildAgua();
   W = COLS * CW; H = ROWS * CH;
   view.width = W; view.height = H; ascii.width = W; ascii.height = H;
   img = actx.createImageData(W, H); px32 = new Uint32Array(img.data.buffer);
   [[glowA, 2], [glowB, 4], [glowC, 8]].forEach(([g, s]) => { g.width = Math.ceil(W / s); g.height = Math.ceil(H / s); });
-  meteoro.ativo = false;
+  cardume.ativo = false;
 }
 
 function draw(frame) {
@@ -793,14 +746,14 @@ function draw(frame) {
     let level = 0;
     while (level < LEVELS.length && L >= LEVELS[level]) level++;
     if (level === 0) continue;
-    // Estrelas usam caractere fixo; no céu, o caractere segue a pincelada; no buquê, varia com a luminosidade.
+    // Bolhas e cardumes usam caractere fixo; na água, o caractere segue as ondas; no recife, varia com a luminosidade.
     const o = ovr[i];
-    const ch = o >= 0 ? o : fg[i] ? START[level] + hash3(r, c, fidx) % COUNT[level] : bgDir[i], m = MASKS[ch];
+    const ch = o >= 0 ? o : fg[i] ? START[level] + hash3(r, c, fidx) % COUNT[level] : agChar[i], m = MASKS[ch];
     const k = (0.45 + 0.75 * L) * 1.6, j = i * 3;
     const pr = Math.min(255, 255 * rgb[j] * k) | 0, pg = Math.min(255, 255 * rgb[j + 1] * k) | 0, pb = Math.min(255, 255 * rgb[j + 2] * k) | 0;
     const rgb32 = (pb << 16) | (pg << 8) | pr;
     let o0 = (r * CH) * W + c * CW, mi = 0;
-    for (let y = 0; y < CH; y++, o0 += W) {               // Escreve um pixel por vez, usando quatro bytes
+    for (let y = 0; y < CH; y++, o0 += W) {
       for (let x = 0; x < CW; x++, mi++) {
         const v = m[mi];
         if (v) px32[o0 + x] = (v << 24) | rgb32;           // A opacidade segue o desenho do caractere
@@ -808,7 +761,7 @@ function draw(frame) {
     }
   }
   actx.putImageData(img, 0, 0);
-  ctx.fillStyle = "#040a26"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#021320"; ctx.fillRect(0, 0, W, H);
   ctx.drawImage(ascii, 0, 0);
   if (settings.glow > 0) {                                                 // Brilho difuso, usando imagens reduzidas e ampliadas
     let src = ascii;
@@ -820,193 +773,149 @@ function draw(frame) {
     ctx.save();
     ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = Math.min(1, settings.glow);
     ctx.imageSmoothingEnabled = true; ctx.drawImage(glowC, 0, 0, W, H);
-    if (settings.glow > 1) { ctx.globalAlpha = settings.glow - 1; ctx.drawImage(glowC, 0, 0, W, H); }
     ctx.restore();
   }
 }
 
-// SURPRESA: A NOITE ESTRELADA EM ASCII (conteúdo original de "ascii-art(1).txt", 100 × 41, sem alterações)
+// SURPRESA: O MAR EM ASCII
+// Gerado a partir de "oceano.png": 120 × 49 caracteres escolhidos pela claridade de cada trecho da foto,
+// com a cor média de cada trecho. O céu ocupa as 10 primeiras linhas; o resto é mar.
 const ARTE = [
-  "@@@#*:::==+=@@@@@@@*-*@@@@@@@*@+##*%+@*@@%@@:%+*%*+@#@%@%%@@@#%@#*%@@@#@@#%@*@@@@#@%@@@@##%#*%%@@@@@",
-  "@@#++-.:===%@@@@@@@%*%#@@@@@@*-*:=++@.-%+=@#%@@=#%*%#@@%##%#*@=**@%%%##@#%@@@+@%@%##@%@**#%#+++*%%:@",
-  "@@@*#*#*==*+@@@@@@@@@%#%@@@@@=*#-*-*#-=:.:-+@%@@@%#@@@@@++-.::+=#%%@@@%@*%@@@@@#@@*###-:+:.:-+:-*+-%",
-  "@%@.%-@%#@%@@%%@@@@=@%@%*#@*%##+@@@@@@%@+@@@%%@@%#@@+@%*==-.+.::+#*@#@@%@@@@*@@#@@-*+*.#.:.....-+::.",
-  "@@%%@@@@@@@##@@@@@@@@@@@@@%%@@%-@*%@@@%@@@%@@@@%@@@@@@%%+#-+=##**-@@@@@@@%%%@%##+-=+=.........=::.:@",
-  "%@%%@%%%@@@@%%%@@+%+:*%=@%@@@%@%@@@#@#*#%@%@@#@@-%@**%@@@@#+==#@#%@@@%@@@@@%%%%*##+::-..=:.-.-..-.=.",
-  "%@%@#@@@@%%@@@@@%-:-..+*#@@@@@@%%@%##*###@*--.#*%@#@**#@@%@*%%%#%@#%@%%@@@@%%%#%%+=:....:.:.....::.#",
-  "%%*@@@@%@#@@@%#@#%-+.-++@@%%%%%%*%#%%*+..::::*:.::#%--%+-##%@@@@%%+%%-+*.#%##%*=+=-:...:........::-:",
-  "=%@@@%%@%%@@@@@@@@%-*-*@%@#%#***#%##+**+*=:-*=**%*@.#*%%##=*@%@@%*#=.:***#++*%#%:+.-......:......:=.",
-  "#+#*@@@@@@@@@@@@@#@@%@@%#*%-%-**%**#==:*%+#*#*+#+.%+.%**#%:%+-+%@%#+:..:..#+#*@*+##.+=.....::.::-.::",
-  "**%+=##%@%@%@@%@@%%+--#*##==:-+*%+-=%%@@@@*%%%@#*#%%+=#%@@%=%%##%%@:==#:.++###%%%#==%=+-.......-:.=:",
-  "%+++*+-#+**=#=#*@@#:=+%*-:*##+%-:=@@@@%=*@%#%@#-*:@*%+%:%:-#@*=%+%%#****#*@=%=*%%##*%%+=:.::..%.:-%#",
-  "#%%=#+#%#*@%#+#@@@%+##+*=##%+#=#=@@@#*-*%#+#@#-##%#%=@+-*%.%#@@%%%*%@%@%%#-###%@%#@-#%*::%#:.+%-+%%%",
-  "#*+@@##@+==@*=@@@@@+#%#*:=:.:.:++@@+%%%*%=+*.*:%+==-+%+-:=%-+%+@%%%%##%@%#@#%%@@%=#%%%%###%@%%#@%@##",
-  ":=**+*+#%+#@+*@@@@@+=*#%@@+@=+:%%%##:=*-+#@*#@+*@=#%=:.-%=:::@@@#*##%%##%%%%@#%*%+%%%+#%@+@%@%@@%*@#",
-  "+#=#++-=+**@*%@@@@%*%@@@@@@@%+@#%%*@.-#**#@#@+%*+%.-@%%-=+#%@*%#@%@*=*#@%%##%@@*%%#*%%%#%@%@%%%#*@@%",
-  "++=%+*-+#**@@*@@@@@@#@*@@%@#*#@@@#%#+=+*-#+**@###%+**%%=+=*%=+%@+:==::+.=@%=%+#%%*=%%%%%%%%%###%##:.",
-  "#%%##%%%#@%@@@@@@@@%#@@@%@#@%@%#%##+=####=#+#*@+@#@=%#%%@@%*#*#%##-*##:*%=*#%##%@+#+#*%#*%=+=.-=::.-",
-  "=:%%%@#%+=*@@@@@@#@@@#@%*#%%#=@%*###%=*-==%+#==*%#%+%%%#@@##=%@****%*#@++=*%##*%***%%-#::=+=-.:.-.-:",
-  ".%%@*%:-:.*:%@@@@@@@*#=**#%%.*.#*.=:=-%#*+#-+*+*#%*+-:=#%+#%%#@+%=.-+#%*@=#-%%*%#*%%:-.:..=-..-....:",
-  "%%@%+*%-=::+@@@@@@@@@@%%%%+:+*-....-::*%#@%%*#+##%#+@%%+%#**@@#*=:%*%##:=%**%%%%%:%.#=--=.:.-..=-%=:",
-  "@%##*@@%=-*@@@@@%@@@@#%*#%+..:.......:.@#@###:%:*@#@@%@@#@##%%#+*+=+%*=##%=*@@@#.%.:--*.+==-#:*%.#%%",
-  "%@#%#@@%%@*#@@@@@@@@@%%@##*=:....:....=@%#%###@@+**%@*%*@@@@=@##=*#=#=-:-%@@@%-=.-..=-.*:%@-+@@@@@@@",
-  "**%#%@@@%%@@@@@@@@@@@+##%@+:..::#.:...-*##%-=%%@%%#*%@%@%%:*%*%-*:*.:%=+%+--+*--:--%=##*=+-@@@@@@@@@",
-  "=.:+#%@%#%*@@@@%%@@@@@#@%@*%:=*=..-..=.##*+#%#=#:-=+%%**+=:.%:*#=+:---:--@--=-:*-+#@-#=*=@%@@%@@@@@@",
-  "#:@::*=+#@@@@@@@@@@@@%#@#=@@#:-...=*%=:*.-=%=-*=*#.=.=:*-:::#-=--#%%::+:%*=%+%=%:++:%@@@@@@@@@@@@@@@",
-  "#%--+*.+*#*@@@@@@%@@@%-%%@@##+::+:+:.=+==-*==+%#-#=..:-.@%#%@@%:*@@@@=+-*@%@@@@%@@@@@@@@@%#@##@%%*%@",
-  ":@*%=**++#*@@@@@@@@@@%@@@@@@**#+:=-=++@%*%##=#++-%%=%*+%.%@@@@@@@@+@@@@@@%%@@@@@@@@@@@%%%%#%%%%%*%*#",
-  "@*%*%@#%*@#@@@@@@@@@@@@@@@@#@@-*=*+%#%%*#%#-+@*=%@%-+#*@%@%@@%@@%%@@@@@@+@@@#@@@@%%@@#%%%%#%%%+%%@%#",
-  "@@%++@=*#%=+@@@@@@+@+@@@@%@@@#@%@@@%@*#@@@@@@@:%@%%@@@#@%#@%@@@*@@@@@@@=@%*%%%%*%%@%@%@@#**%++#@#@%%",
-  "+@@%#:#+*+*@*@@@@@@@@@@@@@@@@@@@@@#@@@@@%@@@@@@@@+@@@@#%@#%%@@@@-@@%@@%@@+@%@%%@@@+@@@@@-#@%%%#:#@@@",
-  "@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@%@@@@@@@@#@@@%%%@@@@@%@@@@@@@%@%@@+@@@@@@@@@@@=@@@@%@@#@@@%@@##*%%#*=",
-  "@@@@@@@@%@@@@@@@@@@@@@@@@@%#@@@@@@@*@@@@@@@@%@@:+%@#@#@**#*+@%#%#@@@%%%@+@%=@*%@@%%#%@@@@@@#%%@+*##@",
-  "@@@@@@@@@@@@@@@@@@@@@@@@@@@%@@@@@@#@@%@@@*@@%@%@%@@@@@@@@%-%@%=@@@@%@*@@@@@@@@@@%=%@@#@@=@##@@=@@%#@",
-  "@@@@@@@@@@@@%%*@@%@@@@@@@@@@@@@@@@@@#@#%@%#@@%@*@@@@*@%%@@@%@@@#@@#%%%%#%@@%@@@@@@@@@%@#%@%%+%@@@#%@",
-  "@%@@@@%%%@@%@@@@@@@@@@@@@@@@@#@@@@%#%@@@@@#%@@@@*##@#+*+@@@@*%@@@@+%@@%@@@@@@%@@@@@@@@*@@@@@@*@@#%%@",
-  "%%@@@@@@@@@@@@@@@@%@@@@@@@=@@@@@*@@@@@@@@@@@@@-==@=@-@%@@@*@@@@@@@%%#@%%%@@@@@@@@@@@@@@@%@@@@@@@@@@@",
-  "@@@@@%%@@@@@@@@@@@@@@@*@+@@@%@@@%@#@@@@@@@@@@@@@@@@%@@+@@@@@@%@@@@@@@@@@@@@@*:%#@@@@@@@@@@+=*%#*+*-:",
-  "%@@@+#@#@@@@@@@@@@@%@@@@@@@@@@@%+@@@@@@@%@@*@@@@@%*****@@@@@@@@@@@@@@@@@@%@@%@@%#=+++#=@*+*@@@@@@@@#",
-  "@@%*@*@%%@@@@@@@@@-@%@@@@@@@@@@@@@@@@@%@@@@@@@@%@@@@@@@@@#@:.@%%@%%@%%@@@@@@@@@@@@@@@@@@@@-@@@@@@@@@",
-  "%:*:%#*#%@@-@=@*@%:-@@@#@@@@@@@@@@@@@@@@@@@@@@@%@@@@@@@@.+@@@@#%@*@@#@@%#@@@%@@@@@%@#%+*#%@@@@@@@@@@",
+  "........................................................................................................................",
+  "........................................................................................................................",
+  "....................:..............................::.:.....:....:..:....:..............................................",
+  "................:.:::::..:.:....:..:::::::::.::::..::::..:::::.::::.::.:..:::.::.:.::.::....:..:........................",
+  "..:..:..:::...:::::::::::::::.:::::::::::::::::::::::::::::::::::::::::::::::::::::.:::..::.::..:.:::::.:.:::.:.........",
+  ":::::::..::::::::::::::::::::::::::-::::::::--:::::-:-::---::-:--::---::--::::--:--::::::::::::::::::::::::::::::.:::...",
+  ":::::::::::::---::::-:::-::::-----------:---------------------------------::------:::---::::-:-::-:-:::::::::::::::..::.",
+  "::::::::-:::----------------------------~~---~--~~~~~--~~~---~--~~-~~-~~~----------------------:-----------:-:::::::::::",
+  ":::--::---------------~-~----~~~~-~-~-~~~~~~~~~~~~~~~=~~~=~~~~~=~~~~~~~~~~~~~~~~~-~~~~~---~~----------------:-::::::-:::",
+  "-:-----:------~------~-~~~--~~~~~~~~~~~~=~======~=======================~==~~~~~~~~~~~~~~~~~~-~--~~-~---------------:::-",
+  "...:...........:...............:..:.:.::..::::::::::::::::::::::::-:::::::.:::::::.:.:::.:...:.:::..............:::.....",
+  "..............................:..:.:....-:.-.......:.:.:::.::.::.---.....::-~.::.:....-:.:....:.:..-:...................",
+  "...:..................:......:-..:-.:.....:...::.:-..-::.:-:~-:--.:-.....:.::.:....:::.:...::.:.:....-....-.............",
+  ".:...........:.....::..::..-:.-...:.:..:.::.....:...:..-.::-:.:.-...-..-:.:::-:--:--=~-~-~-:.~~=..:::.:.-:~:..:-.::.:..:",
+  "...........................:.......:-.:..:..:.:-~:.-~.~~~-~-~:=:--:::::~::::-.--~~--:-:-::.:.::..:....:-:.::....:..:..:.",
+  "....:....:....:::....:::::.::.::~-::::-:=:--:-:--:-:::.::::.-:.~-~--~:-~....:-~~.:~:~---.~====-:...:-.:--:..::.::.......",
+  ".::-:::::::::::::-::::~::.:.::.-:-:.:-::-::---:----::::-~~~--~-::-~--::..-::::-:~--~~:===~-..~~-=~-:-::::-.:.:---::.....",
+  ":..::-:---:--:::.::--:--:~::~---:---~--:-~-~:---:-:-:-:-----~-=-~:~---~-~::::-:-~-~~-:::::-:::-::::--~:::....:..~:..::.:",
+  "-~--~--:--::--:--~~--~::::=::~-~~~-~-~-=-----:::--====~-~~=~-:::~=~~---~-~-::~--~=~~~~=+===~:===+=~-:-::~:=~=~-:.:::.:..",
+  "-~::::.:::-:.:::-~=~-=~--~----~---:---~~~~-:~~~:~:--~-++~-~=~--~~:-~~~~--~-=~~~~*+==-+*+*------=~=+:~~-~--~==~=-~~=-:::.",
+  "::::::.::.::---~-=~:-::~~~~==~=~--~~~~~~~=~-~=~~---~~--===+===~=~~~=~~~-----=-~=~=-~~=-+=~-~--~:~=---~::.::--:~:..--:.::",
+  "---~~~::::----~-~=~====+=~=~++====~~~=~==~~==-==~--~==~++~=====~~~==~-=~=~==~=~~-~-~~===+~~-=+~--:~:-~:--::::::-~=~-:::.",
+  ":::-~~~----~=~-~~=~+--~=+++===+~==++~~=+=+=+++**#*#*=++===*===~~~~~=+=~~~~=~=====~~~=+~=~~~~~~~~~~~~~-~--~~~---~~~~---::",
+  "::--~~====---~-~===++-=~~-~=~~~+*+==+++==+~~===~~-~~~~~~=++++=--===++++++=~~~==*++#%*++===-~==--~==+**+=~+=~--------~=~=",
+  ":::::--~~+=+===+-~*+=+==~=+~-===~=+*****+**++**#+==+==++~=+++**+++++=++==~=====+=+***#++++++*++=-=~~=~~~=~++==-~--~-==+=",
+  "~~~:-~=*+~--:~~-:~~==+=+++*#+++~+#++=+=+**==+++*+++**++++++**+*****++#*###*+=~++**%@@@@*+++=+*+*++=+~~++~=~--:::-:::---~",
+  "-~~=+===-~==+=+*=***+++++++**#*++*++++*+=~+=+=***#****+*+==+*+++=+++~=~=+*+*#****+**#*++==++*+#+=----~=~+**~==~--:::~=-~",
+  "=~=-==~+*+++#*#*+==+=*#***=+**#=~==**#****##***+****+*++*+~+++*#***#+==*=+*#*%##*#*+=++**##**#**++*==+=*=--:--==-~~----:",
+  "++++~:=+==~~-~-=+#*+++=+~====+++*###**++***#+===+~=+***+=+~+*=~=*%%*%#%###%@@%%%**#+*%@%#*##*++++++=+#%#+==+=++~~~=+~+=~",
+  ":--=++=~-::--::=*++#%%######%#*#****++++++~====*=+=~+=*%%#+*##%%*#%%%#*++*+*###%%#*##%##*+**+*#**#****+~=+====**#*====++",
+  "::-==+--:-~~==~===**%%%######++++*%###%##*+*=~-~~+~=+#%%+~-==+*+#+*#**+==~-==+++*==++######***###*=====++=~~--+*=+=+=++=",
+  "++=+==+##+=+==+****#%#*+*%#~++=+*+#***+*+*###*+~-+++*@%++*****#%*+=+++*****==++==+**#**###***#*+~++*#**+++=~-=+=======-:",
+  "-+**=~=~~+~-===+*=~~~===#*#***##***#+++=++*####%#**+*#*#*+#####%@@####%%%#%@%%#*+#%#=**=++=+~+*###+***++++=**++=~==**+=-",
+  "-=**=+***=-~=+**#+==+**#+*###**~=*+##*+++****###%@@%%%#@@%#%***%#*%%####%@@@%%#*++++*+==++==+##*=++=+=~~*#++#+~-:::-~~--",
+  "::-~~~=+++*++=#@%##+*#**#++#*+#%****+##**%#**++**#***##@@%%#++#@#**#*=#%@@@@%##**++++~~=+###*+*%@%#+~~-~~---~~::::~--=+=",
+  "-=+*++-:-~~+=***+=~*#++*+++#@%+=#%%*#%#%%##*=+*#*%%#%#@%%%%%#++*%%#%#+~~~=*%####+#%%*++*++=++~++#*#%#*+~~=****+~~-----++",
+  "~++++-----~:~----:~**#+*@**##@%++**#*#%%#**#%%%=+*==+#@%%#%@@###@@%#****###%#%%#++=++=+#%###*###+=+*%#+===~~==+##=~~---+",
+  "~+###*+~-:-~-~-~===~~+=~+=*##%@%*~===+#%*++=~*%#*###++**##%%%%@%#@#+~+*#%*####%##%@@%#*#%#+===*#**%@@#*-=====+*#*++++*++",
+  "***##**++=#*##****=--~~~*=*%*+=~+#%#%%*+#=+#+~=###%%%@@%@#+=*#**%%#*++#%@%++*+~*#%@@%#%#*+=+*+=++#*===~=+*++=++**#%*###*",
+  "*%#==~~~-=*%*%%%%+-~==~+*####*#@%#%#+++=++*##*+~*%##+%@@%%*#==++=+#%%#*###**+++=~*#@*==++#+*+*##+++~::--:-~=+==##*++++=+",
+  "++=--==~~--+#*#+++=+*%%@@@@@*=##@@%*=*+**++**#+**%*##+++#%#%@%##*#*##@####*+****#=**##+=+~~*###%#=-~-----:~+*+~-+#*+*==~",
+  "+-==~----~*##*======++*%@@#*+==++##*##*##+~~~-=*%#+%@#+++*%%@@@#+~+~+#@%#@*--+#%#**#%%%*+==*+=+#@%%*=~~--~**+=~+###+-=+=",
+  "~~:=+==+##*+**=:~-==%@%+=+#*#***~~~++*+*%#*#**+**#%#%@%**=+*%%*=**+*++*%%#*=~#%@%+=#@@#+~~~~-~=+%##%@*=+*+~~**++===%#***",
+  "==:::~~*%#++=+***#%##++**=#==~*@@#*==~~~*%###%%#@@#~=+#@#*+~===~*%%#*#%%%@@@%*+++*+~*%%#*#*+*~--==**#%%%***++*+-~~~=++++",
+  "~=+**=~~=+#@#=+##*+~-~--~~=~~+##+~-~=~-++@@@@#**++---~=~~+=-~+==*#@@@@@@@#%##%%##+**##*#@%#*%#*~-~~+=*#+=-::-~=++~-~==~+",
+  "~~~~-=+==~=~-~=-==*++~~+*=+::~%@@%*#*#%@%%%*#+==-~~::-=++*=+*%@@@@@%@@@@@#%%#+*===*%%++--+##=**%%*#+*##***+-:-~=+++~~=##",
+  "-:..--+*~~:.::-~-:~===%@%*~~~==#@@@@@@@%#++=*~*++=+~---+@%+**#%%##%%%%%#@%**%@#+*=~=+++*##*+=++*%@%%%+*+%@*%%**#**+*=~+*",
+  "-:~-~*#==--::-~~~~=+*##%***#*=~~+*%@%%*=-++~=*++%*+=*+=+**#@##*#####**+++##*+*+=++=+===+@@@*==++#%**+++++#*~+*+**+=*+*%=",
+  "++=~~~-*#+=~-::~~~#@%*+=~::-~+*##+**#%%*+=*==+=*%%%*+=#**#%#*=~-====*=~~+##***+=+~=~=+~+#%#*+=*+=~---~~=--=+~~-.::=*#+=-",
 ];
-const A_ROWS = ARTE.length, A_COLS = ARTE[0].length;
-const A_ASPECT = 4 / 3;                                   // Proporção da pintura de referência (largura / altura)
+const ARTE_COR = [
+  "003e9000409300419400419300419400419500419400409300409300409300429600439800439a00449a00449b00449b00459b00459c00459c00469d00469d00459c00459c00459c00459c00459b00449a00449a00449a00449a00449b00459b00459b00459b00459b00449b00459b00459c00459c00459d00469e01479e00469e00469e00469e00469e00469f00469f00459e00459e00459e00459d00459c00459c00459d00469e0047a00048a00048a000479f0047a00047a00047a000469e00469f0047a000479f00479f0048a000479f00469e00469e00479e00469e00459d00459c00459d00469d00469e00469d00459d00459c00459c00459c00459d00459d00459d00449b00439900439900429900429900439a00449b00449a00449900449a00449a00449b00459b00449b00449a004399004399004298004398004297004196004195004195004094004093003f92003f91003f90003e8f003e8e003d8d003d8d003d8d",
+  "00429700439800459b00459b00469c00469d00469c00469c00459c00479e00489f0048a10049a20049a20049a30049a30049a30049a4004aa3004aa4004aa4004ba5004ba6004aa5004aa5004aa40049a3004aa3004aa4004aa4004ba4004ba5004ba5004aa4004aa4004aa4004ba6004ca7004ca7004ca7004ba7004ca7004ca8004ca7004ca7004ca7004ca7004ba7004ca9004da9004ca8004ca7004ca7004ca7004ca7004ca8004ca8004ca9004ca9004ca9004da9004daa004da9004ca8004ca8004ca8004ca8004ca7004ca7004ca7004ca7004ca8004ca8004ca7004ba6004ba6004ba6004ba6004ba6004ba5004aa5004aa5004aa5004aa5004aa5004aa40049a4004aa40049a30049a30048a30048a20048a30049a30048a20048a20049a20049a30049a3004aa30049a30049a20048a20048a20048a20048a20048a000479f00469e00469d00459d00449b00449b00449a004399004297004296004195004195004193",
+  "0048a20049a3004aa4004ba5004ba5004ba5004ba5004ca5004ca6004da8004ea9004eaa004fab004fab004fab004fac004fac004fac0050ad0050ad0051ad0051ae0051ae0051af0051af0051ae0050ad0050ae0051af0051af0050af0050ae0051af0052af0052b00052b00052b00052b00052b00052b00051b00052b00052b10052b10053b20053b20053b20053b20053b20054b30054b30053b30053b20053b20053b20053b20053b30052b20053b20053b30053b30054b40054b40054b30054b30053b30053b20053b10053b10052b10051b00052b10052b10052b10052b10052b10052b10052b00051b00051b00051af0050ae0050af0050af0050ad004fad0050ad0050ad004fad004fac004fad004eac004eac004ead004eac004fab004fac004fab004eab004eaa004daa004daa004daa004eaa004eab004daa004ca8004ca7004ca7004ba6004aa5004aa40048a40049a30048a10047a000479f00469d00469d00459b",
+  "0050ac0050ad0051ae0051ae0051ae0051ae0051ad0051ad0152ae0052b00053b10053b20054b30055b30055b40056b40056b60056b60057b70058b80058b80058b80058b80058b80058b80058b80058b80058b80058b90059b90058b90058b90058b80058b90059ba005aba005bbb005bbb005bbc005bbb005bbc005abb005abb005bbc005cbd005cbd015cbd005cbd005cbd005bbc005bbc005cbc005cbd005cbd005cbe005cbe005cbe005cbe005cbd005cbd005cbe005cbe005cbe005cbe005cbe005cbe005cbd005bbc005bbc005bbc005bbb005abc005abc005abb005bbb005abb0059bb0059ba0059ba0059ba0058b90058b90057b90057b90057b80057b70057b70057b70057b70057b70057b70056b60055b50055b50055b50055b50055b40054b30054b30054b30054b30054b30053b20053b20053b20053b10052b00051af0051af0050ad004fac004eab004eab004eab004eaa004da8004ca7004ca6004ba5004aa3",
+  "0054b30055b40056b50056b50057b60057b60057b50057b60058b70059b9015aba005abb005bbc005cbd005cbd005cbe005dbf005ec0005ec0005fc1005ec0005fc1005fc0005fc0005fc1005ec0005fc0005fc1005fc20060c2005fc1005ec1005fc20060c30061c30061c30061c30062c40062c40062c50062c50062c50063c50063c50063c50063c50062c50063c50063c60064c60064c60064c60064c70064c70064c70064c70064c70064c70064c70064c70064c70064c70064c70065c80065c80064c70064c60064c60063c60063c60064c60064c60063c50062c50061c40061c30060c20061c30061c40061c30060c3005fc2005ec1005ec1005ec0005ec0005ebf005dbf005cbf005dbf005dbf005dbf005cbe005cbd005cbd005cbd005bbc005bbc005bbc005bbc005bbd005bbc005abb005abb005aba0059b90058b80057b70056b60056b60056b50055b40054b30053b10052b00052af0051ae0050ad0050ac0050ac",
+  "005bbb005cbc005cbc005dbc005dbc005ebd005ebd005ebe005fc00060c00060c10061c20062c30062c40063c40063c50064c70065c70065c80066c80066c90067ca0067c90066c80066c80066c80066c80066c90066c90066c90066c90067ca0067c90067ca0068ca0068ca0068cb0069cc0069cc0069cc0069cc0069cc0069cc006bcd006cce006bce006bcd006bce006bce006ccf006bce006bce006bce006cce006ccf006ccf006dd0006ed1006dd1006dd0006dd0006dcf006ccf006dd0006dd0006ccf006bce006bce006cce006cce006cce006cce006bcd006acd0069cc0069cc0069cb0068cb0068cb0068cb0068cb0068ca0068ca0067c90066c90066c90065c80064c60064c70064c70064c60064c60063c50063c60063c60062c40061c30062c40062c40062c40062c40062c40062c30061c20060c2005fc1005fc0005ebf005cbe005cbd005cbc005bbb005aba0059b90059b80059b70058b60057b50056b40055b3",
+  "0060c20062c30062c20062c20063c30063c30064c40064c40166c60066c60066c70067c80068ca0069cb006acb006bcc006bcc006bcd006ccd006dce006cce006dcf006dcf006dd0006dcf006dcf006dcf006dd0006dcf006ed0006ed0006ed1006ed1006fd1006fd20070d20071d30071d30071d40072d40072d40072d40073d40074d50074d60074d50074d50174d60074d60075d70075d70075d60076d70075d70076d70076d80076d80077d90077d90177d90076d90077d80076d70076d70176d70076d70075d70075d60075d60074d60074d60074d60073d50072d50071d30071d30071d30071d30071d30070d20070d1006fd1006ed0006ed0006ed0006dcf006cce006bce006bce006bce006bce006bcd006ccd006cce006acc0069cc0069cb0069cb0069cb0069cb0069ca0068ca0068c90067c90066c80066c70065c60065c60064c60063c40062c20060c0005fc0005fbf005fbe005dbd005dbc005cba005ab9005ab8",
+  "0066c70067c70067c70067c80169c8006ac9016aca006bcb006ccb016dcc006dcd006ece006fcf0070d00071d10071d10072d20073d30074d30075d50076d50076d50075d50076d60077d70077d70077d70077d70077d70177d70077d70078d80079d8007ad9017ad9017ad9007ad9007bda007bdb007cdb017ddb017ddb007ddb007ddc007fdd0080dd007fdc007edd007edd007fde0080de0081df0081df0082e00081e00182e00082e00082e00082e00081e00082e00081e00080de0080df0181df0082e00081df0181de0080de0080de0180de0180de007edd007edd007ddc007ddc007cdb007cdb007bda007ad90079d90079d80078d80077d70076d60076d70076d60075d60074d50073d40073d40073d40173d40074d40072d30072d30072d30072d20072d20072d20071d10070d1006fcf006ece006ece006dce006ccc006bcb006aca0069c90068c70067c60065c60065c50065c50064c30063c20061c10061bf0060be",
+  "006ccb006ccb006dcc006ecc006ecd006fcd0070ce0070ce0071cf0174d10075d20076d30177d40077d40079d60179d6007ad7007bd7007cd8007dd9007fdb0080db007fdb007fdb007fdb0080db007fdc0180dc0180dd0181de0181dd0082dd0082dd0183de0084de0085de0086df0186e00086e00187e10189e2018ae3018ae3018be4018ce4028ce5028ce5038ce4038ce4048de5058de5058de5058de6058de6048de6048de6058ee6058ee7068fe7068ee7058de6048ee7048ee6058de6058de6048de6048de6038de6028ce5028de6028de6018ce6018be5018be5008ae30089e20087e20087e10086e00186e00085e00084df0083de0082de0082dd0081dd0080dd007edb007ddb007dda007dda007cda007cd9007dd9007cd9007bd8007bd7007bd7007ad70079d70079d60078d50076d40074d30174d20074d10073d10073d00071cf006fcd006ecd006dcb006bca006ac9006ac8006ac80068c60068c60067c50066c4",
+  "0072cf0072ce0072ce0073ce0073cf0073cf0074cf0075d00078d2007ad4007bd5007cd6007dd6007ed7007fd80080d80082d90083da0083db0084db0085dc0086dd0087dd0086dc0086dd0087dd0087de0088df0088df008ae0008ce1008ce1008be1008be1018ce2028de3038ee4048ee4048ee5078fe50b91e60e92e71192e71393e71593e81794e81994e81b95e81f96e82096e72196e72196e72196e82196e82096e82196e92196e82296e82397e92397e92397e82096e81f96e81f95e81f95e71e94e81e95e81d95e81d95e81c95e81994e81793e81492e71292e70f92e70c90e60a8fe6078fe50590e6058fe5038ee5028fe5018ce3008ae2008be1018be2018be20089e10088e00087df0087df0087df0086de0084dd0083dc0083db0082db0082da0081d9007fd90080d9007fd8007ed7007dd6007cd5007cd4007ad30078d20077d10075d00073cf0071ce0070cc006ecb006eca006ec9006cc9006cc8006bc8006ac7",
+  "003b7d013c7d013d7e033f80013b7b023b7d003c7e003c7e013c7c003c7d003d80003e81003e82013f8101428503448700408301428501438800418401438701438601448901428401438700438a01448b01448801448801438800458b00448a00428701458b03468c02468d02468d04488e03489003468d05488f05489107488e05489005478f04458d054892054a94084b93074991084a90074a920a4c93074a91094b92074a92064993074992074a93074b92074a92074b95064b95064992074c95094c93094b91064891064890064991074a92054a94074b93074a92064a9305489006499007498f04468b06488e05499303489101478f02489002478e05488d074a8f04478c03468c02468c01458c02478c02458902448900438905478a054689044283024082014084014184024388024386024184014082024081013e80023f80013e7f013d7f013d7e023d7d064081033d7d033b7b013c7d013c7e01397a003776003674",
+  "01367a00357800337400327100316f00317001347302357401337101347302377801367802377900357701367501377901387b003a7f00377a02397d023e86003b82013d85013c81013a7f023e85013d85003c84003e8901408c03428c03408900418f02418b01418a044188023f87003e88013c8301428d04438b033f86013f8708468b033f84013f8801418b01428f02428e01418c00429102428e01418d02418b04408502449004459105448f02449003448f03449001429002459408489101438f094283094384043f85013b80013e85034086023d84023d84034087023f87124d8f104c9003418a02439002418c00408a023f89003c86003c83013d84013d8508448b04428c023f8905438c02418b013c84033d84063e80083d7e00387c064085013b8100397f043d82033c8302387c02377803397a01397c023a7d01357702387a01367a02367601367901367901377901357800357701377b003577013373013373013273",
+  "01377b00387f013c84044088013d85023f87013d8501408c003e8a013e89013e86013c82023c7f013c84013d8404428a003f87003f87003f8901428e013c83003c84023d83013f85003c80013d83013a7b013e86003b81033f85074387013f8701408905468e05458e02408702448f02459101469700408a003d84003e87033f86013d8401408a00418e02469402438f00449503449008489401469801479607489207468f03479800469703449002459104489506458d0a468d05408409499107499301428e03438b09448a00418e00439101439101418e00459602459300428e04469102469601438f02428c01449102479701479801489803479404489703418c00418d03469302428f01418b03438d05428c054089003e8803428c023f87023f88003e89013e86033e84023d82084389003d86013e89003a81013f880d4589023a80003b8400367b00367802397d033a7e01387b033a7d013b80023b7f013b8301398000367d",
+  "00449303428b013d86013e8701418b01479700469800499e00479800469701489901449201449203479500449301449200459601499b014b9c034994014b9b004b9d004a9c024b9c024ea201499c004898064d9f014ea5014ca1044fa3004ea4004ea3014b9e0350a3004da20051a90050a70050a7004ca0004c9e0252a50151a60052aa0053ac0050a7014fa5014ca0024ea2004da2004da400499d014ea4014da1014fa3024da0004da2024da0014ea20351a70153ad0152aa0153aa0050a60754a70151a80051a8014ea2044b9a004594014896044b9b034996004999024b9c024998034896074c98054d9a044994094990044794074a96024c9c145da90954a10854a10a4e94064c940c5099074d9a064b98004a9d0b539e1a60a71e62a7004b9c02499a05489503459002428d003e8706438903438d03469305468f08478f043f86013e85003e8906438b04438d02408b04428d04418e023f8a01418a013f89013c86043f88",
+  "00438f01448c00459201418901428c00438f00439000418f01428c01408500438e00418b00408900438d00428a00438c00499b00469500459500469501489701489801489800469500469400479800438f014591014b9c014fa5004ca0004795004796014998014a9b044c9c0757ac0055af0254ac0051a9004da30251a6004fa3004ea30451a4004fa40150a40955a60852a1014795014b9b0451a20a5aae014ea40b58ab105fb00955a50552a40e5ba90453a60959af0252a61567b7025bb30455aa0454a90153ab0254ac0252a70254a90155ab0353a8014fa10054ac0153ac0255ad0553a70151a50454a80355ab095eb5065ab20558af0355ab0254ab0353a7014ea10451a2024c9d034da0014ca0004ea4014a9b024998054b9701459000499903438b024896014797004796014ca20251a50551a3034ea0004a9b03479502448f01449001439100408b014291014190014291024797024999003f8b023e8602408b00408e",
+  "014d9e014c9c014a99014e9e014fa1004c9e004da100499c004ea40052aa0052a9004c9f004d9e004fa20151a20150a00352a30151a50151a50154a90157af0152a60053a80158b00158b20153ab004fa50057af0158ad0157ae015ab2015eb9045ab10259b20056b10059b4015bb7015bb60457ad0153a90759ac0055ac0455a80259b20160bd0260bd015ebb0060bf0461bc015eb90163bc0263bb025bb50152a9004fa10052a50150a1014e9e014d9b004794054993044c99024b9b0a54a30353a70656a80454a70756a60454a70255ab0459af0353a70050a4004fa1004b9a014a98014896024d9a0a549d10569e004da00351a30657ad0351a40659ae0559ac085aac0757a9004fa30655a71562ad246caf2c73b43276b60250a1054993004695014590014b9c024b9b044c9c014a9b024a990a4e99044f9e014da00050a8014c9f034a9804489700418d04428a03438c00438c01469200418f014490014491014694004290",
+  "0152a60154a8015cb3015eb70055ad0157b00159b20055aa0155ab0056ab0154a80154a80056aa0056ab0158ae0159b1015ab2015ab00057ad0156a90157ac0152a5065bae0158ae0150a4014e9e014d9c014c9b004d9f024c98004792054e9a014e9f0258ae0157ad0057b0015bb3005fb90160ba005eba015fbb015bb4005ab4015eb8015fb9035db50162bd0162bf0163c10363be025eb80159b10357ad0258ae015cb40461b70662b80562b80467c00166c10267c10264be025fb90059b10060bb0169c10573c7036cc20166be015cb10158af0051a40055ac025db5005cb6005eb8005eb90062bf055eb4005fb70166c10367c10160bb055cb1075eb20258ad0d66ba1d71ba1667b20f5fae025bb20157af0052a80259b00658aa0458aa1161b10557aa035ab00159af0456a80150a50154a90153aa0252a4074f9b004b9b014ea10150a4014ea2024fa30653a4034c9d0449990147980147960150a2014d9d014c9d004ea1",
+  "004d97004c98004e9c0154a40056a6015ca9015da90161af0266b6015cab0161b2015fb00355a40055a40157a80053a30055a4014f98004d9704549f0159ab005fb40164bb0167bf0163bd0368bf0161ba005db4025eb1015eb50167c50267c2005bb40061bb0165be016ac60369c10065bd0268bd0060b50166b90268c00162b90562b6015ab10062bc016ac00168c00061b9026bc30166c20161bb0162bc0165bf0062bc0164bc0264bb0164bc0165bb0169c1046cbf026cc2046bc10267bd0268c0016ac1066bc0016cc3026ec8006ac30264b90364b90464b80060b30160b6015eb4005db5015cb1015bb1045aac0c60ae0161ba055fb20466bb0360b5015aaf0157a40256a10056a30157a40356a30253a10154a80054a90356a8014e9e0153a50354a30152a3045dae0360b4055db10159af0054a70051a2004c9b014a98004590004691014995014a96014a96034b99034d9a004791014894014d9c014d9a014a9502488e",
+  "0167bd0368ba026abb016cbc0171c20271c1026dbe0059a70161b0015bac015fb10164b90062b70262b70061b6016dc10268ba026ac0016ec4016dc3016ac1036ec00067bb0161b3005eb0015eaf0660af005baa025fae0459a30062b5026cc00270c4016bbd016dc3036bbc016dbf0174c80076c90275ca016fc30267bb0163b50164b30167b80161b20160af015da80168bb016bbd037ccf037ed00679ca0773c2026ec0016cbf016ec10475c50772c20462b10262b3015aa90058a40163b20270c20274c90277cc0172c6016dc20169bd016bc00162b50565b30468b70168b90164b50164b5056abb026bbc0463b10865b01875bc0e68b20969b60267b7066eb9076bb52380c11773b70969b01673ba0766b4005eb10868b71a75bd106cb4267bbe0d67b00563b40262b60165bb0267ba015fb20163b9035cb00156a70960ae0559a60b5fab045fad0364b4005aac0154a30253a0024f9a034f99024a91024a93014d990153a3",
+  "0262af0268b4015fab0158a5005ba60057a001559a03589b03579a01519104589501508e014a89025191004d9001559d035aa00565ab096db40366af0264ad1170b70767b2016ab9016bb80271bf0171c10274c00274c5016dbd0173c20370be0166b50161ad005aa40160a80262a9026db90373bf0276c40171be0267b60261ac0160a90264a80a6aae0270ba015fa80462ab0264b10266b60268b70276c5037cca1887cd2284c9066bb80171c40371c00772be0368b2026bb8016ab7026ab70465b00163ae0367b1056fba0770ba0472be036ab6036dbc0172c10176c70175c70376c50377c60277c80372c30678c7198cd31086d10676c50b6eba026fbc1b87c72894ca258cc52d8dc8016cb50169b40165af0266b20164af0268b5116db20b69b00569b03586be015597075ea50e61a4055395095495035fab036ab90469b71171bd116ebb096cba066ab9036abb0467b90463b6126dbc015fb30153a00153a102519a014d94",
+  "01569501579401518b01538d02558d014c84014d87014f89014b86004f8c015a9b01589b01569a0162a90164ac046cb7036db70871b80b67aa025aa00157a001579f015ea90965ac0a60a50261ac046cb60e7cc50b74bd066fba0e85ce0274c00169b50163aa026ab30262a8046baf066bb00369b1036bb4026bb40371bb0472bd0173ba0376bb0b7bbe036eb4036bad0167a60168a7016aa9036fb1066cac0170b60275ba057bc01085ca107fc10d86ca0a7bc0057ac60375bd0370b60379c2027fc9037ac7047cc80481ca067dc50374bc036aad0467a90261a5015b9a0462a1015ea0126aa80268a90369b20b73ba0572b81271b2046ab00978bb0e74b30c77b80273b5157fbf0477bd0374bc0472bc0574be0167b00266b0056ab20061ad0360aa0c6ab00166af026bb50164ae0960a4015396014c90004788014f910155980155980260a6025a9b07518a03518b01478101447c04457e014582005292004d8d015291014d90",
+  "0066af016ab4016cb70173ba0277ba036fb2015d9c015996015595015797025e9f046db10163ae036ab2016eb4016eb70370bc0475bf057ac40374c10675c1087bc80a7dc81f8fd10e80c90873bd0874bd0372bd137fc61a87ca1182cb0b84cd0a75bc107ac00573b90172bb0282cc0386ce0382c80c84c50388cf0579c10678c3097fc60781c80176bc0870b20775b4036bae006bb10172b6047cbf0a81c40a7fc30373ba0f83c6047bc20379bf0e85ca0785ca0780c60781ca0680c8057dc5077bbd047bbf087cc1087abc047abe027cc4027dc6067bc1047fc80178c3067ac10b7ac0046cb20f77b80471b70465a80166aa036aae0268ac046aad056fb10e7bbd107bbb0b7cbb1e83c00268ae0770b40267ac0b79be197fbf0372bb036fb80164af0163b10466ae015ea4035b9c045b9a015d9d0162a6006fb9015fa70160a70161a5025fa2015fa4015fa40266ab036bb30774bc0273be0166b2015ea700549e01549e004a8c",
+  "0159950159950164a30170b3037ac10274bb0376be026fb8016db50572b70274bd0d7cbf1582c40679c2006bb90272b9067bbe0585cb0382c7178dca016fb4016cb00575bb077fc41289cc1d91d01896d9128bcd0c86ca0983c80782c9037cc40e83c40c87cf0d7ec31487c70376bb0370b40479bd1d92cb0e8dcd2191ca0a8ccd1d93d12b96d11595d5249fdc24a0da45a7da3da4d930a0d61b93cd0684c70991d41590d00488cd0e8bcb0e8cce299bd50d8ccf0582c40677b80573b60374b60575b4077bbb0983c30f8bc60f8dc90881bf017abe037ab9057bb70375b80377bb037dc10785ca0a8ccd0c8dcf088acf0588cc0485c90682c5087fbf1685c10787c6047dbf0b80be0476b5057bbb0575b70273b6046fb2036bab0672b40275bb037ec40579c10479c30779bf036db10269ab0475ba0169af0161a90770b7026db3026db30268ae0166ac0175c0047bc20278c20278c10276be0170b90068af0160a3015fa5015a9d",
+  "015fa60163a70167aa015fa00675b40b82c00f83be0b7ebb0b7ab50a72ad026dad0267a40264a00768a60466a3046caa0774af1086c0047cbb138ac6097fbc0271b00575b30671ad0571b10165a6026eb10574b00378af0583c00484c31895cd1a95cd1a8fc70b85c50c82c00d8bc9148ac6158fcb0e82bf0680bf1088c4027ebe0478b5117eb80883c20677b60b71a90871ad036aa70576b30676b30679ba087cbb0378ba0675b30881c01394d01498d30a8ecb098ac4057cb70174b20177b60788c40581c00b87c11596d0189ad40989c8118dcb1894d10786c50784c4027dc0047ab70275b30b7dba087ebb178cc71797d31b93cf3ba6de5abae744b1e41992cd178dc71085bf077fba0782bc0173b2036faf0373b5067ec10070b7016bb00572b00b7cba1082bf1588c738a4da199ad70e8bcd0d8acf0384ce1089ce057ec50175bc016eb50165aa0164a70064a9016aac0163a60166ac026aaf026cb2067cc40278c30a81c9",
+  "01517f015582015887015a8b01598c0161940271a70375b50372b2127bb90e83c41b91cc0f85c20983c10982be077dba0472ad0784c13faddb229dd20d89c3087fba077bb20a7cb2047db70b7db40b84bb0570a70168a2056fa6087db40a7db20275b00c83be0c8dc81797d1209dd32a9bcf1f95cc1994ce1997d0179ed70c92ce0c8ecb148fc8269cd234a5d72ca9de1992ce158fcb0c83bf2593c9037dbc0a81ba1595d1178fc90377b40a79b21285bc1b90c6259cd11d9bd11fa3db1299d20d91cb0d8dc80a8cc70d91ce058bca0b8dc8088fcc0688c70886c30481bb0381bf0883c20982c00a81be047dbc0b7fb81188c31b97ce2599cf30a3d62aa3d539acdb169dd51794cd1c91c71593cc0d91ce1193d01f95cd1588c20d81bc0774b00169a30672ac05669d066a9e0a74a50475aa0670a5046ea60b7ebb087bba1a93ce1485c01782ba087cba0172b10375b20272b20169a9036ead0275b80478bd1786c51a8ecb1787c3",
+  "0379b70575b2046ead0165a30167a1016ba80b83be369fc90b88bc0375a6016b98016b96016a9305769d046d98016c9d016a9e036ca01079a70f85b30a82b11286b30e87bb1f94c7119ad00c95ca31a8d728a5d51390c40a83ba0a85c0047ebb0f88c42aa5d81499d20d91cd0d8fc80d8bc3087db7158cbe1ca0d1139acc1391c50784be0c8bbf108dc01395ca229bce1895c91a96cb1a99cf2ca1d32b9fd0219bcf1696ce1e9cd01799ce0890ca139cd225a5d722a3d721a3d9219fd727a7db1fa8dd1ba8de109cd60e90ca1495cc2ba2d81f9fd62ba8da2baadb38b1e23aaadb2298ca0f8fc6037eb70c82b41f97c0329dc32e9ec782c0dabcd5e6e0e6f0ced8e5a8c5db439dc4168ab7108cb80f84b30b81b01f93c0299fca1896c51898ca1092c80f90c60b89c40a87c3037bb50277b00b87c00f90c80586c20c77ae056b9e016599016fa101689a016698015e8f016695016393016391016292016a9d01699f036ea60676ae",
+  "02649305719f0775a20e81b01081af1080b11081b10a7eaf036c9d056fa10f7bae0a7cb30f7fb70680ba1489be1b92c61596cb24a7da1a9ed2189dd01594c8098bc30b93cb1b96cb0f98d0109ed70da0db1ea7dd45b4e237b5e515a2d61392c70d8fc51f96c7108fc40e94cd1495ca109dce1698c60d99cb0f97ca0889bd189bcb1093c50d8fc3118fc325a2d329a9d62faede3bafdb34abd931a9da32a9da219dd42093c71c99cf1c9dd3038bc20f97c8159ccc1e9fcd23a0cc1e96c4198fc20d91c81999ca1596cb1f92c10682b40982b7067bac0a7aa91a85b32b9bc61a98c62aa1ce37a9d543b1db3eafdb2399ca2c9ece1996c83d9ec748a5cd5eb0d23c9dc41c94c01087b61185b41885b00580b42492bc249ac02094bc3fa1c3238ab10a7ca502729c02679102668e016f9a047aa80a7fb00384b91293c8339cca2a98c50477a8087aac0c79aa046899026391026593025c88015b86015c860274a11183ae026290076997",
+  "0b7cb4057bb30877b3016ca9077ab20979b20270a91b88bb1c99ca1491c51895c6219fcf43b4e224a3d62fa8d522a3d2129fcf108bb90e86b50b87b8098ebf30a7d137afdb2da9d726a8d51c9dcd0c89c10f8ec41c9ccf46b2de3ca5d00e88ba0580b20c81b30e93c5199dcc1fa7d72aadd925aad516abd42daad027afd63bb4da46b0d626a3ce259ec724a1ca15a3cc22a9d132abd13eb1d62fa6d01193c32898c32298c41799c61a9bc61191be0581b4128bbb1795c11496be33a7cf4bb8dd2daed82faad314a4d234abd60d91c70681b4098cba1a94bc0c87ae0d8cb22a9fc35baecd32a1c779bed94aadcf4cb0d436a3cf38a4d041a6d11d93c21289bb148bbe1990bf259ec933a2cc43abd63ea4cc3ea2c844a6cf48a8d03ea3cc38a4ce1a92c4108ab92592bf088cbc0b8ebb2297bf0c85b42792b90d7aa601689401669201618c016a940176a2077bab0f78a8046ea0046ca0046da1006ea0016a9a035f8e015f8f005b8d",
+  "1c8fc3138dc3158cbf0d80b3026ea001689d0f78a91a8bb8097eab0b7ca9056c99046f9d046a970779a503709d1089b52097bf36add43aaed21d99c0118bb30c89b30989b3118cb30680ab087ea50a94bb118fb4128cb11195bb1695bc1291b91ca0c639b0d03eb5d63cb6d715a1c41d9abc1e9abc1a91b51091ba2a99be1aa7c829a8ca138ab00483ad0487b30594bd0b8cb10188b1048fbb1593b937a6c734a0bd32a7c30f91b41090b3118dae0383ae0c87b02ea9cb118caf027da40c89b020a6ca6dc6e06ec6de2dabcf66c6e34cb6d755bdde44b1d446b0d54aaed16dbcd9a4cfe3a9d1e681c2dd6ebad671b9d134a2c41a93b768afc32694b7329cc076b3d0b7d0e08cb9d24ba8cd2f9fca42a7d269bde042afd72b9ecc2f9dca2397c7178cbd1691c41389bb0f87ba2590bd45a5cd63b1d256aacf1f92c20d80b10f7dad2190bb157faa118bbc0f8cb90783b00273a2077bab0d88bc1f99ca097faf0d81b80e87bf0879b0",
+  "015f9400689d036fa41288bc2094c41e90bd1081a912739902648c01668a026888017291026b8a0161840162840c7b9a1d9fc40d98bf0e8cb23aaccf4cbfe254c5e755c5e85ac1e462bdde43abd143b6dd5ebee146b9df31b1d92ea7cb34a6ca2ba4cb23a0c622a2c926a2c8109bc3129dc31693b71697b60d91b40b8db3027ba50f86aa0b82a70882a7078eb017a4be048dab068ba80c85a40289aa0d92b20698bd39afca6fc8e044bad338adc6168fad1695b53fb4ce49b4cf5cbed745b8d933b3d636aed059c0df7bcce85ac5e435b7d822a5c81798bd1590b4219ebe1098bb28accf46b5d43db1d13cb0d469c0df54b7da5ebcdd51b5da43abd047aace86c1da72b5d254accf2d9bc3148eb72198be188fb5279dc42ea8d141b4da40afd740afda3baeda27a6d32aa6d2269dc62097be0e88b3087cac107eac1a8bb90e8bba0e8ec10889bf118bbf1d98cc1d9bd13ca9d927a0d4118dc30983b9067aac0479ab1491c91a90c6",
+  "01587e01628802668b147a9d0f7a9a1499bc036c90026385015f80016182076e91076d940c759c0883a804779e1083a6108bb30e8db126a7ca32abce58bcdb63c2e05abddd33abce39b0d73eabcf49b0d33fa4c83fadd20e95bd0f97bf0e98bf1599bf2aa4c953bdda44bad942bada3cb9de6acae550c4e647bcdc23a2c51a92b81697bb088fb1017fa201789a037a9c0384a61c8fb0027fa3098eab0a99b949bbd461c2d361c0d1299cb3047b98007f9c0d8ba60c8ca61d9db627a8c30d94b231a8c21e9cba2293b554aec838a1be36a1c11f9ab9047ea1037ea1027da0037393097b9a138caa1895b21393b7359fc035a0c10d84b0118bb8148eb91897c24aaed064bddc5fc0df42b4d935aad144b1d530aad129a6ce20a2ca2cacd435aed355b9da31a9cc0e92b8057ca209789b0b7ea10d7fa20e87ac1f8aac097ea5017ba2027ea90179a301719d1288af209cc50786b30f86b20f85b21a8dbc0a81b32790bf2496c80e88bf",
+  "0b84ae1082ac0c86b32391bd1186b40b83af1a9ac644b3da46aecf1a8fb20c76991d7fa1147fa40b7ea51186aa339fba33a7c526aace34afcf56c0de5cc1de52bad62ca6c71196b929a8c782d1eb43b4cf0280a30a88ac0f93b70b8cb01f8fb01e98ba1da1c444b0cd2eabca23abcd23a0c2139fc42ba2c21fa0be24a5c33bb3d23eb2d222adcf2ea8c61491b303789c006f930e81a50f93b30ca2be2cb0cba1d9e96ec3d51c96ae1a96ac189bb4279cb4249db6139fba0f9bb72fa7c370c8e030a7c60c8fb10786a91087a9178daf1394b41299b6179bb929a1bb3da7bf1d8dac0d7d9c0e8caa1091ae1796b40a90ae0687a7128fae19a2c42fa8cb3cafce33abc931aac767c1d963bed659b8cf32a4c027a3c234aecd3aa8c4249fba0687a8067d9c1d839f0f83a22d9fb948aec73ca9c638abc7169dbc1d97b70a90b50c88af047ba70178a80a7dad1287b90d87ba0887b6077eaa097ba80575a00b6f9a0373a0017098015b86",
+  "016a992092ba239cc8259bc21180a7066f971275990e74980586ad1790b2027595016f8d087c9b137f9f1589a82595ae2f9ab20b86a4057694037391067a980c8cac0985a5057ca048adca26aaca1fadcf1f9fc627a0c540a6c651b1cb4bb2d1369fbc3b9fbd34a8c43facc524a2bf259fbb1d99b40e90ad0793b01495ae34a1ba41adc72aa6c441b8d335b6d44dbbd628a8c61e9dbe179fc4149bbf1b9aba39a9c128acc937b6d120a5c012a1bd5abed243b4cb32afca34afca2facca61c5df7ed0e875cbe64cb7d240afcd43b4ce58bed867c3db6bbed34abbd650bad567c0dc8dcee456bad855bad94fb4d328a4c9169fc63aadd16bc0df2cabd311a2c91c99bd219dbe0f8eb21e9dc11092b30481a31393b3047d9e1b8eae44a8c551b8d23eadc93baac3269db73da5bb1b95b32598b22391ab19849f2091aa1591ac0e8ca92295b43aa4c3199bc21188af117fa804729e08759f0d82af25a4d02fa5ce1d91c00e7fb0016a9f",
+  "015e86067aa537a2c93cabd11389b31585a92496bc2da2c8179dbf078dac0282a00286a40e8caa0e94b32ba4c422a0bd48a5b72c99af0b8cab108fac108ca639a1bc27a2bf2ea7c61699c139adcf65c0df6bc2e24db1d4349ec12e9fc3077da20a84aa1a97b7239dbd2facc83bb3d126a4c30b90b41497bd0e9fc427aaca2bb0d429a9ca24a9cb37b4d441b8d84abfe37acde999d7f06dc9e363c2dd69c4dd50bedb4fbadb7fcce495d6ea70c8e360c2db5dbeda37aecd18a0c032adcb54bed725a3c134adc963c3d863c5dd40b5cf53bad239aecb4eb5d482cce682cbe396d2ea83cce76bc0dc65bcdc4bb4d52aa8c9199dc21394b91291ba2798bf32aacc1c9bbe098cb10785a80c8bb21188ac147da1086f941e83a545a9c45cbad32c9cb81289a7148aa7228ba50c83a00d87a0137f96047898077a97369cb555aabb1b87a01b8fa942a3b82e8fa904719301668a016388015e83016085026387087ca202759e015c83015c84",
+  "015a7d016182026d8c046c8b0576960674942285a02d90a91585a31f96b521a4c622a4c516a0c30b9ac355bbde74c7e775c6de4ab3ca4fb1c71993af39a2c03eaccb3ca7c843aecf43b0d02ea2c027a3c059b5ce42aac51e9bb856b4d06bc1db40acc737a7be25a3c11b9cbd259dba46b2ce42b1d030add02faece5ebfda54bad630a9c728a2c1159dba18a1bc1b9fbd3cb0ce55bbd433a8c1179ab41d9cbc4db8d443b6d47cc9e39ad2e869bbd75fbcd752b7d023a6c41ca5c337b3d17bc9e056b9d424a5c326a5c21ea9c7169ebe1699bd4ba9c475c2da90d2e389cce09fd7efa1d5ee6fc8e249bbd63dacca30a3bc1ca1bc1c9bb7239db71288a212859d0172920675940578951386a54aaecb49afc94eaecb36a4c51c98b8329fc087c5d692d0e46dc3dc2eaac81789a9027294016c8901678206678207708a016b89016d89016582047894036c88005e7b01627e015e7a00627e03749101789f0171991584a91291b80d7fa9",
+  "01739a097aa11988af2197c0229bc2158eaf016689016486026585056f8b03749012869d178ba4259fb943adc62d9cb41f9cb40994b1088fac40aac64ab8d51999bb2b9cb62ba4bb2da4be1795ad0994b250abc09ed0de71bfd4269ab31798b53aa5bd73bed367bad34fb4cf52b3cd53b7d348b3d25ebcd778c6da4eb5ce3bb0cb2fa9c61199b80e98b81da6c532aac911a3c970c2d870c4dd46b5d47bcce258bfd978c9df6dc7e470c3dc5cbad27ec7dc67bccf45adc50a92af1797b12d9fb662b5c886bfcf78bacb7bbece5cb2c81994b50183a30181a40286a7088db028a7c86cc5da58bad047afca56b8d346abc22f9fb941b3cc68c7dc77c3d6339ab4178fad2393ab2898b1108eaf1e8da90585a7128cb0158dae05809f158eaf1194b75eb9d43ea7c039b0cb62c7e249b0cd2f9bba1187a40474930c7593107b9d3497b42d94b32695ba299bbe0c85aa037ca402799c026b8a0267860165870176970176971188ae189cc5",
+  "057c9e2799b12aa2c129a2bf0d8fad017898016f8e01719001718f01748f067790016b87047b95017895016b87016684036e89016d8d036c8e2f95b342a5bf4bb0cc2197b22498ae85cbde30a8c4259ebb3ba5be5eb2cb87c3d35fb5ce239cbb1b96b22ea0b735a2bc4ca8c339a6c653b3ce5bbddc5dbed952b5d031a5c11798b560b7ce6ac1da6fc4de64bfdc129abd1893b419a0ca018baf0587a90c89a94cb2cc83cbe078c7e059bdd761bad186cbdfa5d6e788cddf5dbad252b3cb64b2c8c8d9e2bad5e287bfd069acbe43a4bb3aa3bd38a3be37a8c73eaece40aecf53b9d95fbbd85ebad763b8d659b4d13fa9c9139abc0c90ae0384a61c8dac1886a512829f1697b044acc284c2cf55b0c23fa8c435a5c02a9bb95eb2ca72bad142abc4189bbb1094b30895b62b9dbc62beda43b3ce0f8fb10783a60687ad1682a60776990371951080a30b8aaa1291b03baac634a5c41795b70583a50175950170910178950070921790b5",
+  "0273962191b14db7d845b8da45b3cf2ea7c31499b70188a5027893016b88016a8802799701698b027fa1017b9c0478940a90aa038dac0c83a1067794026f8c1178940a7c970479952899b51494af2ca6c856bbde34add27cc7ddabd7e471bdd036a1ba0282a3067c9c067da10a80a41d95b556bbd95cbad128a4c20990ae0994af0591af0988a21f97b17fc7dc3db2cf2aaecf44b3d44ab9d84eb5d41191ad0c91ac34a7bd2faac03bb7cc50b7ce68c0d88bc8d874bdce6eb8c885c5d787c6d860b8d289c9dd74b8c91d91aa027e991390ab2d9eb968bfd55dbdd841adca44b1ce3db2d049aec65fb5cf71c2dc35abca54b2d278c5e4aedaeab5dfeb86cbdd58b6cd3fafc635b2ca70c1d051b2c6188fab068bae0f89a70b92af399eb840afce25a2c133a7c564c1da8bd1e7b2dceb42b1cc1b97b5027c9d0c87a70685ad0885b00b87b10583ae1592be31a7ce48abcd27a1c81694b51393b51094b91b93b92d99ba2196b91a92b6",
+  "29a7ca3bb1d33cadca54b8cd6dc0cf4aafc22e99ab158ea7239cba0784a544abc72697bc4eb5d454bee02da8c91a9cb534a3ba2aa4c00684a201738b016883037792078198077d941598b20c94ad29a0b75ec0d841b0c8128fac0a87aa0485a61491b053aecd6ebdd343b0cc74c7df73bfd62fa8c31ca1bc4dbad30c8da91291ad36acc61095af05849d0684a13baac456b9cf4db1ca62bed36ec4dc60c0d699d4e695d0e16bc3d583c8d541acc3259cb11498af269cb23fa4bc2f9fb749aabd6cbed566b4c749abc037a4ba1c9ab20f96b143afc76bc2d789cde165bed3279db91693b12494b00c86a8057fa12c98b949aac876bed6c2e1f08ecbe07cc3d64eb2cc58bedc5bb6cc36a6bf128fab1193b01e96b34ab2cb1494b30a93b61888a71e91ad48abc1259bb40788a5087e9c0475980573940e7e9d2990b0289cbb1c8eb21c8aab0982a41a8daf1d93b93ca9c42fa4ca5ebbde77c9eb3cb2db35b0d53cb0d645b1d3239dc3",
+  "4ab9d475c7d46bc0d41f91a805819f017d9e0386a70183a3017a9f0d80a02b9ebc6dbdd345b2ca77c9e165c3e57bc8df6cbacb2395af0176970475930a7b97067e9c0986a41d95b22a9cb840acc664b5c964b1c561b2c93aa9c44cb1cc8fcee072c4d969bcd364b9d260b7cf1a9cb6149db8129ab71089a3259eb91d9bb71d9db84db8ce56bbd11497b51893b004829d259ebf57bedb4fb6cf34b1cd129bb860bcd591cfde86cada7ecde36dc3d829acc63badc01c9fb80893b11092b01c97b31496b0249db434a7c160b6cb8bcbdf53b4cf36a7c456b0c864b8cf40afc727a6c027a6c127a8c3129dbb1f99b2098da80285a61c97b43da8c290cdde3ba9c0109ab20c90ab1096b71b94b242aec814a2c21aa2c00d98bb20a1ce34a9d266b4c91e8dac1984a5158ead02759300678401627f01698501698200607b01698801749406799e1b87ac07769b117ea031a1bf49b6d0289fbc1697b7128dac1187ab2a94b41186ad248fb4",
+  "1f96b6279ab60d85a30174980073980483a6078aad068cb20286a70176980176952195b339abc32f9fb74baabe2c9db5159ab8188aad1886a62f96b443a2bf75bed472bdd8d0e8f4b9e0f0b6d9ecc9e2ebaad1dd3996ac1c8ba34eb2c959b2cca6d2e39ad2e684cbe232a7c2058bab27a3c2299cb41b9eb718a0bc1291ac1194af34a5bb40aec253afc5128fb11e99ba3facc678c8df39adc649b7d23bb0c91699b51298b41395b051b4cd5cb9d151b7cc68c1d780cae378c5db60bbcd5cb6ca40b3c93eadc431a3bf45abc46eb6cba3cfe255b7d252b4d05bb4ce4dadc2229ebb1293b0219cb932abc728a7c240acc54ab1c50985a33aa3b8219bb152b0bd49acbd1b90a5118fa80d91a90288a104809b309cb83cacd242b0ce3fadca63bfd741abc61087a5017796047994016e8d00658303718d02718d0169860168870174942897b440a6bd188ba6017d9d02799c1791b64bafd244aac70e8eb02896ba1081a609799e047298",
+  "308ca9036a8d0e7a9e0d88ad05789e02789a017495017091007697017fa12b9dbe69bed749b1ce38a9c81285a1097794097f9e0b7f9a077d9a0d87a41f9ac2289bc436a1c175b6ceb3d7e69ecddb5ebbd231a3ba1f94ad0d86a21483a0168aa91594b144aac567b9d047aec751b2cb3eadc723a3c04eb8d041b3ce1e9db701819d0483a1017e9d01799b1388a83ba6c46fc2da5dbdd82ba5c264bedd83cae049b4cf18a0be1ca0bc1e9db438a7bd65bdd48eccdabddfe9cde4efacd3e15bb1c71997b10687a00f88a2027d9c158fab58b0c597cfe46ebbd06ebcd09fd2e32ea0bd0081a50082a91591b846abc780c2d84cafc834a5c3199ebd42a9be77c1d384c4d481bdc93fa2b91690aa098ca82391a8259cb4269ab30988a62496b158b3c6a3cfe374c0dd77bace2d92ab1189a8027597037193017194017699048fb72dadd11b9dbf118ead0283a506819e0c8ba939a6c35fb5c948b2c81691aa0073920b7b9a1382a6077395",
+  "046f99066f940062850c71961b80a10d81a20e8cae098eb53fafd463bada2aa0c01b91b31d91b22293aa0d8aab016e8d076b8501708d0476951088a166bad5acd9f06dc2e22c9fc11b8ba33491a559abbe4aabc766b2ca53abc23c9bb22a94af0c839d0884a30485a52093af168da42b97ae1890ad1f99b568bed84bb1cb35a5c040a8bf3ba8c22b9fbe1596b42398b232a9c737adce58bbd93fb1cf8bcbe38acee260bdd42aa2bd0d93b00d8aa62293ae38a1b86ebdd15eb9cf2ea5be1a9cb827a6c536a5c01e9db5269fb72698b12b99b453a8c388c5d881c1d370b9cd38a1ba0c8cae038db15cadc684c6d9bddaea94c4d5219bba068aa842a7c085c4d2c8e1eb83baca369bb40e8ca90984a0027f9a067d950177920276920f809c3597ab88c7d760b3c85eb4c78cc9d98ac7d842aac62494b316a1bf23a9c90b95b60386a70184a529a9cc26a7c4199bb91696b10d8dac0a85a40887a84bb5d641aac62b9ab630a4c3419fbc",
+  "138fba0b81a901678a016487016287046f9507789d4ca9c984c4db40abc80f96bd1290b90988ad178dae34a7cb2593ba44a3c368b7d160b6d149a2ba60b4cd2ca0be2e93aa3a9fba2d97a915768a4fa8b81a92a60c8da60689a551acc6afd6e7a0d1e364b7cf42a8c12096ae1288a00475930877900685a11998bb61bad742afcb41abc54fb2c984c7d877bfce5cb5c985c4dbbfdee76bb6c50382a20889a6189bb841b4d18ccfde59bad132acc70c8ba602839e068ba80c91ae128aa41a8eaa55a4b982b6c482b5c276aebe54a4bb63aabf89bfd179bdcd86c3d29bccd9c3dee7bfdce75fb4c835a4c01f9fc11e9bbc1990ae209abc0f8eaf0686a435a1bf97c8d883c0d73ca9c5259fb84cafc438a7ba2399ae289fb40789a201779501718c0a75900e809b2894b13ea9c038a7c563b8ce76c7d981c9db20a0bb299ebc2fa3c4209cbd1095b52ba6c41896b4007394026c8c066b8608708c0d759223849f2a8ba1128fb3148db0",
+  "0785ae06799f2996bc38a4cd35a4c30c7ea0027fa40183a80795b6189bbf43b0d2a8d9ea73bbcf1594b92496b55eacc567afc33e9ab3168dad027a99027492096f89046d8704667e0a7388086c80147485098097067b952699b35ab5d16ab5cf3399b1077d9b0173910577941190ad0784a1047e9b1788a62f99bb91c6dcbddeecb8d7e295cddc58aabb40a2b43194a81b8da01489a0006e8901708b01728e017b94067c94017b980483a01296b70688a703809a0386a01793ac0b8aa9228eaa61a0b77dadc1b7c5d0d9d8dee4e4e7c7d4deacc6d6aad1e29bccdc80becd81bbcb60aabd55a8bc6cb2c582bdd05fb3c848adc83ba8c63aa5c232a1c154acc854acc5188eb26aadc191c8da7abccf52b1c736a3b777c0d04ab0c633a2b90b85a2027a97067f990886a324a1bb0e93b145b1c753b1c41592ab0e93af00769500708f016e90066e8e03799b0c82a11693b31997b60a7c9c006c90056f8d026d920a7593047296128fb5",
+  "0b719403678c0c7396066e94016d941491b91999bb0786ac097d9f0578971179950d6e8802738e07829b0e839d016d8805819b0d8ea6269cb325a8c41997b005849f067d991a96b33c9fb9147e9319839b00647d0167820e7f9865b8d0c2e1eec1deee72b9d03e9bb5489eb73195ae4ca6c07cbdd69acbe181c1da86bed47cb9ca3a9eb55eb5cb2496ac158aa105819b017b94087e92067d9201647b016277016c85057e981e93aa1a91b21399b60d93ae229cb826a1bd70c2da98cddf9cc5d2dde0e5f6f1f1c7d1da9abdcdd5dde3f4f1f3e3e6e8c1d5dfa7d0db67b0bf86bfce86b8c66eb2c62799b54396ab2692b01d93ad1c94af47a8bc71bad066b5ca35a2be2095b2017ea00576941084a346a6c233a6c10e85a2379cb640a7c06bbbcf5fb4cb3ea2bb5cafc91593b1299fb758b2c367b4c141aabd299fbb239ebd1283a4017193006b8c01708f0578940686a7209bb9209ec01594af05819e077e9a0a82a23eb0d757b6d3",
+  "016086005a81005a7f005d8101668c027196219ac022a1c3037292017998016b86015e7801647c01677c01657803667902647b00687f07778b2b8c9e1f8b9e138ca871beda9dd6e866bfd91c94b0087c9505829d047f9d088caa1d92aa59adc0a8d0dba4d3e5d1e2ebbbd7e3adcfdeb3d1dea5cedc8dc7dc56abc2108cac1593ab0688a51b97b20b859e29a2bc1d91a61293aa0b889c1e97a70a839801748b017089017a96249eb9acd8e58bccdb2ca5c3199ab541aecb6cbacd89c3cf82bfcf78b6c96ba9bc79b1c380b7ca7eb6cb9fbbca80bbce66adc2a7cbdc83bbcf43a2ba3b9fb487bccc90cddd45a5ba3599af3198b1118ba7027e9f067b9a1f8da72b95af2499b6309fbf4eaacc50adc538a4c2339eba269cb8118fb11994b53fa7c275c1daa6d1e26abad271bed874b8cb2298b14aacc627a1b781c8da84c9d937a7c174c2d583c7e02ba2cb2ba5d042abc8209ebe239db9209dbd339db8057a9a0272941084aa289dc1",
+  "016f9a01658a04688f036d900570942a92ad55b1cb1289ab0881a202779501708c016b85016378016b7f036e86046d85077589097b8b0678920c86a41e98b44eaac66bb8cb6dbdce2da3c143a3bb3b9bb545a6be2d9fb9148faa0784a107839f1d90aa4ba8be7abbcc9bccdb8fc5d97bbed5319db90d87a50183a20b88a3098caa0489a51494ab2097ab1b95aa28a4bb63c1d12da7bc0895b01697ac1c9db51795ac0486a20f92ad29a1b92ca5c051b9cf85cbdf62bbd446a9c649a7bf72b2c355a5bc6baab970b2c564b4cd5ba9bd46a1b51f93ab1e90a81790ac52b0c75cb3cd3fa2bc2e96b73d9bb42f8da2167e9524879d1b87a10d839b1388a60888a707809f1589a62f9bbf97cce3ccdce6a7d4e82ca3c61190af0883a11790a92597af50abbf62b6c732a8bf44a7bb1b92ad1a91ae2a9db92591ad0e85a25bb1c730a8c40183a50f84a42a8fa8288da944a0ba3295a60b8ca71193b326a0bf1294b63aabd178c0d00c8cb0",
+  "1a8da4188bac0b7b980a779204819d04789601708f36a5c157b8d11f99b50889a9037293016784006079016c8408748c0a75880c7c934daabf8ccddd90cede48aac22296b20d8faf017d9d007492007391027899017d9f1395b421a2c22ca8c73dacca1594b3289fbf23a2bf5cbad88dcee47dcce543aec70c93b4118ead1695ad1091a908859e2099af1b92a63da3b56fc5d77dcee16ec5d727a1b91f91a9108faa3eb1c428a6bc40afc24cb3c770becc50aec1319eb426a0b9098aa801819f088aa81591ad0d8aa41a90ad359eb31d91ab05819e05829f068caa41acc955b6d428a4c41f96b93399b8148dae108dad1187a40583a10d87a10587a30f90ac1a95ad07849d108ba452afca7cbfd060acbc519fb23095ab228ea94497aa298fa11a8fa208809b01708a017089007392026d880676950d85a4016f8d026a8617809e1191ab027da009759700607f005975015e790168870d87a7329dbf40abc81198bc0f85aa017296",
+];
+const A_ROWS = ARTE.length, A_COLS = ARTE[0].length, HORIZONTE = 10;
+const A_ASPECT = 1448 / 1086;                             // Proporção da foto de referência (largura / altura)
 const A_CELL = A_COLS / (A_ROWS * A_ASPECT);              // Altura da célula em relação à largura
 const MONO_ARTE = 'Consolas, Menlo, "DejaVu Sans Mono", "Liberation Mono", "Courier New", monospace';
+const RAMPA_MAR = " .:-~=+*#%@";
 const arte = document.getElementById("arte"), gArte = arte.getContext("2d");
 const arteGlow = document.createElement("canvas"), gGlow = arteGlow.getContext("2d");
 const arteGlow2 = document.createElement("canvas"), gGlow2 = arteGlow2.getContext("2d");
-let arteFill = null, arteKind, artePh, arteChar, arteLayout = null, arteUltima = -1;
-let arteHi, arteSp, arteB, arteS, arteC;
+let arteFill = null, arteHi, arteKind, artePh, arteSp, arteV, arteChar, arteLayout = null, arteUltima = -1;
 
-// Densidade do caractere → claridade: no arquivo, "@" marca áreas escuras e "." as mais claras.
-const DENS = { "@": 0, "%": 0.12, "#": 0.24, "*": 0.36, "+": 0.48, "=": 0.58, "-": 0.68, ":": 0.8, ".": 0.92 };
-// Estrelas da pintura (x, y como fração da largura/altura; raio como fração da altura).
-const ARTE_ESTRELAS = [
-  [0.07, 0.035, 0.05], [0.20, 0.02, 0.035], [0.325, 0.035, 0.04], [0.395, 0.05, 0.045], [0.205, 0.16, 0.055],
-  [0.31, 0.33, 0.045], [0.095, 0.47, 0.05], [0.345, 0.55, 0.10], [0.62, 0.065, 0.065], [0.72, 0.225, 0.065],
-  [0.005, 0.45, 0.04],
-];
-const ARTE_LUA = [0.915, 0.15, 0.075];
-const ARTE_LUZES = [[0.43, 0.87], [0.47, 0.91], [0.52, 0.88], [0.60, 0.95], [0.68, 0.86], [0.74, 0.89], [0.79, 0.92], [0.83, 0.86], [0.71, 0.94]];
-// Contorno do cipreste à esquerda: [y, x esquerdo, x direito], interpolado entre as linhas.
-const CIPRESTE = [[0.0, 0.150, 0.170], [0.1, 0.140, 0.185], [0.3, 0.115, 0.215], [0.5, 0.100, 0.245], [0.7, 0.085, 0.300], [0.85, 0.080, 0.360], [1.0, 0.070, 0.420]];
-function noCipreste(u, v) {
-  let k = 1;
-  while (k < CIPRESTE.length - 1 && v > CIPRESTE[k][0]) k++;
-  const [y0, a0, b0] = CIPRESTE[k - 1], [y1, a1, b1] = CIPRESTE[k], f = clamp((v - y0) / (y1 - y0));
-  const wob = 0.012 * Math.sin(v * 46) + 0.008 * Math.sin(v * 97 + 1.3);      // Contorno em chamas, irregular
-  return u > a0 + (a1 - a0) * f - wob && u < b0 + (b1 - b0) * f + wob;
-}
-const linhaMorros = (u) => (u < 0.38 ? 0.74 : 0.74 - 0.21 * smoothstep(0.38, 1, u)) + 0.012 * Math.sin(u * 23);
-// Céu noturno: quase preto-azulado nas áreas densas, subindo para índigo, ultramar e o ciano-menta
-// das pinceladas claras — escuro o bastante para as estrelas e a lua se destacarem.
-const CEU_ARTE = [
-  [0.00, [0.012, 0.025, 0.09]], [0.30, [0.025, 0.055, 0.20]], [0.52, [0.06, 0.13, 0.40]],
-  [0.70, [0.13, 0.28, 0.64]], [0.85, [0.26, 0.52, 0.78]], [1.00, [0.58, 0.82, 0.84]],
-];
-function rampa(stops, k) {
-  k = clamp(k);
-  for (let s = 1; s < stops.length; s++)
-    if (k <= stops[s][0]) return lerp3(stops[s - 1][1], stops[s][1], (k - stops[s - 1][0]) / (stops[s][0] - stops[s - 1][0]));
-  return stops[stops.length - 1][1];
-}
-// Cor de cada caractere por região da composição, com variações orgânicas dentro de cada região.
-// kind: 0 céu, 1 estrela/lua, 2 cipreste, 3 morros e vila, 4 luz de janela, 5 ponto do céu que pisca
-function corDaArte(c, r, ch) {
-  const u = (c + 0.5) / A_COLS, v = (r + 0.5) / A_ROWS, b = DENS[ch] ?? 1;
-  const n = hash3(c, r, 3) / 4294967296, n2 = hash3(c, r, 8) / 4294967296;
-  const campo = 0.5 + 0.5 * Math.sin(u * 11 + v * 7 + 1.5 * Math.sin(v * 9 + u * 3));   // Variação lenta, como pinceladas
-  const dist = (x, y) => Math.hypot((u - x) * A_ASPECT, v - y);
-
-  if (noCipreste(u, v)) {                                                       // Cipreste: verdes quase pretos
-    let col = lerp3([0.012, 0.03, 0.022], [0.05, 0.13, 0.10], clamp(b * 1.8 + 0.25 * campo));
-    if (n < 0.22) col = lerp3(col, [0.10, 0.07, 0.03], 0.55);                    // Toques terrosos
-    if (b > 0.5) col = lerp3(col, [0.14, 0.32, 0.28], (b - 0.5) * 1.6);          // Bordas iluminadas em azul-esverdeado
-    return [col, 2];
-  }
-  const dl = dist(ARTE_LUA[0], ARTE_LUA[1]), Rl = ARTE_LUA[2];
-  if (dl < Rl * 2.1) {                                                          // Lua: núcleo dourado e halo concêntrico
-    if (dl < Rl) {
-      let col = lerp3([0.95, 0.60, 0.08], [1.00, 0.92, 0.30], 0.35 + 0.65 * b + 0.15 * (n - 0.5));
-      col = lerp3(col, [1.00, 0.97, 0.74], (b - 0.75) * 3);
-      return [col, 1];
-    }
-    const e = (dl - Rl) / (Rl * 1.1), anel = 0.5 + 0.5 * Math.cos(e * TAU * 1.5);
-    const col = lerp3(lerp3([0.98, 0.88, 0.32], [0.70, 0.90, 0.48], e * 1.3), [0.62, 0.86, 0.82], e * anel);
-    return [lerp3(col, rampa(CEU_ARTE, 0.3 + 0.6 * b), e * e * 0.8), 1];
-  }
-  for (const [sx, sy, sr] of ARTE_ESTRELAS) {                                  // Estrelas: amarelo-claro, creme e halos
-    const d = dist(sx, sy);
-    if (d >= sr) continue;
-    const e = d / sr;
-    if (e < 0.45) return [lerp3([1.00, 0.86, 0.28], [1.00, 0.98, 0.80], b * 0.9 + 0.2 * n), 1];
-    const halo = lerp3([0.96, 0.92, 0.45], n2 < 0.5 ? [0.72, 0.92, 0.55] : [0.80, 0.94, 0.98], (e - 0.45) * 1.8);
-    return [lerp3(halo, rampa(CEU_ARTE, 0.3 + 0.6 * b), clamp((e - 0.7) * 3) * 0.7), 1];
-  }
-  if (v > linhaMorros(u)) {                                                    // Morros e vila
-    for (const [lx, ly] of ARTE_LUZES)
-      if (Math.abs(u - lx) < 0.011 && Math.abs(v - ly) < 0.018) return [[1.00, 0.80, 0.28], 4];
-    if (v > 0.8 && b > 0.5 && n < 0.6) return [[1.00, 0.84, 0.36], 4];          // Janelas acesas
-    if (Math.abs(u - 0.565) < 0.008 && v > 0.66 && v < 0.86) return [[0.62, 0.70, 0.86], 3];   // Torre da igreja
-    let col = lerp3([0.02, 0.035, 0.11], [0.07, 0.15, 0.36], clamp(0.2 + 0.7 * b + 0.25 * (campo - 0.5)));
-    if (v > 0.8 && n2 < 0.35) col = lerp3(col, [0.04, 0.14, 0.11], 0.6);       // Vegetação verde-escura
-    else if (n2 > 0.85) col = lerp3(col, [0.10, 0.09, 0.22], 0.5);              // Telhados em violeta-acinzentado
-    return [col, 3];
-  }
-  // Céu: claridade do caractere + faixa luminosa diagonal + redemoinhos.
-  const faixa = u > 0.18 ? Math.exp(-(((v - (0.62 - 0.2 * u)) / 0.07) ** 2)) : 0;
-  const redem = Math.max(Math.exp(-((dist(0.5, 0.33) / 0.15) ** 2)), Math.exp(-((dist(0.66, 0.47) / 0.1) ** 2)));
-  let tom = 0.02 + 0.9 * b + 0.1 * (campo - 0.5) + 0.08 * (n - 0.5) + 0.12 * faixa * b + 0.1 * redem * b;
-  let col = rampa(CEU_ARTE, tom);
-  if (n2 < 0.12) col = lerp3(col, [0.20, 0.55, 0.60], 0.4 * b);               // Toques de ciano
-  else if (n2 > 0.92) col = lerp3(col, [0.08, 0.06, 0.26], 0.5);               // Toques de índigo
-  if (b >= 0.68 && n < 0.24) return [col, 5];                                   // Pontos claros que piscam como estrelas
-  return [col, 0];
-}
-// Fluxo do céu: espirais nos dois redemoinhos e uma correnteza ondulada no resto, combinadas como
-// [seno, cosseno] para que um único giro por quadro faça as pinceladas claras "andarem" pelo céu.
-const ARTE_REDEMOINHOS = [[0.50, 0.33, 0.17, 1], [0.66, 0.47, 0.11, -1], [0.86, 0.36, 0.09, 1]];
-function fluxoArte(c, r) {
-  const u = (c + 0.5) / A_COLS, v = (r + 0.5) / A_ROWS;
-  let sn = 0, cs = 0, W = 0;
-  for (const [x, y, R, dir] of ARTE_REDEMOINHOS) {
-    const dx = (u - x) * A_ASPECT, dy = v - y, d = Math.hypot(dx, dy);
-    const w = Math.exp(-((d / R) ** 2) * 1.2), a = d * 46 - dir * 2 * Math.atan2(dy, dx);
-    sn += w * Math.sin(a); cs += w * Math.cos(a); W += w;
-  }
-  const w0 = Math.max(0.15, 1 - W), p = u * 16 + 2.2 * Math.sin(v * 9 + u * 4) - v * 5;
-  sn += w0 * Math.sin(p); cs += w0 * Math.cos(p);
-  const m = Math.hypot(sn, cs) + 1e-6;
-  return [sn / m, cs / m];
-}
+// kind: 0 céu, 1 mar, 2 reflexo do sol (cintila)
 function prepararArte() {
   if (arteFill) return;
   const n = A_ROWS * A_COLS;
-  arteFill = new Array(n); arteKind = new Uint8Array(n); artePh = new Float32Array(n); arteChar = new Array(n);
-  arteHi = new Array(n); arteSp = new Float32Array(n); arteB = new Float32Array(n);
-  arteS = new Float32Array(n); arteC = new Float32Array(n);
-  const css = (col) => `rgb(${Math.round(clamp(col[0]) * 255)},${Math.round(clamp(col[1]) * 255)},${Math.round(clamp(col[2]) * 255)})`;
-  const CLAROES = [[1.00, 0.97, 0.84], [1.00, 0.88, 0.42], [0.74, 0.90, 1.00]];  // Creme, dourado e azul-claro
+  arteFill = new Array(n); arteHi = new Array(n); arteKind = new Uint8Array(n);
+  artePh = new Float32Array(n); arteSp = new Float32Array(n); arteV = new Float32Array(n); arteChar = new Array(n);
+  const css = (c) => `rgb(${Math.round(clamp(c[0]) * 255)},${Math.round(clamp(c[1]) * 255)},${Math.round(clamp(c[2]) * 255)})`;
   for (let r = 0; r < A_ROWS; r++) for (let c = 0; c < A_COLS; c++) {
-    const i = r * A_COLS + c, ch = ARTE[r][c], rr = hash3(c, r, 21) / 4294967296;
-    arteChar[i] = ch;
-    const [col, kind] = corDaArte(c, r, ch);
-    arteFill[i] = css(col);
-    arteKind[i] = kind;
-    arteB[i] = DENS[ch] ?? 1;
-    artePh[i] = rr * TAU;
-    arteSp[i] = 0.8 + (hash3(c, r, 22) / 4294967296) * 2.4;                    // Cada estrela no seu ritmo
-    [arteS[i], arteC[i]] = fluxoArte(c, r);
-    // Clarão de cada estrela, desenhado por cima no pico do brilho.
-    if (kind === 1) arteHi[i] = css(lerp3(col, [1.00, 0.98, 0.88], 0.65));
-    else if (kind === 5) arteHi[i] = css(CLAROES[hash3(c, r, 23) % 3]);
-    else if (kind === 4) arteHi[i] = css([1.00, 0.93, 0.62]);
+    const i = r * A_COLS + c, ch = ARTE[r][c], hex = ARTE_COR[r].substr(c * 6, 6);
+    const base = [parseInt(hex.substr(0, 2), 16) / 255, parseInt(hex.substr(2, 2), 16) / 255, parseInt(hex.substr(4, 2), 16) / 255];
+    const v = Math.max(0, RAMPA_MAR.indexOf(ch)) / (RAMPA_MAR.length - 1);
+    const mar = r >= HORIZONTE, reflexo = mar && v >= 0.8;
+    arteChar[i] = ch; arteV[i] = v;
+    arteKind[i] = !mar ? 0 : reflexo ? 2 : 1;
+    // Bem mais escuro que a foto: mar profundo, para a frase e os peixes se destacarem.
+    const k = !mar ? 0.4 : reflexo ? 0.7 : 0.26 + 0.3 * v;
+    arteFill[i] = css(mul(base, k));
+    arteHi[i] = css(lerp3(base, [0.95, 1, 1], 0.75));
+    artePh[i] = (hash3(c, r, 21) / 4294967296) * TAU;
+    arteSp[i] = 0.9 + (hash3(c, r, 22) / 4294967296) * 2.6;
   }
 }
-// Encaixa a matriz 100 × 41 cobrindo a tela inteira ("cover"), sem deformar os caracteres.
-// O que sobra para fora da tela é percorrido por uma panorâmica lenta: no celular em pé, a câmera
-// passeia do redemoinho central até a lua e volta ao cipreste; em telas largas, sobe e desce entre céu e vila.
+// Encaixa a matriz cobrindo a tela inteira ("cover"), sem deformar os caracteres;
+// o que sobra para fora da tela é percorrido por uma panorâmica lenta.
 function ajustarArte() {
   const vw = innerWidth || 1, vh = innerHeight || 1, dpr = Math.min(2, devicePixelRatio || 1);
   arte.width = Math.round(vw * dpr); arte.height = Math.round(vh * dpr);
@@ -1014,72 +923,96 @@ function ajustarArte() {
   gArte.font = `bold 100px ${MONO_ARTE}`;
   const adv = gArte.measureText("@").width / 100 || 0.6;
   const sobraX = Math.max(0, cw * A_COLS - vw), sobraY = Math.max(0, ch * A_ROWS - vh);
-  // Velocidade de cerca de 16 px/s; ciclo de ida e volta com no mínimo 40 s.
   const ciclo = Math.max(40, 2 * Math.max(sobraX, sobraY) / 16);
   arteLayout = { dpr, vw, vh, cw, ch, sobraX, sobraY, ciclo, fs: Math.min(cw / adv, ch * 1.05) };
   arteGlow.width = Math.ceil(arte.width / 8); arteGlow.height = Math.ceil(arte.height / 8);
   arteGlow2.width = Math.ceil(arte.width / 3); arteGlow2.height = Math.ceil(arte.height / 3);
   arteUltima = -1;
 }
+// Peixes ASCII nadando no mar da surpresa. Atravessam a parte visível da tela (assim aparecem
+// com frequência também no celular) e balançam junto com as ondas.
+const PEIXES_MAR = [
+  { txt: "><(((('>", d: 1, r: 15, v: 4.2, cor: "#ff9a4d", fase: 0.00 },
+  { txt: "<'))))><", d: -1, r: 20, v: 3.4, cor: "#ffd84d", fase: 0.45 },
+  { txt: "><>", d: 1, r: 25, v: 6.5, cor: "#8fe9ff", fase: 0.20 },
+  { txt: "><>", d: 1, r: 26, v: 6.5, cor: "#8fe9ff", fase: 0.27 },
+  { txt: "><>", d: 1, r: 24, v: 6.5, cor: "#8fe9ff", fase: 0.33 },
+  { txt: "<')))><", d: -1, r: 30, v: 3.0, cor: "#ff7aa8", fase: 0.70 },
+  { txt: "><((('>", d: 1, r: 35, v: 3.8, cor: "#c9a0ff", fase: 0.85 },
+  { txt: "<><", d: -1, r: 40, v: 5.5, cor: "#8fe9ff", fase: 0.55 },
+  { txt: "<><", d: -1, r: 41, v: 5.5, cor: "#8fe9ff", fase: 0.61 },
+  { txt: "><(((('>", d: 1, r: 45, v: 3.2, cor: "#ffb36b", fase: 0.38 },
+  { txt: "<'))))><", d: -1, r: 12, v: 2.6, cor: "#9fd8ff", fase: 0.12 },
+];
+let ocupado = null;                                         // Células cobertas por peixes (o mar não é desenhado ali)
 function pintarArte(t) {
   const L = arteLayout, g = gArte;
-  // Posição da panorâmica (0 = início, 1 = fim do trecho que sobra); começa no centro da obra.
   const k = REDUCED ? 0.5 : 0.5 + 0.5 * Math.sin(TAU * (t - tSurpresa) / L.ciclo);
   const ox = -L.sobraX * k, oy = -L.sobraY * k;
   g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
   g.clearRect(0, 0, arte.width, arte.height);
   g.setTransform(L.dpr, 0, 0, L.dpr, 0, 0);
   g.font = `bold ${L.fs}px ${MONO_ARTE}`; g.textAlign = "center"; g.textBaseline = "middle";
-  const anim = REDUCED ? 0 : 1;
-  const w = (t - tSurpresa) * 0.75 * anim, cw = Math.cos(w), sw = Math.sin(w);   // Giro do fluxo do céu
-  // Desenha apenas as células visíveis (com uma de margem).
-  const c0 = Math.max(0, Math.floor(-ox / L.cw) - 1), c1 = Math.min(A_COLS, Math.ceil((L.vw - ox) / L.cw) + 1);
+  const anim = REDUCED ? 0 : 1, tm = (t - tSurpresa) * anim;
+  const c0 = Math.max(0, Math.floor(-ox / L.cw) - 2), c1 = Math.min(A_COLS, Math.ceil((L.vw - ox) / L.cw) + 2);
   const r0 = Math.max(0, Math.floor(-oy / L.ch) - 1), r1 = Math.min(A_ROWS, Math.ceil((L.vh - oy) / L.ch) + 1);
+  // Ondas: cada linha do mar balança de lado, mais forte perto da praia (embaixo).
+  const ondaX = (r) => r >= HORIZONTE
+    ? (0.06 + 0.32 * clamp((r - HORIZONTE) / (A_ROWS - HORIZONTE))) * L.cw * Math.sin(tm * 1.1 + r * 0.55) : 0;
+  // Posição dos peixes nesta imagem, em colunas da arte.
+  if (!ocupado) ocupado = new Uint8Array(A_ROWS * A_COLS);
+  ocupado.fill(0);
+  const iniVis = -ox / L.cw, largVis = L.vw / L.cw;
+  for (const p of PEIXES_MAR) {
+    const n = p.txt.length, vao = largVis + 16 + n, andou = (p.fase * vao + p.v * tm) % vao;
+    p.x = p.d > 0 ? iniVis - 8 - n + andou : iniVis + largVis + 8 - andou;
+    for (let c = Math.floor(p.x); c <= Math.ceil(p.x + n); c++) if (c >= 0 && c < A_COLS) ocupado[p.r * A_COLS + c] = 1;
+  }
   for (let r = r0; r < r1; r++) {
-    const y = oy + (r + 0.5) * L.ch;
+    const y = oy + (r + 0.5) * L.ch, dx = ondaX(r);
     for (let c = c0; c < c1; c++) {
       const i = r * A_COLS + c, ch = arteChar[i];
-      if (ch === " ") continue;
-      const kind = arteKind[i], x = ox + (c + 0.5) * L.cw;
-      let a = 0.95, flash = 0;
-      if (kind === 0 || kind === 5) {
-        // Céu em movimento: as cristas da onda acendem as pinceladas claras, girando nos redemoinhos.
-        const onda = anim ? arteS[i] * cw - arteC[i] * sw : 0.4;
-        const crista = onda > 0 ? onda * onda : 0;
-        a = 0.42 + 0.58 * crista * (0.35 + 0.65 * arteB[i]);
-        if (kind === 5) {                                        // Estrela que pisca: um clarão curto e nítido
-          const p = anim ? Math.sin(t * arteSp[i] + artePh[i]) : 0.6;
-          flash = p > 0 ? Math.pow(p, 6) : 0;
-        }
-      } else if (kind === 1) {                                   // Estrelas e lua: pulsam e brilham
-        const p = anim ? 0.5 + 0.5 * Math.sin(t * (1.2 + arteSp[i] * 0.6) + artePh[i]) : 0.7;
-        a = 0.62 + 0.38 * p; flash = p * p * p;
-      } else if (kind === 4) {                                   // Janelas da vila tremeluzem de leve
-        const p = anim ? 0.5 + 0.5 * Math.sin(t * 2.6 + artePh[i]) : 0.6;
-        a = 0.8 + 0.2 * p; flash = p * 0.35;
+      if (ch === " " || ocupado[i]) continue;
+      const kind = arteKind[i], x = ox + (c + 0.5) * L.cw + dx;
+      let a = 0.9, flash = 0;
+      if (kind === 1) {                                         // Luz correndo sobre a água
+        const crista = 0.5 + 0.5 * Math.sin(c * 0.22 + r * 0.5 - tm * 1.5);
+        a = 0.55 + 0.45 * crista * (0.4 + 0.6 * arteV[i]);
+        if (arteV[i] >= 0.6) { const p = anim ? Math.sin(t * arteSp[i] + artePh[i]) : 0; flash = p > 0 ? Math.pow(p, 8) * 0.8 : 0; }
+      } else if (kind === 2) {                                  // Reflexos do sol: cintilam
+        const p = anim ? 0.5 + 0.5 * Math.sin(t * (1.4 + arteSp[i]) + artePh[i]) : 0.7;
+        a = 0.65 + 0.35 * p; flash = p * p * p * 0.7;
       }
       g.globalAlpha = a; g.fillStyle = arteFill[i];
       g.fillText(ch, x, y);
       if (flash > 0.02) { g.globalAlpha = flash; g.fillStyle = arteHi[i]; g.fillText(ch, x, y); }
     }
   }
-  // Brilho difuso em duas escalas: um halo próximo e um mais amplo. Como o céu é escuro,
-  // o brilho vem quase só das estrelas, da lua e das pinceladas acesas.
+  // Peixes por cima do mar, com um leve brilho da própria cor.
+  g.globalAlpha = 1; g.shadowBlur = 7 * L.dpr;
+  for (const p of PEIXES_MAR) {
+    if (p.r < r0 || p.r >= r1) continue;
+    const y = oy + (p.r + 0.5) * L.ch + Math.sin(tm * 2 + p.fase * 10) * L.ch * 0.12, dx = ondaX(p.r);
+    g.fillStyle = g.shadowColor = p.cor;
+    for (let k = 0; k < p.txt.length; k++) g.fillText(p.txt[k], ox + (p.x + k + 0.5) * L.cw + dx, y);
+  }
+  g.shadowBlur = 0;
+  // Brilho difuso em duas escalas: um halo próximo e um mais amplo, vindo sobretudo dos reflexos.
   g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1;
   gGlow2.clearRect(0, 0, arteGlow2.width, arteGlow2.height); gGlow2.imageSmoothingEnabled = true;
   gGlow2.drawImage(arte, 0, 0, arteGlow2.width, arteGlow2.height);
   gGlow.clearRect(0, 0, arteGlow.width, arteGlow.height); gGlow.imageSmoothingEnabled = true;
   gGlow.drawImage(arteGlow2, 0, 0, arteGlow.width, arteGlow.height);
   g.globalCompositeOperation = "lighter"; g.imageSmoothingEnabled = true;
-  g.globalAlpha = 0.5; g.drawImage(arteGlow2, 0, 0, arte.width, arte.height);
-  g.globalAlpha = 1; g.drawImage(arteGlow, 0, 0, arte.width, arte.height);
+  g.globalAlpha = 0.32; g.drawImage(arteGlow2, 0, 0, arte.width, arte.height);
+  g.globalAlpha = 0.6; g.drawImage(arteGlow, 0, 0, arte.width, arte.height);
   g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
 }
 
 // NARRATIVA: intro (0–10 s) → presente (10–20 s) → convite (a partir de 20 s) → surpresa (após o clique)
 const FRASES = {
-  intro: "Dizem que Van Gogh enxergava beleza até nas noites mais escuras...",
-  presente: "Então pensei em te dar um pedacinho desse céu.",
+  intro: "Dizem que o mar guarda os segredos mais bonitos do mundo...",
+  presente: "Então mergulhei fundo pra te trazer um pedacinho dele.",
 };
 const JANELAS = { intro: [0, 10], presente: [10, 20] };
 const palco = document.getElementById("palco"), mensagem = document.getElementById("mensagem");
@@ -1121,7 +1054,7 @@ function narrativa(t) {
 function abrirSurpresa() {
   if (estado === "surpresa" || estado !== "convite") return;  // Abre uma única vez, só depois do convite
   tSurpresa = clock;
-  prepararArte(); ajustarArte(); pintarArte(clock);           // A pintura já está pronta antes do crossfade
+  prepararArte(); ajustarArte(); pintarArte(clock);           // O mar já está pronto antes do crossfade
   estado = "surpresa";
   document.body.dataset.estado = "surpresa";
   botao.disabled = true;
@@ -1145,7 +1078,7 @@ async function abrirCamera() {
   if (abrindoCamera || streamCamera) return;
   abrindoCamera = true;
   selfieMsg.textContent = "";
-  mostrarSelfie();                       // A tela escura já aparece enquanto o navegador pede a permissão
+  mostrarSelfie();                       // A tela já aparece enquanto o navegador pede a permissão
   carregarSegmentador();                 // O modelo de contorno carrega em paralelo com a permissão da câmera
   try {
     if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -1162,7 +1095,7 @@ async function abrirCamera() {
     streamCamera = null;
     selfieMsg.textContent =
       e.name === "NotAllowedError" || e.name === "SecurityError"
-        ? "Para ver a estrela, permita o acesso à câmera nas configurações do navegador e toque no botão de novo."
+        ? "Para ver o tesouro, permita o acesso à câmera nas configurações do navegador e toque no botão de novo."
         : e.name === "NotFoundError" || e.name === "OverconstrainedError"
         ? "Não encontrei uma câmera frontal neste aparelho."
         : e.name === "Inseguro"
@@ -1185,24 +1118,24 @@ selfieFechar.addEventListener("click", fecharCamera);
 selfie.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharCamera(); });
 addEventListener("pagehide", () => { if (streamCamera) streamCamera.getTracks().forEach((tr) => tr.stop()); });
 
-// EFEITO "ESTRELA" NA SELFIE
+// EFEITO "TESOURO DO MAR" NA SELFIE
 // Um modelo de segmentação (MediaPipe, do Google) separa a pessoa do fundo a cada quadro. Com essa máscara:
-//  • o fundo escurece em azul-noite e ganha estrelinhas piscando;
-//  • a pessoa recebe um halo dourado pulsante e um contorno fino creme, como uma estrela;
-//  • faíscas ASCII (* + .) nascem do contorno e sobem; uma coroa de estrelas gira sobre a cabeça.
-// Tudo é processado no próprio aparelho. Se o modelo não carregar (sem internet), fica uma moldura dourada.
+//  • atrás da pessoa aparece o mar (oceano.png), escurecido em 50%;
+//  • a pessoa recebe um halo azul-água pulsante e um contorno fino quase branco, como luz na água;
+//  • bolhas ASCII (. o O) nascem do contorno e sobem; peixinhos-palhaço (peixe.gif) nadam em volta da cabeça.
+// Tudo é processado no próprio aparelho. Se o modelo não carregar (sem internet), fica uma moldura azul-água.
 const selfieCanvas = document.getElementById("selfie-canvas"), gSelfie = selfieCanvas.getContext("2d");
-const novoCanvas = () => { const c = document.createElement("canvas"); return [c, c.getContext("2d", { willReadFrequently: false })]; };
+const novoCanvas = () => { const c = document.createElement("canvas"); return [c, c.getContext("2d")]; };
 const [mascC, gMasc] = novoCanvas(), [b0C, gB0] = novoCanvas(), [b1C, gB1] = novoCanvas(), [b2C, gB2] = novoCanvas(), [tmpC, gTmp] = novoCanvas();
 const [entradaC, gEntrada] = novoCanvas(), [pessoaC, gPessoa] = novoCanvas();
-const quadroFundo = new Image();                                       // Fundo da selfie: A Noite Estrelada
-quadroFundo.src = "ANoiteEstrelada_VanGogh.jpg";
-const coroa = document.getElementById("coroa");
-const estrelasCoroa = Array.from({ length: 7 }, () => {
-  const img = new Image(); img.src = "estrelinha.gif"; img.alt = ""; img.decoding = "async";
-  coroa.appendChild(img); return img;
+const marFundo = new Image();                                          // Fundo da selfie: o mar
+marFundo.src = "oceano.png";
+const cardumeSelfie = document.getElementById("cardume-selfie");
+const peixesSelfie = Array.from({ length: 5 }, () => {
+  const img = new Image(); img.src = "peixe.gif"; img.alt = ""; img.decoding = "async";
+  cardumeSelfie.appendChild(img); return img;
 });
-let acumFaiscas = 0;
+let acumBolhasSelfie = 0;
 const MP_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const MODELO = "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite";
 let segmentador = null, segEstado = "parado", rafSelfie = 0, ultimoTempoVideo = -1;
@@ -1210,11 +1143,9 @@ let mascImg = null, mascVal = null, mascW = 0, mascH = 0, mascPronta = false, in
 let bordas = new Int32Array(0), nBordas = 0;
 const cabeca = { x: 0.5, y: 0.2, w: 0.2, ok: false };                     // Topo da cabeça, em fração da máscara
 const SEL_DPR = () => Math.min(1.5, devicePixelRatio || 1);
-const FAISCA_CH = ["*", "+", "*", ".", "+"];
-const FAISCA_COR = ["255,214,102", "255,246,210", "170,210,255", "255,190,70"];
-const faiscas = Array.from({ length: 110 }, () => ({ vivo: false }));
-const ceuSelfie = Array.from({ length: 46 }, (_, k) => ({ x: rnd(9000 + k), y: rnd(9100 + k), f: 0.8 + rnd(9200 + k) * 2.2,
-  ph: rnd(9300 + k) * TAU, ch: FAISCA_CH[k % 5], cor: FAISCA_COR[k % 4], s: 0.6 + rnd(9400 + k) * 0.8 }));
+const BOLHA_CH = [".", "o", "O", "o", "."];
+const BOLHA_COR = ["210,245,255", "140,225,255", "255,255,255", "120,200,255"];
+const bolhasSelfie = Array.from({ length: 110 }, () => ({ vivo: false }));
 
 async function carregarSegmentador() {
   if (segEstado !== "parado") return;
@@ -1228,7 +1159,7 @@ async function carregarSegmentador() {
     catch { segmentador = await ImageSegmenter.createFromOptions(vision, opcoes("CPU")); }
     segEstado = "pronto";
   } catch (e) {
-    segmentador = null; segEstado = "falhou";                         // Segue só com a moldura dourada
+    segmentador = null; segEstado = "falhou";                         // Segue só com a moldura azul-água
   }
 }
 
@@ -1263,7 +1194,7 @@ function receberMascara(res) {
     px[j + 3] = v < 0.25 ? 0 : v > 0.75 ? 255 : ((v - 0.25) / 0.5) * 255;     // Borda suave
   }
   gMasc.putImageData(mascImg, 0, 0);
-  // Bordas (para as faíscas) e topo da cabeça (para a coroa).
+  // Bordas (para as bolhas) e topo da cabeça (para os peixinhos).
   nBordas = 0;
   let topo = -1, somaX = 0, nX = 0;
   for (let y = 1; y < h - 1; y += 2) {
@@ -1281,7 +1212,7 @@ function receberMascara(res) {
     let largura = 0;
     const yl = Math.min(h - 1, topo + Math.round(h * 0.1));
     for (let x = 0; x < w; x++) if (mascVal[yl * w + x] > 0.5) largura++;
-    const suave = cabeca.ok ? 0.25 : 1;                                // Suaviza para a coroa não tremer
+    const suave = cabeca.ok ? 0.25 : 1;                                // Suaviza para os peixes não tremerem
     cabeca.x += (somaX / nX / w - cabeca.x) * suave;
     cabeca.y += (topo / h - cabeca.y) * suave;
     cabeca.w += (clamp(largura / w, 0.08, 0.6) - cabeca.w) * suave;
@@ -1293,12 +1224,12 @@ function receberMascara(res) {
 function iniciarEfeitos() {
   cancelAnimationFrame(rafSelfie);
   ultimoTempoVideo = -1; mascPronta = false; inverter = null; amostrasInv = 0; cabeca.ok = false;
-  faiscas.forEach((p) => { p.vivo = false; });
+  bolhasSelfie.forEach((p) => { p.vivo = false; });
   rafSelfie = requestAnimationFrame(quadroSelfie);
 }
 function pararEfeitos() {
   cancelAnimationFrame(rafSelfie); rafSelfie = 0;
-  coroa.hidden = true;
+  cardumeSelfie.hidden = true;
   gSelfie.setTransform(1, 0, 0, 1, 0, 0); gSelfie.clearRect(0, 0, selfieCanvas.width, selfieCanvas.height);
 }
 let ultimoQuadroSelfie = 0;
@@ -1327,19 +1258,18 @@ function desenharSelfie(t, dt, W, H, dpr) {
   const pulso = REDUCED ? 0.85 : 0.72 + 0.28 * Math.sin(t * 2.1);
   // Converte um ponto da máscara (fração 0–1) para a tela, já espelhada como um espelho.
   const telaX = (fx) => W - (dx + fx * dw), telaY = (fy) => dy + fy * dh;
-
   g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
   g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
 
   if (mascPronta) {
-    // Fundo: A Noite Estrelada cobrindo a tela inteira, escurecida em 50%.
+    // Fundo: o mar cobrindo a tela inteira, escurecido em 50%.
     g.setTransform(1, 0, 0, 1, 0, 0);
-    if (quadroFundo.complete && quadroFundo.naturalWidth) {
-      const qw = quadroFundo.naturalWidth, qh = quadroFundo.naturalHeight, qs = Math.max(W / qw, H / qh);
-      g.drawImage(quadroFundo, (W - qw * qs) / 2, (H - qh * qs) / 2, qw * qs, qh * qs);
-    } else { g.fillStyle = "#040a26"; g.fillRect(0, 0, W, H); }
+    if (marFundo.complete && marFundo.naturalWidth) {
+      const qw = marFundo.naturalWidth, qh = marFundo.naturalHeight, qs = Math.max(W / qw, H / qh);
+      g.drawImage(marFundo, (W - qw * qs) / 2, (H - qh * qs) / 2, qw * qs, qh * qs);
+    } else { g.fillStyle = "#021320"; g.fillRect(0, 0, W, H); }
     g.fillStyle = "rgba(0,0,0,0.5)"; g.fillRect(0, 0, W, H);
-    // A pessoa, recortada pela máscara, por cima do quadro.
+    // A pessoa, recortada pela máscara, por cima do mar.
     if (pessoaC.width !== W || pessoaC.height !== H) { pessoaC.width = W; pessoaC.height = H; }
     gPessoa.setTransform(1, 0, 0, 1, 0, 0); gPessoa.globalCompositeOperation = "source-over"; gPessoa.clearRect(0, 0, W, H);
     gPessoa.setTransform(-1, 0, 0, 1, W, 0);                             // Espelho
@@ -1353,18 +1283,18 @@ function desenharSelfie(t, dt, W, H, dpr) {
     for (const [c, gc] of [[b0C, gB0], [b1C, gB1], [b2C, gB2]]) {
       gc.clearRect(0, 0, c.width, c.height); gc.imageSmoothingEnabled = true; gc.drawImage(mascC, 0, 0, c.width, c.height);
     }
-    // Halo dourado amplo (fora da pessoa), pulsando.
+    // Halo azul-água amplo (fora da pessoa), pulsando.
     gTmp.globalCompositeOperation = "source-over"; gTmp.clearRect(0, 0, mascW, mascH); gTmp.imageSmoothingEnabled = true;
     gTmp.drawImage(b2C, 0, 0, mascW, mascH); gTmp.drawImage(b1C, 0, 0, mascW, mascH);
-    gTmp.globalCompositeOperation = "source-in"; gTmp.fillStyle = "rgb(255,192,60)"; gTmp.fillRect(0, 0, mascW, mascH);
+    gTmp.globalCompositeOperation = "source-in"; gTmp.fillStyle = "rgb(60,205,255)"; gTmp.fillRect(0, 0, mascW, mascH);
     gTmp.globalCompositeOperation = "destination-out"; gTmp.drawImage(mascC, 0, 0);
     g.globalCompositeOperation = "lighter"; g.imageSmoothingEnabled = true;
     g.globalAlpha = pulso; g.drawImage(tmpC, dx, dy, dw, dh);
     g.globalAlpha = 0.45 * pulso; g.drawImage(tmpC, dx, dy, dw, dh);
-    // Contorno fino e intenso, creme-dourado, colado à silhueta.
+    // Contorno fino e intenso, quase branco, colado à silhueta.
     gTmp.globalCompositeOperation = "source-over"; gTmp.clearRect(0, 0, mascW, mascH);
     gTmp.drawImage(b0C, 0, 0, mascW, mascH); gTmp.drawImage(b0C, 0, 0, mascW, mascH);
-    gTmp.globalCompositeOperation = "source-in"; gTmp.fillStyle = "rgb(255,236,170)"; gTmp.fillRect(0, 0, mascW, mascH);
+    gTmp.globalCompositeOperation = "source-in"; gTmp.fillStyle = "rgb(205,250,255)"; gTmp.fillRect(0, 0, mascW, mascH);
     gTmp.globalCompositeOperation = "destination-out"; gTmp.drawImage(mascC, 0, 0);
     g.globalAlpha = 0.95; g.drawImage(tmpC, dx, dy, dw, dh); g.drawImage(tmpC, dx, dy, dw, dh);
   } else {
@@ -1373,74 +1303,65 @@ function desenharSelfie(t, dt, W, H, dpr) {
   }
   g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
 
-  if (!mascPronta) {                                                  // Sem contorno (ainda carregando ou offline): moldura dourada
+  if (!mascPronta) {                                                  // Sem contorno (ainda carregando ou offline): moldura azul-água
     const grad = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.55);
-    grad.addColorStop(0, "rgba(255,200,80,0)"); grad.addColorStop(1, `rgba(255,200,80,${0.32 * pulso})`);
+    grad.addColorStop(0, "rgba(80,210,255,0)"); grad.addColorStop(1, `rgba(80,210,255,${0.32 * pulso})`);
     g.globalCompositeOperation = "lighter"; g.fillStyle = grad; g.fillRect(0, 0, W, H);
     g.globalCompositeOperation = "source-over";
   }
 
   const fonte = (px) => `bold ${Math.round(px * dpr)}px ${MONO_ARTE}`;
   g.textAlign = "center"; g.textBaseline = "middle";
-  // Estrelinhas ASCII piscando: só enquanto o quadro ainda não está atrás da pessoa (ele já tem as estrelas dele).
-  if (!mascPronta) for (const e of ceuSelfie) {
-    const X = e.x * W, Y = e.y * H * 0.92;
-    const b = REDUCED ? 0.7 : 0.5 + 0.5 * Math.sin(t * e.f + e.ph);
-    g.globalAlpha = 0.25 + 0.75 * b * b; g.fillStyle = `rgb(${e.cor})`; g.font = fonte(10 + 8 * e.s * (0.6 + 0.4 * b));
-    g.fillText(e.ch, X, Y);
-  }
-  // Faíscas que nascem do contorno (ou das bordas da tela, sem contorno) e sobem cintilando.
-  acumFaiscas += (REDUCED ? 8 : 38) * dt;                             // Faíscas por segundo, igual em qualquer taxa de quadros
-  const novas = Math.floor(acumFaiscas); acumFaiscas -= novas;
+  // Bolhas ASCII que nascem do contorno (ou do fundo da tela, sem contorno) e sobem balançando.
+  acumBolhasSelfie += (REDUCED ? 8 : 34) * dt;
+  const novas = Math.floor(acumBolhasSelfie); acumBolhasSelfie -= novas;
   for (let n = 0; n < novas; n++) {
-    const p = faiscas.find((q) => !q.vivo);
+    const p = bolhasSelfie.find((q) => !q.vivo);
     if (!p) break;
     if (mascPronta && nBordas) {
       const k = bordas[(Math.random() * nBordas) | 0];
       p.x = telaX(((k % mascW) + 0.5) / mascW); p.y = telaY((Math.floor(k / mascW) + 0.5) / mascH);
-    } else {
-      const lado = Math.random();
-      p.x = lado < 0.5 ? (Math.random() < 0.5 ? 0.04 : 0.96) * W : Math.random() * W;
-      p.y = lado < 0.5 ? Math.random() * H : H * (0.9 + Math.random() * 0.1);
-    }
-    p.vx = (Math.random() - 0.5) * 30 * dpr; p.vy = -(25 + Math.random() * 45) * dpr * (REDUCED ? 0.2 : 1);
-    p.vida = 0; p.dur = 1.2 + Math.random() * 1.4; p.tam = 11 + Math.random() * 12;
-    p.ch = FAISCA_CH[(Math.random() * FAISCA_CH.length) | 0]; p.cor = FAISCA_COR[(Math.random() * FAISCA_COR.length) | 0];
+    } else { p.x = Math.random() * W; p.y = H * (0.85 + Math.random() * 0.15); }
+    p.x0 = p.x; p.vy = -(30 + Math.random() * 50) * dpr * (REDUCED ? 0.2 : 1);
+    p.vida = 0; p.dur = 1.6 + Math.random() * 1.6; p.tam = 12 + Math.random() * 14;
+    p.ch = BOLHA_CH[(Math.random() * BOLHA_CH.length) | 0]; p.cor = BOLHA_COR[(Math.random() * BOLHA_COR.length) | 0];
     p.ph = Math.random() * TAU; p.vivo = true;
   }
-  g.shadowBlur = 10 * dpr;
-  for (const p of faiscas) {
+  g.shadowBlur = 8 * dpr;
+  for (const p of bolhasSelfie) {
     if (!p.vivo) continue;
     p.vida += dt;
     if (p.vida >= p.dur) { p.vivo = false; continue; }
-    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.y += p.vy * dt; p.x = p.x0 + Math.sin(p.vida * 4 + p.ph) * 8 * dpr;
     const f = p.vida / p.dur, env = Math.sin(Math.PI * f);
-    g.globalAlpha = env * (0.65 + 0.35 * Math.sin(p.vida * 11 + p.ph));
-    g.fillStyle = g.shadowColor = `rgb(${p.cor})`; g.font = fonte(p.tam * (0.7 + 0.5 * env));
+    g.globalAlpha = env * 0.9;
+    g.fillStyle = g.shadowColor = `rgb(${p.cor})`; g.font = fonte(p.tam * (0.7 + 0.5 * f));   // Crescem ao subir
     g.fillText(p.ch, p.x, p.y);
   }
   g.shadowBlur = 0; g.globalAlpha = 1;
-  // Coroa de estrelinhas (estrelinha.gif) girando devagar sobre a cabeça. São <img> sobre o canvas,
+  // Peixinhos-palhaço (peixe.gif) nadando em volta da cabeça. São <img> sobre o canvas,
   // porque um GIF desenhado no canvas ficaria parado no primeiro quadro.
   if (mascPronta && cabeca.ok) {
-    const css = 1 / dpr;                                                // Pixels do canvas → pixels CSS
-    const rx = cabeca.w * dw * 0.6 * css, ry = rx * 0.24, cx = telaX(cabeca.x) * css;
-    const base = clamp(cabeca.w * dw * css * 0.26, 30, 90);            // Tamanho proporcional à cabeça
-    const cy = Math.max(base * 0.6 + ry, telaY(cabeca.y) * css - rx * 0.12);   // Logo acima da cabeça, sem sair da tela
-    const giro = REDUCED ? 0 : t * 0.6;
-    coroa.hidden = false;
-    estrelasCoroa.forEach((img, k) => {
-      const a = giro + (k / estrelasCoroa.length) * TAU, z = Math.sin(a);   // z < 0: estrela "atrás" da cabeça
-      const tam = base * (z < 0 ? 0.68 : 1) * (0.92 + 0.08 * Math.sin(t * 3 + k * 1.7));
-      img.style.width = img.style.height = `${tam.toFixed(1)}px`;
-      img.style.transform = `translate(${(cx + Math.cos(a) * rx - tam / 2).toFixed(1)}px, ${(cy + z * ry - tam / 2).toFixed(1)}px)`;
+    const css = 1 / dpr;
+    const rx = cabeca.w * dw * 0.68 * css, ry = rx * 0.26, cx = telaX(cabeca.x) * css;
+    const base = clamp(cabeca.w * dw * css * 0.34, 40, 120);           // Largura do peixe, proporcional à cabeça
+    const cy = Math.max(base * 0.5 + ry, telaY(cabeca.y) * css - rx * 0.1);
+    const giro = REDUCED ? 0 : t * 0.55;
+    cardumeSelfie.hidden = false;
+    peixesSelfie.forEach((img, k) => {
+      const a = giro + (k / peixesSelfie.length) * TAU, z = Math.sin(a);  // z < 0: peixe "atrás" da cabeça
+      const larg = base * (z < 0 ? 0.68 : 1), alt = larg * 480 / 586;
+      // O GIF olha para a esquerda: na frente o peixe nada para a esquerda; atrás, vira e nada para a direita.
+      const vira = z < 0 ? -1 : 1, sobe = Math.sin(t * 2.4 + k) * alt * 0.08;
+      img.style.width = `${larg.toFixed(1)}px`; img.style.height = `${alt.toFixed(1)}px`;
+      img.style.transform = `translate(${(cx + Math.cos(a) * rx - larg / 2).toFixed(1)}px, ${(cy + z * ry - alt / 2 + sobe).toFixed(1)}px) scaleX(${vira})`;
       img.style.opacity = z < 0 ? "0.55" : "1";
       img.style.zIndex = z < 0 ? "1" : "2";
     });
-  } else coroa.hidden = true;
+  } else cardumeSelfie.hidden = true;
 }
 
-// MÚSICA DE FUNDO: fundo_site.mp3 em loop infinito, iniciada automaticamente ao abrir.
+// MÚSICA DE FUNDO: oceano.mp3 em loop infinito, iniciada automaticamente ao abrir.
 // Se o navegador bloquear o áudio automático (Chrome, Safari e Firefox exigem um toque antes do som),
 // a música começa no primeiro toque, clique ou tecla em qualquer lugar da página.
 const musica = document.getElementById("musica"), btnSom = document.getElementById("som");
@@ -1473,15 +1394,15 @@ btnSom.addEventListener("click", () => {
 atualizarSom();
 tocarMusica();
 
-// Posiciona o palco de textos no centro das flores, acompanhando o "contain" do canvas.
+// Posiciona o palco de textos na água aberta, acima do recife, acompanhando o "contain" do canvas.
 function posicionarPalco() {
   const vw = innerWidth || 1, vh = innerHeight || 1, sc = Math.min(vw / W, vh / H);
   const ox = (vw - W * sc) / 2, oy = (vh - H * sc) / 2;
-  const x = ox + ((X_MID - X_MID) * 2 / S + COLS / 2) * CW * sc;
-  const y = oy + ((68 - Y0) / S) * CH * sc;                   // Altura do miolo do buquê, no mundo
-  const bw = 124 * 2 / S * CW * sc;                           // Largura aproximada do buquê aberto, em pixels
+  const x = ox + (COLS / 2) * CW * sc;
+  const y = oy + ((52 - Y0) / S) * CH * sc;                   // Altura da água aberta, acima do buquê
+  const bw = 124 * 2 / S * CW * sc;
   palco.style.setProperty("--ax", `${x}px`);
-  palco.style.setProperty("--ay", `${clamp(y, vh * 0.22, vh * 0.78)}px`);
+  palco.style.setProperty("--ay", `${clamp(y, vh * 0.22, vh * 0.7)}px`);
   palco.style.setProperty("--bw", `${bw}px`);
 }
 
@@ -1496,7 +1417,7 @@ function tick(now) {
   lastNow = now;
   narrativa(clock);
   const tS = clock - tSurpresa, emSurpresa = estado === "surpresa";
-  if ((!emSurpresa || tS < 2.2) && now - lastDraw >= 1000 / FPS - 2) {   // O buquê para de ser desenhado após o crossfade
+  if ((!emSurpresa || tS < 2.2) && now - lastDraw >= 1000 / FPS - 2) {   // O recife para de ser desenhado após o crossfade
     lastDraw = now;
     scene(clock);
     draw(Math.floor(clock * FPS));
@@ -1512,7 +1433,7 @@ document.addEventListener("visibilitychange", () => {
   if (!document.hidden) { lastNow = performance.now(); rafId = requestAnimationFrame(tick); }
 });
 
-// Redimensionamento: textos e pintura se ajustam sempre; a grade do buquê só é recriada
+// Redimensionamento: textos e mar se ajustam sempre; a grade do recife só é recriada
 // quando a proporção muda bastante (ex.: girar o celular). Nada reinicia a narrativa.
 let resizeTimer = 0;
 const onResize = () => {
